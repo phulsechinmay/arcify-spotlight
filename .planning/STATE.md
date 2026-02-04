@@ -10,20 +10,20 @@ See: .planning/PROJECT.md (updated 2026-02-03)
 ## Current Position
 
 ```
-Phase: 1 of 2 (Bug Fixes)
-Plan: 2 of 2 complete
-Status: Phase complete
-Progress: [==========] 100%
+Phase: 2 of 2 (UX Improvements)
+Plan: 1 of ? in phase
+Status: In progress
+Progress: [===========-------] ~60%
 ```
 
-Last activity: 2026-02-03 - Completed 01-02-PLAN.md (tab fuzzy matching)
+Last activity: 2026-02-03 - Completed 02-01-PLAN.md (URL preview and density)
 
 ## Phase Summary
 
 | Phase | Goal | Status |
 |-------|------|--------|
 | 1 - Bug Fixes | Eliminate duplicates, fix tab matching | Complete (2/2 plans) |
-| 2 - UX Improvements | URL preview, density, theming | Ready |
+| 2 - UX Improvements | URL preview, density, theming | In progress (1/? plans) |
 
 ## Accumulated Context
 
@@ -42,8 +42,9 @@ Last activity: 2026-02-03 - Completed 01-02-PLAN.md (tab fuzzy matching)
 - `getResultPriority()` documented with priority order: open-tab > pinned-tab > bookmark > history > top-site
 - `BackgroundDataProvider.getOpenTabsData()` uses fuzzy matching for title and URL
 - `BackgroundDataProvider.getPinnedTabsData()` uses fuzzy matching for title and URL
-- `SelectionManager` needs callback for selection changes (UX-01)
+- `SelectionManager.onSelectionChange` callback pattern for selection-driven UI updates (UX-01 complete)
 - Tab Groups API (`chrome.tabGroups.get()`) for color (UX-03)
+- Density CSS: max-height 288px, item min-height 40px, padding 4px 0
 
 ### Blockers
 (none)
@@ -59,9 +60,9 @@ Last activity: 2026-02-03 - Completed 01-02-PLAN.md (tab fuzzy matching)
 ## Session Continuity
 
 Last session: 2026-02-03
-Stopped at: Completed 01-02-PLAN.md (Phase 1 complete)
+Stopped at: Completed 02-01-PLAN.md (URL preview and density)
 Resume file: None
 
 ---
 
-*Last updated: 2026-02-03 - Completed Phase 1 Bug Fixes*
+*Last updated: 2026-02-03 - Completed 02-01-PLAN.md*
