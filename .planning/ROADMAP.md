@@ -20,8 +20,8 @@ This milestone fixes suggestion bugs and improves UX density and visual feedback
 **Plans:** 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Fix URL deduplication (fragments, trailing slashes, www prefix)
-- [ ] 01-02-PLAN.md — Add fuzzy matching for open tab title/URL search
+- [x] 01-01-PLAN.md — Fix URL deduplication (fragments, trailing slashes, www prefix)
+- [x] 01-02-PLAN.md — Add fuzzy matching for open tab title/URL search
 
 **Requirements:**
 - BUG-01: User sees no duplicate suggestions when same URL exists in history and open tabs
@@ -69,10 +69,10 @@ Plans:
 
 | Phase | Status | Requirements | Completed |
 |-------|--------|--------------|-----------|
-| 1 - Bug Fixes | Planned | BUG-01, BUG-02 | 0/2 |
-| 2 - UX Improvements | Not Started | UX-01, UX-02, UX-03 | 0/3 |
+| 1 - Bug Fixes | Complete ✓ | BUG-01, BUG-02 | 2/2 |
+| 2 - UX Improvements | Ready | UX-01, UX-02, UX-03 | 0/3 |
 
-**Overall:** 0/5 requirements complete
+**Overall:** 2/5 requirements complete
 
 ---
 

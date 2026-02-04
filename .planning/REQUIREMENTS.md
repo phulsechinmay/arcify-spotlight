@@ -9,8 +9,8 @@ Requirements for v1.0 Polish milestone. Each maps to roadmap phases.
 
 ### Bug Fixes
 
-- [ ] **BUG-01**: User sees no duplicate suggestions when same URL exists in history and open tabs
-- [ ] **BUG-02**: User sees open tabs in suggestions when input matches tab title or URL
+- [x] **BUG-01**: User sees no duplicate suggestions when same URL exists in history and open tabs
+- [x] **BUG-02**: User sees open tabs in suggestions when input matches tab title or URL
 
 ### UX Improvements
 
@@ -38,8 +38,8 @@ Deferred to next milestone.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BUG-01 | Phase 1 | Pending |
-| BUG-02 | Phase 1 | Pending |
+| BUG-01 | Phase 1 | Complete |
+| BUG-02 | Phase 1 | Complete |
 | UX-01 | Phase 2 | Pending |
 | UX-02 | Phase 2 | Pending |
 | UX-03 | Phase 2 | Pending |
