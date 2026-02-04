@@ -46,6 +46,12 @@ Plans:
 
 **Dependencies:** Phase 1 (stable data layer needed before UI polish)
 
+**Plans:** 2 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — URL preview on selection + density improvements (UX-01, UX-02)
+- [ ] 02-02-PLAN.md — Tab group color theming (UX-03)
+
 **Requirements:**
 - UX-01: User sees URL bar update to show selected suggestion URL when navigating with keyboard
 - UX-02: User sees denser suggestion list with reduced padding between items
@@ -69,8 +75,8 @@ Plans:
 
 | Phase | Status | Requirements | Completed |
 |-------|--------|--------------|-----------|
-| 1 - Bug Fixes | Complete ✓ | BUG-01, BUG-02 | 2/2 |
-| 2 - UX Improvements | Ready | UX-01, UX-02, UX-03 | 0/3 |
+| 1 - Bug Fixes | Complete | BUG-01, BUG-02 | 2/2 |
+| 2 - UX Improvements | Planned | UX-01, UX-02, UX-03 | 0/3 |
 
 **Overall:** 2/5 requirements complete
 
