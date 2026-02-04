@@ -194,9 +194,9 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
         }
 
         .arcify-spotlight-results {
-            max-height: 270px;
+            max-height: 288px;
             overflow-y: auto;
-            padding: 8px 0;
+            padding: 4px 0;
             scroll-behavior: smooth;
             scrollbar-width: none; /* Firefox */
             -ms-overflow-style: none; /* IE and Edge */
@@ -209,8 +209,8 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
         .arcify-spotlight-result-item {
             display: flex;
             align-items: center;
-            padding: 12px 24px 12px 20px;
-            min-height: 44px;
+            padding: 8px 20px 8px 16px;
+            min-height: 40px;
             cursor: pointer;
             transition: background-color 0.15s ease;
             border: none;
@@ -242,7 +242,7 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
         .arcify-spotlight-result-content {
             flex: 1;
             min-width: 0;
-            min-height: 32px;
+            min-height: 24px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -252,7 +252,7 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
             font-size: 14px;
             font-weight: 500;
             color: #ffffff;
-            margin: 0 0 2px 0;
+            margin: 0 0 1px 0;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -377,7 +377,21 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
     }
 
 
-    const selectionManager = new SelectionManager(resultsContainer);
+    // URL preview callback - updates input placeholder with selected result URL
+    const handleSelectionChange = (result, index) => {
+        if (result && result.url) {
+            input.placeholder = result.url;
+        } else if (result && result.title) {
+            input.placeholder = result.title;
+        } else {
+            // Reset to default placeholder
+            input.placeholder = spotlightTabMode === SpotlightTabMode.NEW_TAB
+                ? 'Search or enter URL (opens in new tab)...'
+                : 'Search or enter URL...';
+        }
+    };
+
+    const selectionManager = new SelectionManager(resultsContainer, handleSelectionChange);
 
     // Load initial results
     async function loadInitialResults() {
