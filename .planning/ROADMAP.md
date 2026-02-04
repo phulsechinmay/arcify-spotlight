@@ -20,7 +20,7 @@ This milestone establishes a comprehensive testing infrastructure for Arcify Spo
 **Plans:** 1 plan
 
 Plans:
-- [ ] 01-01-PLAN.md — Configure Vitest, Puppeteer, and GitHub Actions CI
+- [x] 01-01-PLAN.md — Configure Vitest, Puppeteer, and GitHub Actions CI
 
 **Requirements:**
 - INFRA-01: Developer can run unit tests with `npm test`
@@ -42,7 +42,12 @@ Plans:
 
 **Dependencies:** Phase 1 (infrastructure must exist)
 
-**Plans:** 1 plan
+**Plans:** 3 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — URL utilities and deduplication tests (UNIT-01, UNIT-02, UNIT-05)
+- [ ] 02-02-PLAN.md — Fuzzy matching and scoring tests (UNIT-03, UNIT-04)
+- [ ] 02-03-PLAN.md — Selection manager tests (UNIT-06)
 
 **Requirements:**
 - UNIT-01: URL normalization handles all edge cases
@@ -124,13 +129,13 @@ Plans:
 
 | Phase | Status | Requirements | Completed |
 |-------|--------|--------------|-----------|
-| 1 - Infrastructure | Planned | INFRA-01, INFRA-02, INFRA-03, INFRA-04 | 0/4 |
+| 1 - Infrastructure | Complete | INFRA-01, INFRA-02, INFRA-03, INFRA-04 | 4/4 |
 | 2 - Unit Pure | Pending | UNIT-01, UNIT-02, UNIT-03, UNIT-04, UNIT-05, UNIT-06 | 0/6 |
 | 3 - Unit Mocks | Pending | MOCK-01, MOCK-02, MOCK-03 | 0/3 |
 | 4 - Integration | Pending | INT-01, INT-02, INT-03 | 0/3 |
 | 5 - E2E | Pending | E2E-01, E2E-02, E2E-03 | 0/3 |
 
-**Overall:** 0/19 requirements complete
+**Overall:** 4/19 requirements complete
 
 ## Coverage
 
@@ -162,3 +167,4 @@ Plans:
 
 *Roadmap created: 2026-02-04*
 *Phase 1 planned: 2026-02-04*
+*Phase 2 planned: 2026-02-04*
