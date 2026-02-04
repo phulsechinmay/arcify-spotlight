@@ -11,19 +11,19 @@ See: .planning/PROJECT.md (updated 2026-02-03)
 
 ```
 Phase: 1 of 2 (Bug Fixes)
-Plan: 1 of 2 complete
-Status: In progress
-Progress: [=====.....] 50%
+Plan: 2 of 2 complete
+Status: Phase complete
+Progress: [==========] 100%
 ```
 
-Last activity: 2026-02-04 - Completed 01-01-PLAN.md (URL deduplication)
+Last activity: 2026-02-03 - Completed 01-02-PLAN.md (tab fuzzy matching)
 
 ## Phase Summary
 
 | Phase | Goal | Status |
 |-------|------|--------|
-| 1 - Bug Fixes | Eliminate duplicates, fix tab matching | In progress (1/2 plans) |
-| 2 - UX Improvements | URL preview, density, theming | Blocked by Phase 1 |
+| 1 - Bug Fixes | Eliminate duplicates, fix tab matching | Complete (2/2 plans) |
+| 2 - UX Improvements | URL preview, density, theming | Ready |
 
 ## Accumulated Context
 
@@ -34,11 +34,14 @@ Last activity: 2026-02-04 - Completed 01-01-PLAN.md (URL deduplication)
 - Arcify bookmark detection deferred to v1.5
 - URL fragments stripped during deduplication (page#section1 = page#section2)
 - Query parameters preserved (page?id=1 != page?id=2)
+- Minimum 2-character query for tab matching to avoid noise
 
 ### Implementation Notes
 - `BaseDataProvider.normalizeUrlForDeduplication()` now handles fragments, trailing slashes, www prefix, protocol
+- `BaseDataProvider.fuzzyMatch()` provides characters-in-sequence matching for tab filtering
 - `getResultPriority()` documented with priority order: open-tab > pinned-tab > bookmark > history > top-site
-- `BackgroundDataProvider.getOpenTabsData()` handles tab filtering
+- `BackgroundDataProvider.getOpenTabsData()` uses fuzzy matching for title and URL
+- `BackgroundDataProvider.getPinnedTabsData()` uses fuzzy matching for title and URL
 - `SelectionManager` needs callback for selection changes (UX-01)
 - Tab Groups API (`chrome.tabGroups.get()`) for color (UX-03)
 
@@ -55,10 +58,10 @@ Last activity: 2026-02-04 - Completed 01-01-PLAN.md (URL deduplication)
 
 ## Session Continuity
 
-Last session: 2026-02-04 06:55 UTC
-Stopped at: Completed 01-01-PLAN.md
-Resume file: .planning/phases/01-bug-fixes/01-02-PLAN.md
+Last session: 2026-02-03
+Stopped at: Completed 01-02-PLAN.md (Phase 1 complete)
+Resume file: None
 
 ---
 
-*Last updated: 2026-02-04 - Completed 01-01-PLAN.md*
+*Last updated: 2026-02-03 - Completed Phase 1 Bug Fixes*
