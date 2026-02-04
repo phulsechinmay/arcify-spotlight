@@ -18,13 +18,13 @@ Fast, keyboard-driven tab and URL navigation that feels native to Chrome, elimin
 - ✓ Chrome storage integration for settings and state — existing
 - ✓ Keyboard navigation through suggestions — existing
 
-### Active
+### Completed (v1.0)
 
-- [ ] Fix: Eliminate duplicate items in suggestions (same item from history + open tabs)
-- [ ] Fix: Correctly show open tabs in suggestions when input matches tab name/URL
-- [ ] UX: Update spotlight URL bar to reflect selected suggestion when scrolling with keyboard
-- [ ] UX: Reduce padding on suggestion items for better screen density
-- [ ] UX: Dynamic color highlight matching active tab group color (purple fallback if no group)
+- [x] Fix: Eliminate duplicate items in suggestions (same item from history + open tabs)
+- [x] Fix: Correctly show open tabs in suggestions when input matches tab name/URL
+- [x] UX: Update spotlight URL bar to reflect selected suggestion when scrolling with keyboard
+- [x] UX: Reduce padding on suggestion items for better screen density
+- [x] UX: Dynamic color highlight matching active tab group color (purple fallback if no group)
 
 ### Deferred (v1.5)
 
@@ -67,22 +67,28 @@ Fast, keyboard-driven tab and URL navigation that feels native to Chrome, elimin
 - **Compatibility**: Chrome 88+ only (Manifest V3 requirement)
 - **Existing Architecture**: Work within current message-passing and data provider patterns
 
-## Current Milestone: v1.0 Polish
+## Current Milestone: v1.5 (Planned)
 
-**Goal:** Fix suggestion bugs and improve UX density and visual feedback.
+**Goal:** Arcify bookmark folder integration
 
-**Target features:**
-- Eliminate duplicate suggestions
-- Fix open tab matching in suggestions
-- URL bar preview on keyboard navigation
-- Denser suggestion layout
-- Tab group color matching
+**Planned features:**
+- Detect tabs in Arcify bookmark folder
+- Change suggestion wording for Arcify-managed tabs
+
+## Completed Milestones
+
+See [MILESTONES.md](MILESTONES.md) for full history.
+
+- **v1.0 Polish** (2026-02-04): Bug fixes (deduplication, fuzzy matching) and UX improvements (URL preview, tab group colors)
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Two-phase approach (bugs → UX) for v1.0 | Address stability first, then polish. Integration deferred to v1.5 | — Pending |
+| Two-phase approach (bugs → UX) for v1.0 | Address stability first, then polish. Integration deferred to v1.5 | ✓ Completed |
+| URL fragments stripped during deduplication | page#section1 = page#section2, but query params preserved | ✓ Implemented |
+| Direct Tab Groups API usage | chrome.tabGroups.get() instead of chrome.storage.local lookup | ✓ Implemented |
+| URL preview in input.value | Allows user to edit URL, flag prevents search re-trigger | ✓ Implemented |
 
 ---
-*Last updated: 2026-02-03 after milestone v1.0 scope adjusted*
+*Last updated: 2026-02-04 — v1.0 Polish milestone complete*
