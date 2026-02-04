@@ -477,20 +477,29 @@ export class BaseDataProvider {
     }
 
     // Normalize URL for consistent deduplication
+    // Handles: fragments (#section), trailing slashes, protocol (http/https), www prefix
+    // Query parameters are intentionally preserved (different params = different pages)
     normalizeUrlForDeduplication(url) {
         if (!url) return '';
-        
+
         let normalizedUrl = url.toLowerCase();
-        
-        // Remove trailing slashes
+
+        // Remove URL fragments (anchors) - user decision: ignore fragments
+        // Must be done first before other normalizations
+        const fragmentIndex = normalizedUrl.indexOf('#');
+        if (fragmentIndex !== -1) {
+            normalizedUrl = normalizedUrl.substring(0, fragmentIndex);
+        }
+
+        // Remove trailing slashes - user decision: ignore trailing slashes
         normalizedUrl = normalizedUrl.replace(/\/+$/, '');
-        
+
         // Remove protocol prefixes for comparison (http/https shouldn't matter)
         normalizedUrl = normalizedUrl.replace(/^https?:\/\//, '');
-        
-        // Remove www. prefix for comparison
+
+        // Remove www. prefix for comparison - user decision: ignore www prefix
         normalizedUrl = normalizedUrl.replace(/^www\./, '');
-        
+
         return normalizedUrl;
     }
 
