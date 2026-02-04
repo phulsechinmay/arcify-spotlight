@@ -2,19 +2,26 @@
 // Consolidates identical SelectionManager implementations from overlay.js and popup.js
 
 export class SelectionManager {
-    constructor(container) {
+    constructor(container, onSelectionChange = null) {
         this.container = container;
         this.selectedIndex = 0;
         this.results = [];
+        this.onSelectionChange = onSelectionChange;
     }
 
     updateResults(newResults) {
         this.results = newResults;
         this.selectedIndex = 0;
         this.updateVisualSelection();
+
+        // Trigger callback for initial selection
+        if (this.onSelectionChange && this.results.length > 0) {
+            this.onSelectionChange(this.getSelectedResult(), this.selectedIndex);
+        }
     }
 
     moveSelection(direction) {
+        const oldIndex = this.selectedIndex;
         const maxIndex = this.results.length - 1;
 
         if (direction === 'down') {
@@ -24,16 +31,33 @@ export class SelectionManager {
         }
 
         this.updateVisualSelection();
+
+        // Notify callback if selection changed
+        if (this.onSelectionChange && oldIndex !== this.selectedIndex) {
+            this.onSelectionChange(this.getSelectedResult(), this.selectedIndex);
+        }
     }
 
     moveToFirst() {
+        const oldIndex = this.selectedIndex;
         this.selectedIndex = 0;
         this.updateVisualSelection();
+
+        // Notify callback if selection changed
+        if (this.onSelectionChange && oldIndex !== this.selectedIndex) {
+            this.onSelectionChange(this.getSelectedResult(), this.selectedIndex);
+        }
     }
 
     moveToLast() {
+        const oldIndex = this.selectedIndex;
         this.selectedIndex = Math.max(0, this.results.length - 1);
         this.updateVisualSelection();
+
+        // Notify callback if selection changed
+        if (this.onSelectionChange && oldIndex !== this.selectedIndex) {
+            this.onSelectionChange(this.getSelectedResult(), this.selectedIndex);
+        }
     }
 
     getSelectedResult() {
