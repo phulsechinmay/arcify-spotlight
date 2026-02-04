@@ -14,9 +14,9 @@ Requirements for v1.0 Polish milestone. Each maps to roadmap phases.
 
 ### UX Improvements
 
-- [ ] **UX-01**: User sees URL bar update to show selected suggestion URL when navigating with keyboard
-- [ ] **UX-02**: User sees denser suggestion list with reduced padding between items
-- [ ] **UX-03**: User sees highlight color matching their active tab group color (purple if no group)
+- [x] **UX-01**: User sees URL bar update to show selected suggestion URL when navigating with keyboard
+- [x] **UX-02**: User sees denser suggestion list with reduced padding between items
+- [x] **UX-03**: User sees highlight color matching their active tab group color (purple if no group)
 
 ## v1.5 Requirements
 
@@ -40,9 +40,9 @@ Deferred to next milestone.
 |-------------|-------|--------|
 | BUG-01 | Phase 1 | Complete |
 | BUG-02 | Phase 1 | Complete |
-| UX-01 | Phase 2 | Pending |
-| UX-02 | Phase 2 | Pending |
-| UX-03 | Phase 2 | Pending |
+| UX-01 | Phase 2 | Complete |
+| UX-02 | Phase 2 | Complete |
+| UX-03 | Phase 2 | Complete |
 
 **Coverage:**
 - v1.0 requirements: 5 total
