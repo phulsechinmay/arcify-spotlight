@@ -5,20 +5,20 @@
 See: .planning/PROJECT.md (updated 2026-02-04)
 
 **Core value:** Fast, keyboard-driven tab and URL navigation that feels native to Chrome
-**Current focus:** Milestone v1.01 (Testing Infrastructure) - roadmap complete, ready to plan Phase 1
+**Current focus:** Milestone v1.01 (Testing Infrastructure) - Phase 2 in progress
 
 ## Current Position
 
 ```
 Milestone: v1.01 Testing Infrastructure
-Phase: 1 - Test Infrastructure Setup (pending)
-Plan: Not started
-Status: Roadmap complete, awaiting plan-phase
+Phase: 2 - Unit Tests - Pure Logic (in progress)
+Plan: 02-01-PLAN.md executed
+Status: Plan 02-01 complete, continue with 02-02
 ```
 
-Progress: [--------------------] 0/19 requirements (0%)
+Progress: [#####---------------] 5/19 requirements (26%)
 
-Last activity: 2026-02-04 - Roadmap created
+Last activity: 2026-02-04 - Completed 02-01-PLAN.md (URL utilities and deduplication tests)
 
 ## Milestone History
 
@@ -32,11 +32,11 @@ Last activity: 2026-02-04 - Roadmap created
 
 | Phase | Goal | Status | Requirements |
 |-------|------|--------|--------------|
-| 1 | Test infrastructure setup | Pending | 4 |
-| 2 | Unit tests - pure logic | Pending | 6 |
-| 3 | Unit tests - Chrome API mocks | Pending | 3 |
-| 4 | Integration tests | Pending | 3 |
-| 5 | E2E tests | Pending | 3 |
+| 1 | Test infrastructure setup | Complete | 4/4 |
+| 2 | Unit tests - pure logic | In Progress | 1/6 (02-01 done) |
+| 3 | Unit tests - Chrome API mocks | Pending | 0/3 |
+| 4 | Integration tests | Pending | 0/3 |
+| 5 | E2E tests | Pending | 0/3 |
 
 ## Accumulated Context
 
@@ -60,13 +60,18 @@ Last activity: 2026-02-04 - Roadmap created
 - Some race conditions in message handlers
 - No automated tests (addressing in v1.01)
 
+### v1.01 Phase 2 Decisions
+- file.txt treated as valid URL - isURL() is intentionally permissive for domain patterns
+- Provider tests use Object.create(BaseDataProvider.prototype) for instance method testing
+- Table-driven tests with it.each() for comprehensive edge case coverage
+
 ## Session Continuity
 
 Last session: 2026-02-04
-Stopped at: Roadmap created for v1.01
-Next action: `/gsd:plan-phase 1` to plan infrastructure setup
-Resume file: .planning/ROADMAP.md
+Stopped at: Completed 02-01-PLAN.md (URL utilities and deduplication tests)
+Next action: Execute 02-02-PLAN.md (scoring and fuzzy matching tests)
+Resume file: .planning/phases/02-unit-tests-pure-logic/02-01-SUMMARY.md
 
 ---
 
-*Last updated: 2026-02-04 - Roadmap created for v1.01 Testing Infrastructure*
+*Last updated: 2026-02-04 - Completed 02-01-PLAN.md*
