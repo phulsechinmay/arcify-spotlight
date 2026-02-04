@@ -20,14 +20,25 @@ export class BackgroundDataProvider extends BaseDataProvider {
     async getOpenTabsData(query = '') {
         try {
             const tabs = await chrome.tabs.query({});
-            
+
             const filteredTabs = tabs.filter(tab => {
                 if (!tab.title || !tab.url) return false;
+
+                // No query = return all tabs
                 if (!query) return true;
-                return tab.title.toLowerCase().includes(query.toLowerCase()) || 
-                       tab.url.toLowerCase().includes(query.toLowerCase());
+
+                // Minimum 2 characters before matching - user decision to avoid noise
+                if (query.length < 2) return false;
+
+                const queryLower = query.toLowerCase();
+                const titleLower = tab.title.toLowerCase();
+                const urlLower = tab.url.toLowerCase();
+
+                // Use fuzzy matching for both title and URL - user decision
+                return this.fuzzyMatch(queryLower, titleLower) ||
+                       this.fuzzyMatch(queryLower, urlLower);
             });
-            
+
             return filteredTabs;
         } catch (error) {
             Logger.error('[BackgroundDataProvider] Error querying tabs:', error);
@@ -140,11 +151,17 @@ export class BackgroundDataProvider extends BaseDataProvider {
                     const matchingTab = BookmarkUtils.findTabByUrl(tabs, bookmark.url);
                     Logger.log('[BackgroundDataProvider] Processing bookmark:', bookmark.title, 'matching tab:', !!matchingTab);
                     
-                    // Apply query filter
+                    // Apply query filter with fuzzy matching
                     if (query) {
+                        // Minimum 2 characters before matching - consistent with open tabs
+                        if (query.length < 2) {
+                            Logger.log('[BackgroundDataProvider] Query too short, skipping pinned tab:', bookmark.title);
+                            continue;
+                        }
+
                         const queryLower = query.toLowerCase();
-                        const titleMatch = bookmark.title.toLowerCase().includes(queryLower);
-                        const urlMatch = bookmark.url.toLowerCase().includes(queryLower);
+                        const titleMatch = this.fuzzyMatch(queryLower, bookmark.title.toLowerCase());
+                        const urlMatch = this.fuzzyMatch(queryLower, bookmark.url.toLowerCase());
                         if (!titleMatch && !urlMatch) {
                             Logger.log('[BackgroundDataProvider] Bookmark filtered out by query:', bookmark.title);
                             continue;

@@ -114,9 +114,9 @@ async function initializeSpotlight() {
         }
 
         .arcify-spotlight-results {
-            max-height: 288px;
+            max-height: 270px;
             overflow-y: auto;
-            padding: 4px 0;
+            padding: 8px 0;
             scroll-behavior: smooth;
             scrollbar-width: none;
             -ms-overflow-style: none;
@@ -129,8 +129,8 @@ async function initializeSpotlight() {
         .arcify-spotlight-result-item {
             display: flex;
             align-items: center;
-            padding: 8px 20px 8px 16px;
-            min-height: 40px;
+            padding: 12px 24px 12px 20px;
+            min-height: 44px;
             cursor: pointer;
             transition: background-color 0.15s ease;
             border: none;
@@ -162,7 +162,7 @@ async function initializeSpotlight() {
         .arcify-spotlight-result-content {
             flex: 1;
             min-width: 0;
-            min-height: 24px;
+            min-height: 32px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -172,7 +172,7 @@ async function initializeSpotlight() {
             font-size: 14px;
             font-weight: 500;
             color: #ffffff;
-            margin: 0 0 1px 0;
+            margin: 0 0 2px 0;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -273,7 +273,26 @@ async function initializeSpotlight() {
         return await SpotlightMessageClient.handleResult(result, mode);
     }
 
-    const selectionManager = new SelectionManager(resultsContainer);
+    // Flag to track selection-driven input changes (should not trigger search)
+    let isSelectionDrivenChange = false;
+
+    // URL preview callback - updates input value with selected result URL
+    const handleSelectionChange = (result, index) => {
+        isSelectionDrivenChange = true;
+        if (result && result.metadata && result.metadata.query) {
+            // For search/autocomplete suggestions, use the query
+            input.value = result.metadata.query;
+        } else if (result && result.url) {
+            input.value = result.url;
+        } else if (result && result.title) {
+            input.value = result.title;
+        } else {
+            input.value = '';
+        }
+        // Flag will be checked and reset by the input handler
+    };
+
+    const selectionManager = new SelectionManager(resultsContainer, handleSelectionChange);
 
     // Load initial results
     // Use 'current-tab' mode since we're on the new tab page itself
@@ -355,12 +374,23 @@ async function initializeSpotlight() {
         selectionManager.updateResults([]);
     }
 
-    // Input event handlers
-    input.addEventListener('input', SharedSpotlightLogic.createInputHandler(
+    // Create the base input handler once (with debouncing)
+    const baseInputHandler = SharedSpotlightLogic.createInputHandler(
         handleInstantInput,
         handleAsyncSearch,
         150
-    ));
+    );
+
+    // Input event handler - skip search for selection-driven changes
+    input.addEventListener('input', (e) => {
+        if (isSelectionDrivenChange) {
+            // Reset flag and skip search - this was a selection preview update
+            isSelectionDrivenChange = false;
+            return;
+        }
+        // User typed something - trigger search
+        baseInputHandler(e);
+    });
 
     // Handle result selection
     // Use 'current-tab' mode so navigation happens in the current tab (the new tab page itself)

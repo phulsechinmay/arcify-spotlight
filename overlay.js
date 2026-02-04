@@ -194,9 +194,9 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
         }
 
         .arcify-spotlight-results {
-            max-height: 288px;
+            max-height: 270px;
             overflow-y: auto;
-            padding: 4px 0;
+            padding: 8px 0;
             scroll-behavior: smooth;
             scrollbar-width: none; /* Firefox */
             -ms-overflow-style: none; /* IE and Edge */
@@ -209,8 +209,8 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
         .arcify-spotlight-result-item {
             display: flex;
             align-items: center;
-            padding: 8px 20px 8px 16px;
-            min-height: 40px;
+            padding: 12px 24px 12px 20px;
+            min-height: 44px;
             cursor: pointer;
             transition: background-color 0.15s ease;
             border: none;
@@ -242,7 +242,7 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
         .arcify-spotlight-result-content {
             flex: 1;
             min-width: 0;
-            min-height: 24px;
+            min-height: 32px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -252,7 +252,7 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
             font-size: 14px;
             font-weight: 500;
             color: #ffffff;
-            margin: 0 0 1px 0;
+            margin: 0 0 2px 0;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -377,18 +377,23 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
     }
 
 
-    // URL preview callback - updates input placeholder with selected result URL
+    // Flag to track selection-driven input changes (should not trigger search)
+    let isSelectionDrivenChange = false;
+
+    // URL preview callback - updates input value with selected result URL
     const handleSelectionChange = (result, index) => {
-        if (result && result.url) {
-            input.placeholder = result.url;
+        isSelectionDrivenChange = true;
+        if (result && result.metadata && result.metadata.query) {
+            // For search/autocomplete suggestions, use the query
+            input.value = result.metadata.query;
+        } else if (result && result.url) {
+            input.value = result.url;
         } else if (result && result.title) {
-            input.placeholder = result.title;
+            input.value = result.title;
         } else {
-            // Reset to default placeholder
-            input.placeholder = spotlightTabMode === SpotlightTabMode.NEW_TAB
-                ? 'Search or enter URL (opens in new tab)...'
-                : 'Search or enter URL...';
+            input.value = '';
         }
+        // Flag will be checked and reset by the input handler
     };
 
     const selectionManager = new SelectionManager(resultsContainer, handleSelectionChange);
@@ -492,12 +497,23 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
     }
 
 
-    // Input event handlers
-    input.addEventListener('input', SharedSpotlightLogic.createInputHandler(
+    // Create the base input handler once (with debouncing)
+    const baseInputHandler = SharedSpotlightLogic.createInputHandler(
         handleInstantInput,    // instant update (zero latency)
         handleAsyncSearch,     // async update (debounced by SearchEngine)
         150                    // debounce delay in ms
-    ));
+    );
+
+    // Input event handler - skip search for selection-driven changes
+    input.addEventListener('input', (e) => {
+        if (isSelectionDrivenChange) {
+            // Reset flag and skip search - this was a selection preview update
+            isSelectionDrivenChange = false;
+            return;
+        }
+        // User typed something - trigger search
+        baseInputHandler(e);
+    });
 
     // Handle result selection
     async function handleResultAction(result) {

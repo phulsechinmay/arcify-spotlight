@@ -427,6 +427,35 @@ export class BaseDataProvider {
         });
     }
 
+    /**
+     * Simple fuzzy match - checks if all characters in query appear in text in order
+     * Examples: "ghub" matches "GitHub", "yt" matches "YouTube", "gml" matches "Gmail"
+     * @param {string} query - The search query (lowercase)
+     * @param {string} text - The text to search in (lowercase)
+     * @returns {boolean} - True if fuzzy match found
+     */
+    fuzzyMatch(query, text) {
+        if (!query || !text) return false;
+
+        const queryLower = query.toLowerCase();
+        const textLower = text.toLowerCase();
+
+        // Quick check: if query is contained, it's a match
+        if (textLower.includes(queryLower)) {
+            return true;
+        }
+
+        // Fuzzy match: all query characters must appear in order
+        let queryIndex = 0;
+        for (let i = 0; i < textLower.length && queryIndex < queryLower.length; i++) {
+            if (textLower[i] === queryLower[queryIndex]) {
+                queryIndex++;
+            }
+        }
+
+        return queryIndex === queryLower.length;
+    }
+
     // Comprehensive deduplication across all result sources
     deduplicateResults(results) {
         const seen = new Map();
@@ -477,26 +506,37 @@ export class BaseDataProvider {
     }
 
     // Normalize URL for consistent deduplication
+    // Handles: fragments (#section), trailing slashes, protocol (http/https), www prefix
+    // Query parameters are intentionally preserved (different params = different pages)
     normalizeUrlForDeduplication(url) {
         if (!url) return '';
-        
+
         let normalizedUrl = url.toLowerCase();
-        
-        // Remove trailing slashes
+
+        // Remove URL fragments (anchors) - user decision: ignore fragments
+        // Must be done first before other normalizations
+        const fragmentIndex = normalizedUrl.indexOf('#');
+        if (fragmentIndex !== -1) {
+            normalizedUrl = normalizedUrl.substring(0, fragmentIndex);
+        }
+
+        // Remove trailing slashes - user decision: ignore trailing slashes
         normalizedUrl = normalizedUrl.replace(/\/+$/, '');
-        
+
         // Remove protocol prefixes for comparison (http/https shouldn't matter)
         normalizedUrl = normalizedUrl.replace(/^https?:\/\//, '');
-        
-        // Remove www. prefix for comparison
+
+        // Remove www. prefix for comparison - user decision: ignore www prefix
         normalizedUrl = normalizedUrl.replace(/^www\./, '');
-        
+
         return normalizedUrl;
     }
 
     // Get result priority for deduplication (higher = better)
+    // Priority order: open-tab > pinned-tab > bookmark > history > top-site
+    // When same URL exists in multiple sources, higher priority source wins
     getResultPriority(result) {
-        // Use the same priority order as BASE_SCORES for consistency
+        // Use BASE_SCORES for consistent priority hierarchy
         const typePriorities = {
             'open-tab': BASE_SCORES.OPEN_TAB,
             'pinned-tab': BASE_SCORES.PINNED_TAB,

@@ -13,11 +13,8 @@ export class SelectionManager {
         this.results = newResults;
         this.selectedIndex = 0;
         this.updateVisualSelection();
-
-        // Trigger callback for initial selection
-        if (this.onSelectionChange && this.results.length > 0) {
-            this.onSelectionChange(this.getSelectedResult(), this.selectedIndex);
-        }
+        // Note: Callback is NOT triggered on initial load - only on explicit navigation
+        // This prevents URL preview from overriding empty input on spotlight open
     }
 
     moveSelection(direction) {
