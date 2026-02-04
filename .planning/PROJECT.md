@@ -25,6 +25,9 @@ Fast, keyboard-driven tab and URL navigation that feels native to Chrome, elimin
 - [ ] UX: Update spotlight URL bar to reflect selected suggestion when scrolling with keyboard
 - [ ] UX: Reduce padding on suggestion items for better screen density
 - [ ] UX: Dynamic color highlight matching active tab group color (purple fallback if no group)
+
+### Deferred (v1.5)
+
 - [ ] Integration: Detect when tab is in Arcify bookmark folder and change item wording accordingly
 
 ### Out of Scope
@@ -64,9 +67,9 @@ Fast, keyboard-driven tab and URL navigation that feels native to Chrome, elimin
 - **Compatibility**: Chrome 88+ only (Manifest V3 requirement)
 - **Existing Architecture**: Work within current message-passing and data provider patterns
 
-## Current Milestone: v1.0 Polish & Integration
+## Current Milestone: v1.0 Polish
 
-**Goal:** Fix suggestion bugs, improve UX density and visual feedback, integrate with Arcify bookmark detection.
+**Goal:** Fix suggestion bugs and improve UX density and visual feedback.
 
 **Target features:**
 - Eliminate duplicate suggestions
@@ -74,13 +77,12 @@ Fast, keyboard-driven tab and URL navigation that feels native to Chrome, elimin
 - URL bar preview on keyboard navigation
 - Denser suggestion layout
 - Tab group color matching
-- Arcify bookmark folder detection
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Three-phase approach (bugs → UX → integration) | Address stability first, then polish, then new features | — Pending |
+| Two-phase approach (bugs → UX) for v1.0 | Address stability first, then polish. Integration deferred to v1.5 | — Pending |
 
 ---
-*Last updated: 2026-02-03 after milestone v1.0 started*
+*Last updated: 2026-02-03 after milestone v1.0 scope adjusted*

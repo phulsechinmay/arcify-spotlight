@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-02-03)
 
 **Core value:** Fast, keyboard-driven tab and URL navigation that feels native to Chrome
-**Current focus:** Milestone v1.0 — Polish & Integration
+**Current focus:** Milestone v1.0 — Polish
 
 ## Current Position
 
@@ -24,7 +24,7 @@ Last activity: 2026-02-03 — Milestone v1.0 started
 
 ### Notes
 - Research completed: STACK.md, FEATURES.md, ARCHITECTURE.md, PITFALLS.md
-- 6 active requirements scoped for v1.0
+- 5 active requirements scoped for v1.0 (Arcify bookmark detection deferred to v1.5)
 
 ---
 *Last updated: 2026-02-03*
