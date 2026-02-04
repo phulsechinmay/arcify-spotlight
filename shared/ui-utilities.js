@@ -237,7 +237,8 @@ export class SpotlightUtils {
             green: '139, 218, 153',
             pink: '251, 170, 215',
             purple: '214, 166, 255',
-            cyan: '165, 226, 234'
+            cyan: '165, 226, 234',
+            orange: '255, 176, 103'
         };
 
         let rgb = defaultColorMap[spaceColor] || defaultColorMap.purple;

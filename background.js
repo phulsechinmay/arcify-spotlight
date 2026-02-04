@@ -302,21 +302,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     } else if (message.action === 'getActiveSpaceColor') {
         (async () => {
             try {
-                const spacesResult = await chrome.storage.local.get('spaces');
-                const spaces = spacesResult.spaces || [];
-
                 const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
+                // Check if tab exists and is in a group
                 if (!activeTab || !activeTab.groupId || activeTab.groupId === chrome.tabGroups.TAB_GROUP_ID_NONE) {
                     sendResponse({ success: true, color: 'purple' });
                     return;
                 }
 
-                const activeSpace = spaces.find(space => space.id === activeTab.groupId);
-
-                if (activeSpace && activeSpace.color) {
-                    sendResponse({ success: true, color: activeSpace.color });
-                } else {
+                // Fetch color directly from Tab Groups API
+                try {
+                    const group = await chrome.tabGroups.get(activeTab.groupId);
+                    sendResponse({ success: true, color: group.color || 'purple' });
+                } catch (groupError) {
+                    // Group may have been closed or API unavailable
+                    Logger.error('[Background] Error fetching tab group:', groupError);
                     sendResponse({ success: true, color: 'purple' });
                 }
             } catch (error) {
