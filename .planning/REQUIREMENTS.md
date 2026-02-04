@@ -9,19 +9,19 @@ Requirements for testing infrastructure. Each maps to roadmap phases.
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: Developer can run unit tests with `npm test`
-- [ ] **INFRA-02**: Developer can run E2E tests with `npm run test:e2e`
-- [ ] **INFRA-03**: Tests run automatically on git push via CI/CD
-- [ ] **INFRA-04**: Test coverage reports are generated
+- [x] **INFRA-01**: Developer can run unit tests with `npm test`
+- [x] **INFRA-02**: Developer can run E2E tests with `npm run test:e2e`
+- [x] **INFRA-03**: Tests run automatically on git push via CI/CD
+- [x] **INFRA-04**: Test coverage reports are generated
 
 ### Unit Tests - Pure Logic
 
-- [ ] **UNIT-01**: URL normalization handles all edge cases (fragments, trailing slashes, www, protocol)
-- [ ] **UNIT-02**: Deduplication correctly prioritizes open tabs over history
-- [ ] **UNIT-03**: Fuzzy matching works for character-in-sequence patterns (ghub→GitHub)
-- [ ] **UNIT-04**: Relevance scoring applies bonuses correctly
-- [ ] **UNIT-05**: URL detection (isURL) handles domains, localhost, IPs, and rejects search queries
-- [ ] **UNIT-06**: Selection manager navigates correctly (up/down/home/end bounds)
+- [x] **UNIT-01**: URL normalization handles all edge cases (fragments, trailing slashes, www, protocol)
+- [x] **UNIT-02**: Deduplication correctly prioritizes open tabs over history
+- [x] **UNIT-03**: Fuzzy matching works for character-in-sequence patterns (ghub→GitHub)
+- [x] **UNIT-04**: Relevance scoring applies bonuses correctly
+- [x] **UNIT-05**: URL detection (isURL) handles domains, localhost, IPs, and rejects search queries
+- [x] **UNIT-06**: Selection manager navigates correctly (up/down/home/end bounds)
 
 ### Unit Tests - Chrome API Mocks
 
@@ -68,16 +68,16 @@ Deferred to later milestones.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 1 | Pending |
-| INFRA-02 | Phase 1 | Pending |
-| INFRA-03 | Phase 1 | Pending |
-| INFRA-04 | Phase 1 | Pending |
-| UNIT-01 | Phase 2 | Pending |
-| UNIT-02 | Phase 2 | Pending |
-| UNIT-03 | Phase 2 | Pending |
-| UNIT-04 | Phase 2 | Pending |
-| UNIT-05 | Phase 2 | Pending |
-| UNIT-06 | Phase 2 | Pending |
+| INFRA-01 | Phase 1 | Complete |
+| INFRA-02 | Phase 1 | Complete |
+| INFRA-03 | Phase 1 | Complete |
+| INFRA-04 | Phase 1 | Complete |
+| UNIT-01 | Phase 2 | Complete |
+| UNIT-02 | Phase 2 | Complete |
+| UNIT-03 | Phase 2 | Complete |
+| UNIT-04 | Phase 2 | Complete |
+| UNIT-05 | Phase 2 | Complete |
+| UNIT-06 | Phase 2 | Complete |
 | MOCK-01 | Phase 3 | Pending |
 | MOCK-02 | Phase 3 | Pending |
 | MOCK-03 | Phase 3 | Pending |

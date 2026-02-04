@@ -45,9 +45,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — URL utilities and deduplication tests (UNIT-01, UNIT-02, UNIT-05)
-- [ ] 02-02-PLAN.md — Fuzzy matching and scoring tests (UNIT-03, UNIT-04)
-- [ ] 02-03-PLAN.md — Selection manager tests (UNIT-06)
+- [x] 02-01-PLAN.md — URL utilities and deduplication tests (UNIT-01, UNIT-02, UNIT-05)
+- [x] 02-02-PLAN.md — Fuzzy matching and scoring tests (UNIT-03, UNIT-04)
+- [x] 02-03-PLAN.md — Selection manager tests (UNIT-06)
 
 **Requirements:**
 - UNIT-01: URL normalization handles all edge cases
@@ -130,12 +130,12 @@ Plans:
 | Phase | Status | Requirements | Completed |
 |-------|--------|--------------|-----------|
 | 1 - Infrastructure | Complete | INFRA-01, INFRA-02, INFRA-03, INFRA-04 | 4/4 |
-| 2 - Unit Pure | Pending | UNIT-01, UNIT-02, UNIT-03, UNIT-04, UNIT-05, UNIT-06 | 0/6 |
+| 2 - Unit Pure | Complete | UNIT-01, UNIT-02, UNIT-03, UNIT-04, UNIT-05, UNIT-06 | 6/6 |
 | 3 - Unit Mocks | Pending | MOCK-01, MOCK-02, MOCK-03 | 0/3 |
 | 4 - Integration | Pending | INT-01, INT-02, INT-03 | 0/3 |
 | 5 - E2E | Pending | E2E-01, E2E-02, E2E-03 | 0/3 |
 
-**Overall:** 4/19 requirements complete
+**Overall:** 10/19 requirements complete
 
 ## Coverage
 
