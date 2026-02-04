@@ -533,8 +533,10 @@ export class BaseDataProvider {
     }
 
     // Get result priority for deduplication (higher = better)
+    // Priority order: open-tab > pinned-tab > bookmark > history > top-site
+    // When same URL exists in multiple sources, higher priority source wins
     getResultPriority(result) {
-        // Use the same priority order as BASE_SCORES for consistency
+        // Use BASE_SCORES for consistent priority hierarchy
         const typePriorities = {
             'open-tab': BASE_SCORES.OPEN_TAB,
             'pinned-tab': BASE_SCORES.PINNED_TAB,
