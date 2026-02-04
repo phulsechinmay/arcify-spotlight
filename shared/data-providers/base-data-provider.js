@@ -427,6 +427,35 @@ export class BaseDataProvider {
         });
     }
 
+    /**
+     * Simple fuzzy match - checks if all characters in query appear in text in order
+     * Examples: "ghub" matches "GitHub", "yt" matches "YouTube", "gml" matches "Gmail"
+     * @param {string} query - The search query (lowercase)
+     * @param {string} text - The text to search in (lowercase)
+     * @returns {boolean} - True if fuzzy match found
+     */
+    fuzzyMatch(query, text) {
+        if (!query || !text) return false;
+
+        const queryLower = query.toLowerCase();
+        const textLower = text.toLowerCase();
+
+        // Quick check: if query is contained, it's a match
+        if (textLower.includes(queryLower)) {
+            return true;
+        }
+
+        // Fuzzy match: all query characters must appear in order
+        let queryIndex = 0;
+        for (let i = 0; i < textLower.length && queryIndex < queryLower.length; i++) {
+            if (textLower[i] === queryLower[queryIndex]) {
+                queryIndex++;
+            }
+        }
+
+        return queryIndex === queryLower.length;
+    }
+
     // Comprehensive deduplication across all result sources
     deduplicateResults(results) {
         const seen = new Map();
