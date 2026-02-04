@@ -19,6 +19,9 @@ This milestone establishes a comprehensive testing infrastructure for Arcify Spo
 
 **Plans:** 1 plan
 
+Plans:
+- [ ] 01-01-PLAN.md — Configure Vitest, Puppeteer, and GitHub Actions CI
+
 **Requirements:**
 - INFRA-01: Developer can run unit tests with `npm test`
 - INFRA-02: Developer can run E2E tests with `npm run test:e2e`
@@ -121,7 +124,7 @@ This milestone establishes a comprehensive testing infrastructure for Arcify Spo
 
 | Phase | Status | Requirements | Completed |
 |-------|--------|--------------|-----------|
-| 1 - Infrastructure | Pending | INFRA-01, INFRA-02, INFRA-03, INFRA-04 | 0/4 |
+| 1 - Infrastructure | Planned | INFRA-01, INFRA-02, INFRA-03, INFRA-04 | 0/4 |
 | 2 - Unit Pure | Pending | UNIT-01, UNIT-02, UNIT-03, UNIT-04, UNIT-05, UNIT-06 | 0/6 |
 | 3 - Unit Mocks | Pending | MOCK-01, MOCK-02, MOCK-03 | 0/3 |
 | 4 - Integration | Pending | INT-01, INT-02, INT-03 | 0/3 |
@@ -158,3 +161,4 @@ This milestone establishes a comprehensive testing infrastructure for Arcify Spo
 ---
 
 *Roadmap created: 2026-02-04*
+*Phase 1 planned: 2026-02-04*
