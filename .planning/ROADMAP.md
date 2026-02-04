@@ -71,7 +71,11 @@ Plans:
 
 **Dependencies:** Phase 1 (infrastructure), Phase 2 (pure logic patterns established)
 
-**Plans:** 1 plan
+**Plans:** 2 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Extend Chrome mock + cache tests (MOCK-01)
+- [ ] 03-02-PLAN.md — Debounce tests + action routing tests (MOCK-02, MOCK-03)
 
 **Requirements:**
 - MOCK-01: SearchEngine caching returns cached results within TTL
@@ -154,7 +158,7 @@ Plans:
 | MOCK-01 | 3 | SearchEngine caching |
 | MOCK-02 | 3 | SearchEngine debouncing |
 | MOCK-03 | 3 | Action routing |
-| INT-01 | 3 | Query delivery |
+| INT-01 | 4 | Query delivery |
 | INT-02 | 4 | Results return |
 | INT-03 | 4 | Activation flow |
 | E2E-01 | 5 | Full search flow |
@@ -168,3 +172,4 @@ Plans:
 *Roadmap created: 2026-02-04*
 *Phase 1 planned: 2026-02-04*
 *Phase 2 planned: 2026-02-04*
+*Phase 3 planned: 2026-02-04*
