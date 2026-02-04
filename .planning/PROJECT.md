@@ -58,7 +58,7 @@ Fast, keyboard-driven tab and URL navigation that feels native to Chrome, elimin
 **Known Technical Debt:**
 - Large monolithic components (sidebar.js is 3986 lines)
 - Some race conditions in message handlers
-- No automated tests
+- No automated tests (addressing in v1.01)
 
 ## Constraints
 
@@ -67,7 +67,19 @@ Fast, keyboard-driven tab and URL navigation that feels native to Chrome, elimin
 - **Compatibility**: Chrome 88+ only (Manifest V3 requirement)
 - **Existing Architecture**: Work within current message-passing and data provider patterns
 
-## Current Milestone: v1.5 (Planned)
+## Current Milestone: v1.01 Testing Infrastructure
+
+**Goal:** Establish comprehensive testing foundation for regression prevention, refactoring confidence, and living documentation.
+
+**Target features:**
+- Unit/integration tests for suggestion logic (ranking, deduplication, fuzzy matching)
+- E2E tests for UI interactions (hotkeys, keyboard navigation, tab switching)
+- Chrome extension-specific testing patterns
+- Balanced coverage across unit and E2E layers
+
+## Future Milestones
+
+### v1.5 (Deferred)
 
 **Goal:** Arcify bookmark folder integration
 
@@ -91,4 +103,4 @@ See [MILESTONES.md](MILESTONES.md) for full history.
 | URL preview in input.value | Allows user to edit URL, flag prevents search re-trigger | ✓ Implemented |
 
 ---
-*Last updated: 2026-02-04 — v1.0 Polish milestone complete*
+*Last updated: 2026-02-04 — v1.01 Testing Infrastructure milestone started*

@@ -5,24 +5,25 @@
 See: .planning/PROJECT.md (updated 2026-02-04)
 
 **Core value:** Fast, keyboard-driven tab and URL navigation that feels native to Chrome
-**Current focus:** Milestone v1.5 (Arcify bookmark integration) - not started
+**Current focus:** Milestone v1.01 (Testing Infrastructure) - defining requirements
 
 ## Current Position
 
 ```
-Milestone: v1.0 Polish - COMPLETE (archived)
-Next: v1.5 - Arcify bookmark folder integration
-Status: Between milestones
+Milestone: v1.01 Testing Infrastructure
+Phase: Not started (defining requirements)
+Status: Defining requirements
 ```
 
-Last activity: 2026-02-04 - Completed and archived v1.0 milestone
+Last activity: 2026-02-04 - Milestone v1.01 started
 
 ## Milestone History
 
 | Milestone | Goal | Status |
 |-----------|------|--------|
 | v1.0 Polish | Bug fixes + UX improvements | Complete ✓ (archived) |
-| v1.5 | Arcify bookmark integration | Planned |
+| v1.01 | Testing Infrastructure | In Progress |
+| v1.5 | Arcify bookmark integration | Deferred |
 
 ## Accumulated Context
 
@@ -38,14 +39,14 @@ Last activity: 2026-02-04 - Completed and archived v1.0 milestone
 ### Technical Debt Noted
 - Large monolithic components (sidebar.js is 3986 lines)
 - Some race conditions in message handlers
-- No automated tests
+- No automated tests (addressing in v1.01)
 
 ## Session Continuity
 
 Last session: 2026-02-04
-Stopped at: Completed v1.0 milestone archival
+Stopped at: Defining v1.01 requirements
 Resume file: None
 
 ---
 
-*Last updated: 2026-02-04 - v1.0 milestone complete and archived*
+*Last updated: 2026-02-04 - v1.01 Testing Infrastructure milestone started*
