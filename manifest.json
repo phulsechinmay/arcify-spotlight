@@ -5,6 +5,7 @@
   "description": "Search/command bar for tabs, bookmarks, and history",
   "permissions": [
     "tabs",
+    "tabGroups",
     "storage",
     "bookmarks",
     "commands",
