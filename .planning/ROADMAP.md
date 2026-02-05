@@ -74,8 +74,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Extend Chrome mock + cache tests (MOCK-01)
-- [ ] 03-02-PLAN.md — Debounce tests + action routing tests (MOCK-02, MOCK-03)
+- [x] 03-01-PLAN.md — Extend Chrome mock + cache tests (MOCK-01)
+- [x] 03-02-PLAN.md — Debounce tests + action routing tests (MOCK-02, MOCK-03)
 
 **Requirements:**
 - MOCK-01: SearchEngine caching returns cached results within TTL
@@ -135,11 +135,11 @@ Plans:
 |-------|--------|--------------|-----------|
 | 1 - Infrastructure | Complete | INFRA-01, INFRA-02, INFRA-03, INFRA-04 | 4/4 |
 | 2 - Unit Pure | Complete | UNIT-01, UNIT-02, UNIT-03, UNIT-04, UNIT-05, UNIT-06 | 6/6 |
-| 3 - Unit Mocks | Pending | MOCK-01, MOCK-02, MOCK-03 | 0/3 |
+| 3 - Unit Mocks | Complete | MOCK-01, MOCK-02, MOCK-03 | 3/3 |
 | 4 - Integration | Pending | INT-01, INT-02, INT-03 | 0/3 |
 | 5 - E2E | Pending | E2E-01, E2E-02, E2E-03 | 0/3 |
 
-**Overall:** 10/19 requirements complete
+**Overall:** 13/19 requirements complete
 
 ## Coverage
 

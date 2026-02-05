@@ -25,9 +25,9 @@ Requirements for testing infrastructure. Each maps to roadmap phases.
 
 ### Unit Tests - Chrome API Mocks
 
-- [ ] **MOCK-01**: SearchEngine caching returns cached results within TTL
-- [ ] **MOCK-02**: SearchEngine debouncing prevents rapid-fire API calls
-- [ ] **MOCK-03**: Action routing calls correct Chrome APIs for each result type
+- [x] **MOCK-01**: SearchEngine caching returns cached results within TTL
+- [x] **MOCK-02**: SearchEngine debouncing prevents rapid-fire API calls
+- [x] **MOCK-03**: Action routing calls correct Chrome APIs for each result type
 
 ### Integration Tests
 
@@ -78,9 +78,9 @@ Deferred to later milestones.
 | UNIT-04 | Phase 2 | Complete |
 | UNIT-05 | Phase 2 | Complete |
 | UNIT-06 | Phase 2 | Complete |
-| MOCK-01 | Phase 3 | Pending |
-| MOCK-02 | Phase 3 | Pending |
-| MOCK-03 | Phase 3 | Pending |
+| MOCK-01 | Phase 3 | Complete |
+| MOCK-02 | Phase 3 | Complete |
+| MOCK-03 | Phase 3 | Complete |
 | INT-01 | Phase 4 | Pending |
 | INT-02 | Phase 4 | Pending |
 | INT-03 | Phase 4 | Pending |
