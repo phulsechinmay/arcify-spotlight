@@ -13,7 +13,23 @@ export const chromeMock = {
     query: vi.fn().mockResolvedValue([]),
     update: vi.fn().mockResolvedValue({}),
     create: vi.fn().mockResolvedValue({ id: 1 }),
-    get: vi.fn().mockResolvedValue({})
+    get: vi.fn().mockResolvedValue({}),
+    sendMessage: vi.fn().mockResolvedValue(undefined),
+    onActivated: {
+      addListener: vi.fn(),
+      removeListener: vi.fn()
+    },
+    onRemoved: {
+      addListener: vi.fn(),
+      removeListener: vi.fn()
+    }
+  },
+
+  commands: {
+    onCommand: {
+      addListener: vi.fn(),
+      removeListener: vi.fn()
+    }
   },
 
   storage: {
@@ -67,7 +83,8 @@ export const chromeMock = {
   },
 
   tabGroups: {
-    get: vi.fn().mockResolvedValue({ color: 'grey', title: '' })
+    get: vi.fn().mockResolvedValue({ color: 'grey', title: '' }),
+    TAB_GROUP_ID_NONE: -1
   },
 
   windows: {
@@ -92,6 +109,14 @@ export function resetChromeMocks() {
   chromeMock.tabs.update.mockClear().mockResolvedValue({});
   chromeMock.tabs.create.mockClear().mockResolvedValue({ id: 1 });
   chromeMock.tabs.get.mockClear().mockResolvedValue({});
+  chromeMock.tabs.sendMessage.mockClear().mockResolvedValue(undefined);
+  chromeMock.tabs.onActivated.addListener.mockClear();
+  chromeMock.tabs.onActivated.removeListener.mockClear();
+  chromeMock.tabs.onRemoved.addListener.mockClear();
+  chromeMock.tabs.onRemoved.removeListener.mockClear();
+
+  chromeMock.commands.onCommand.addListener.mockClear();
+  chromeMock.commands.onCommand.removeListener.mockClear();
 
   chromeMock.storage.local.get.mockClear().mockResolvedValue({});
   chromeMock.storage.local.set.mockClear().mockResolvedValue(undefined);
