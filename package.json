@@ -6,12 +6,23 @@
   "scripts": {
     "dev": "vite build --config vite.config.dev.js --watch",
     "build": "vite build",
-    "clean": "rm -rf dist dist-dev"
+    "build:zip": "npm run build && npm run zip",
+    "zip": "node scripts/zip.js",
+    "clean": "rm -rf dist dist-dev",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "npm run build && node --test test/e2e/**/*.e2e.test.js"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "^4.0.18",
+    "archiver": "^7.0.1",
     "fs-extra": "^11.2.0",
+    "puppeteer": "^24.36.1",
     "vite": "^6.0.0",
-    "vite-plugin-singlefile": "^2.3.0"
+    "vite-plugin-singlefile": "^2.3.0",
+    "vitest": "^4.0.18"
   },
   "keywords": [
     "chrome-extension",

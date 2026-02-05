@@ -42,3 +42,6 @@ CLAUDE.md
 
 # Playwright
 test-results/
+
+# Test coverage
+coverage/

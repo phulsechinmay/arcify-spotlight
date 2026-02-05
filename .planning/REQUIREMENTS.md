@@ -31,9 +31,9 @@ Requirements for testing infrastructure. Each maps to roadmap phases.
 
 ### Integration Tests
 
-- [ ] **INT-01**: Message passing delivers queries from overlay to background
-- [ ] **INT-02**: Message passing returns results from background to overlay
-- [ ] **INT-03**: Spotlight activation flow works end-to-end
+- [x] **INT-01**: Message passing delivers queries from overlay to background
+- [x] **INT-02**: Message passing returns results from background to overlay
+- [x] **INT-03**: Spotlight activation flow works end-to-end
 
 ### E2E Tests
 
@@ -81,9 +81,9 @@ Deferred to later milestones.
 | MOCK-01 | Phase 3 | Complete |
 | MOCK-02 | Phase 3 | Complete |
 | MOCK-03 | Phase 3 | Complete |
-| INT-01 | Phase 4 | Pending |
-| INT-02 | Phase 4 | Pending |
-| INT-03 | Phase 4 | Pending |
+| INT-01 | Phase 4 | Complete |
+| INT-02 | Phase 4 | Complete |
+| INT-03 | Phase 4 | Complete |
 | E2E-01 | Phase 5 | Pending |
 | E2E-02 | Phase 5 | Pending |
 | E2E-03 | Phase 5 | Pending |

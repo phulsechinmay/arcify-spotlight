@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Arcify Spotlight",
-  "version": "1.0.0",
-  "description": "Search/command bar for tabs, bookmarks, and history",
+  "version": "0.0.1",
+  "description": "Arc Browser (Spotlight)-like experience for your URL bar, including auto-complete, history, bookmarks and more",
   "permissions": [
     "tabs",
     "tabGroups",
@@ -50,7 +50,9 @@
     }
   ],
   "externally_connectable": {
-    "ids": ["*"]
+    "ids": [
+      "*"
+    ]
   },
   "icons": {
     "128": "assets/icon.png"
