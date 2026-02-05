@@ -98,8 +98,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Extend Chrome mock with callListeners + integration setup
-- [ ] 04-02-PLAN.md — Message passing tests + activation flow tests
+- [x] 04-01-PLAN.md — Extend Chrome mock with callListeners + integration setup
+- [x] 04-02-PLAN.md — Message passing tests + activation flow tests
 
 **Requirements:**
 - INT-01: Message passing delivers queries from overlay to background
@@ -121,6 +121,9 @@ Plans:
 
 **Plans:** 1 plan
 
+Plans:
+- [ ] 05-01-PLAN.md — E2E tests for search flow, keyboard navigation, and tab switching
+
 **Requirements:**
 - E2E-01: Full search flow works (open -> type -> see results -> select -> navigate)
 - E2E-02: Keyboard navigation works (arrow keys, enter, escape)
@@ -140,10 +143,10 @@ Plans:
 | 1 - Infrastructure | Complete | INFRA-01, INFRA-02, INFRA-03, INFRA-04 | 4/4 |
 | 2 - Unit Pure | Complete | UNIT-01, UNIT-02, UNIT-03, UNIT-04, UNIT-05, UNIT-06 | 6/6 |
 | 3 - Unit Mocks | Complete | MOCK-01, MOCK-02, MOCK-03 | 3/3 |
-| 4 - Integration | Pending | INT-01, INT-02, INT-03 | 0/3 |
+| 4 - Integration | Complete | INT-01, INT-02, INT-03 | 3/3 |
 | 5 - E2E | Pending | E2E-01, E2E-02, E2E-03 | 0/3 |
 
-**Overall:** 13/19 requirements complete
+**Overall:** 16/19 requirements complete
 
 ## Coverage
 
@@ -178,3 +181,5 @@ Plans:
 *Phase 2 planned: 2026-02-04*
 *Phase 3 planned: 2026-02-04*
 *Phase 4 planned: 2026-02-05*
+*Phase 4 complete: 2026-02-04*
+*Phase 5 planned: 2026-02-04*
