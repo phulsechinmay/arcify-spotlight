@@ -95,7 +95,11 @@ Plans:
 
 **Dependencies:** Phase 3 (mocking patterns established)
 
-**Plans:** 1 plan
+**Plans:** 2 plans
+
+Plans:
+- [ ] 04-01-PLAN.md — Extend Chrome mock with callListeners + integration setup
+- [ ] 04-02-PLAN.md — Message passing tests + activation flow tests
 
 **Requirements:**
 - INT-01: Message passing delivers queries from overlay to background
@@ -173,3 +177,4 @@ Plans:
 *Phase 1 planned: 2026-02-04*
 *Phase 2 planned: 2026-02-04*
 *Phase 3 planned: 2026-02-04*
+*Phase 4 planned: 2026-02-05*
