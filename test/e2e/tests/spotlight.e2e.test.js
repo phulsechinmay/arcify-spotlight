@@ -21,6 +21,12 @@ import {
   openNewTabPage
 } from '../setup.js';
 
+// Set to true to add delays between actions for visual observation
+const DEBUG = false;
+const ACTION_DELAY = 800;
+const wait = (ms = ACTION_DELAY) =>
+  DEBUG ? new Promise(resolve => setTimeout(resolve, ms)) : Promise.resolve();
+
 describe('Spotlight E2E Tests', () => {
   let browser;
   let extensionId;
@@ -38,11 +44,13 @@ describe('Spotlight E2E Tests', () => {
   describe('E2E-01: Full Search Flow', () => {
     it('displays spotlight interface on new tab page', async () => {
       const page = await openNewTabPage(browser, extensionId);
+      await wait();
 
       // Wait for spotlight to be visible
       await page.waitForSelector('[data-testid="spotlight-overlay"]', {
         timeout: 5000
       });
+      await wait();
 
       // Verify key elements are present
       const input = await page.$('[data-testid="spotlight-input"]');
@@ -56,14 +64,17 @@ describe('Spotlight E2E Tests', () => {
 
     it('shows results when typing a query', async () => {
       const page = await openNewTabPage(browser, extensionId);
+      await wait();
 
       // Wait for spotlight to be ready
       await page.waitForSelector('[data-testid="spotlight-input"]', {
         timeout: 5000
       });
+      await wait();
 
       // Type a search query
       await page.type('[data-testid="spotlight-input"]', 'google');
+      await wait();
 
       // Wait for results to appear (with reasonable timeout for async search)
       await page.waitForSelector('[data-testid="spotlight-result"]', {
@@ -79,13 +90,16 @@ describe('Spotlight E2E Tests', () => {
 
     it('clears results when input is cleared', async () => {
       const page = await openNewTabPage(browser, extensionId);
+      await wait();
 
       await page.waitForSelector('[data-testid="spotlight-input"]', {
         timeout: 5000
       });
+      await wait();
 
       // Type a query
       await page.type('[data-testid="spotlight-input"]', 'test');
+      await wait();
 
       // Wait for results
       await page.waitForSelector('[data-testid="spotlight-result"]', {
@@ -121,13 +135,16 @@ describe('Spotlight E2E Tests', () => {
   describe('E2E-02: Keyboard Navigation', () => {
     it('first result is selected by default', async () => {
       const page = await openNewTabPage(browser, extensionId);
+      await wait();
 
       await page.waitForSelector('[data-testid="spotlight-input"]', {
         timeout: 5000
       });
+      await wait();
 
       // Type a query to get results
       await page.type('[data-testid="spotlight-input"]', 'example');
+      await wait();
 
       // Wait for results
       await page.waitForSelector('[data-testid="spotlight-result"]', {
@@ -147,10 +164,12 @@ describe('Spotlight E2E Tests', () => {
 
     it('arrow down moves selection to next result', async () => {
       const page = await openNewTabPage(browser, extensionId);
+      await wait();
 
       await page.waitForSelector('[data-testid="spotlight-input"]', {
         timeout: 5000
       });
+      await wait();
 
       // Type a query - the instant suggestion + any matching results should give us multiple
       await page.type('[data-testid="spotlight-input"]', 'google.com');
@@ -168,6 +187,7 @@ describe('Spotlight E2E Tests', () => {
       if (results.length >= 2) {
         // Press arrow down
         await page.keyboard.press('ArrowDown');
+        await wait();
 
         // Small delay for selection update
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -199,10 +219,12 @@ describe('Spotlight E2E Tests', () => {
 
     it('arrow up moves selection to previous result', async () => {
       const page = await openNewTabPage(browser, extensionId);
+      await wait();
 
       await page.waitForSelector('[data-testid="spotlight-input"]', {
         timeout: 5000
       });
+      await wait();
 
       // Type a query
       await page.type('[data-testid="spotlight-input"]', 'github.com');
@@ -220,8 +242,10 @@ describe('Spotlight E2E Tests', () => {
       if (results.length >= 2) {
         // Press arrow down then arrow up
         await page.keyboard.press('ArrowDown');
+        await wait();
         await new Promise(resolve => setTimeout(resolve, 100));
         await page.keyboard.press('ArrowUp');
+        await wait();
         await new Promise(resolve => setTimeout(resolve, 100));
 
         // Check first result is selected again
@@ -246,10 +270,12 @@ describe('Spotlight E2E Tests', () => {
 
     it('Enter navigates to selected result', async () => {
       const page = await openNewTabPage(browser, extensionId);
+      await wait();
 
       await page.waitForSelector('[data-testid="spotlight-input"]', {
         timeout: 5000
       });
+      await wait();
 
       // Type a URL that will be recognized
       await page.type('[data-testid="spotlight-input"]', 'https://example.com');
@@ -258,6 +284,7 @@ describe('Spotlight E2E Tests', () => {
       await page.waitForSelector('[data-testid="spotlight-result"]', {
         timeout: 5000
       });
+      await wait();
 
       // Press Enter to navigate
       await page.keyboard.press('Enter');
@@ -280,6 +307,80 @@ describe('Spotlight E2E Tests', () => {
     });
   });
 
+  describe('E2E-04: Overlay on Regular Page', () => {
+    it('opens spotlight as overlay on a regular webpage', async () => {
+      // Get the service worker to trigger spotlight programmatically
+      const ext = await waitForExtension(browser);
+      const worker = ext.worker;
+
+      // Open a regular webpage
+      const page = await browser.newPage();
+      await page.goto('https://example.com', {
+        waitUntil: 'networkidle0'
+      });
+      await wait();
+
+      // Verify the page content is visible
+      const pageTitle = await page.title();
+      assert.ok(
+        pageTitle.includes('Example'),
+        'Should have loaded example.com page'
+      );
+
+      // Wait for content script to be ready (it loads at document_start)
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Trigger spotlight via service worker (sends message to content script)
+      await worker.evaluate(async () => {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tab) {
+          // Send activation message to the content script
+          await chrome.tabs.sendMessage(tab.id, {
+            action: 'activateSpotlight',
+            mode: 'current-tab',
+            tabUrl: tab.url,
+            tabId: tab.id
+          });
+        }
+      });
+      await wait();
+
+      // Wait for spotlight overlay to appear on the page
+      await page.waitForSelector('[data-testid="spotlight-overlay"]', {
+        timeout: 5000
+      });
+
+      // Verify spotlight is visible as an overlay
+      const spotlight = await page.$('[data-testid="spotlight-overlay"]');
+      assert.ok(spotlight, 'Spotlight overlay should appear on the page');
+
+      // Verify the page content is still in the background (not navigated away)
+      const currentUrl = page.url();
+      assert.ok(
+        currentUrl.includes('example.com'),
+        'Should still be on example.com (overlay, not navigation)'
+      );
+      await wait();
+
+      // Verify we can interact with spotlight
+      const input = await page.$('[data-testid="spotlight-input"]');
+      assert.ok(input, 'Spotlight input should be available');
+
+      // Type a query to verify functionality
+      await page.type('[data-testid="spotlight-input"]', 'test');
+
+      // Wait for results
+      await page.waitForSelector('[data-testid="spotlight-result"]', {
+        timeout: 5000
+      });
+
+      const results = await page.$$('[data-testid="spotlight-result"]');
+      assert.ok(results.length > 0, 'Should show results in overlay mode');
+
+      await page.close();
+    });
+  });
+
   describe('E2E-03: Tab Switching', () => {
     it('selecting an open tab result switches to that tab', async () => {
       // First, open a known page in a new tab
@@ -287,14 +388,16 @@ describe('Spotlight E2E Tests', () => {
       await targetPage.goto('https://example.com', {
         waitUntil: 'domcontentloaded'
       });
-      const targetPageUrl = targetPage.url();
+      await wait();
 
       // Open new tab page with spotlight
       const spotlightPage = await openNewTabPage(browser, extensionId);
+      await wait();
 
       await spotlightPage.waitForSelector('[data-testid="spotlight-input"]', {
         timeout: 5000
       });
+      await wait();
 
       // Search for the open tab
       await spotlightPage.type('[data-testid="spotlight-input"]', 'example.com');
@@ -303,6 +406,7 @@ describe('Spotlight E2E Tests', () => {
       await spotlightPage.waitForSelector('[data-testid="spotlight-result"]', {
         timeout: 5000
       });
+      await wait();
 
       // Find a result that indicates an open tab (has "Switch to tab" action)
       // Note: The result action text varies, so we look for any result with the URL
