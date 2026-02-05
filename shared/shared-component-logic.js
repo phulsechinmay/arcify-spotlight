@@ -57,10 +57,11 @@ export class SharedSpotlightLogic {
             const isSelected = index === 0; // First result is always selected by default
 
             return `
-                <button class="arcify-spotlight-result-item ${isSelected ? 'selected' : ''}" 
-                        data-index="${index}">
-                    <img class="arcify-spotlight-result-favicon" 
-                         src="${SpotlightUtils.getFaviconUrl(result)}" 
+                <button class="arcify-spotlight-result-item ${isSelected ? 'selected' : ''}"
+                        data-index="${index}"
+                        data-testid="spotlight-result">
+                    <img class="arcify-spotlight-result-favicon"
+                         src="${SpotlightUtils.getFaviconUrl(result)}"
                          alt="favicon"
                          data-fallback-icon="true">
                     <div class="arcify-spotlight-result-content">

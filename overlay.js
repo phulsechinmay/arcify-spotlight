@@ -331,6 +331,7 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
     // Create spotlight dialog
     const dialog = document.createElement('dialog');
     dialog.id = 'arcify-spotlight-dialog';
+    dialog.setAttribute('data-testid', 'spotlight-overlay');
 
     dialog.innerHTML = `
         <div class="arcify-spotlight-container">
@@ -339,9 +340,10 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
                     <circle cx="11" cy="11" r="8"></circle>
                     <path d="m21 21-4.35-4.35"></path>
                 </svg>
-                <input 
-                    type="text" 
-                    class="arcify-spotlight-input" 
+                <input
+                    type="text"
+                    class="arcify-spotlight-input"
+                    data-testid="spotlight-input"
                     placeholder="${spotlightTabMode === SpotlightTabMode.NEW_TAB ? 'Search or enter URL (opens in new tab)...' : 'Search or enter URL...'}"
                     spellcheck="false"
                     autocomplete="off"
@@ -349,8 +351,8 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
                     autocapitalize="off"
                 >
             </div>
-            <div class="arcify-spotlight-results">
-                <div class="arcify-spotlight-loading">Loading...</div>
+            <div class="arcify-spotlight-results" data-testid="spotlight-results">
+                <div class="arcify-spotlight-loading" data-testid="spotlight-loading">Loading...</div>
             </div>
         </div>
     `;

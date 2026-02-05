@@ -230,15 +230,16 @@ async function initializeSpotlight() {
 
     // Create spotlight UI
     container.innerHTML = `
-        <div class="arcify-spotlight-wrapper">
+        <div class="arcify-spotlight-wrapper" data-testid="spotlight-overlay">
             <div class="arcify-spotlight-input-wrapper">
                 <svg class="arcify-spotlight-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="11" cy="11" r="8"></circle>
                     <path d="m21 21-4.35-4.35"></path>
                 </svg>
-                <input 
-                    type="text" 
-                    class="arcify-spotlight-input" 
+                <input
+                    type="text"
+                    class="arcify-spotlight-input"
+                    data-testid="spotlight-input"
                     placeholder="Search or enter URL (opens in new tab)..."
                     spellcheck="false"
                     autocomplete="off"
@@ -246,8 +247,8 @@ async function initializeSpotlight() {
                     autocapitalize="off"
                 >
             </div>
-            <div class="arcify-spotlight-results">
-                <div class="arcify-spotlight-loading">Loading...</div>
+            <div class="arcify-spotlight-results" data-testid="spotlight-results">
+                <div class="arcify-spotlight-loading" data-testid="spotlight-loading">Loading...</div>
             </div>
         </div>
     `;
