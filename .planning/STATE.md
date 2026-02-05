@@ -12,13 +12,13 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 ```
 Milestone: v1.01 Testing Infrastructure
 Phase: 3 - Unit Tests - Chrome API Mocks (in progress)
-Plan: 03-01 executed
-Status: Plan 03-01 complete (157 tests), ready for 03-02
+Plan: 03-02 executed
+Status: Plan 03-02 complete (197 tests), ready for 03-03
 ```
 
-Progress: [###########---------] 11/19 requirements (58%)
+Progress: [############--------] 12/19 requirements (63%)
 
-Last activity: 2026-02-04 - Completed 03-01-PLAN.md (SearchEngine cache tests)
+Last activity: 2026-02-05 - Completed 03-02-PLAN.md (Debounce and Action Routing Tests)
 
 ## Milestone History
 
@@ -34,7 +34,7 @@ Last activity: 2026-02-04 - Completed 03-01-PLAN.md (SearchEngine cache tests)
 |-------|------|--------|--------------|
 | 1 | Test infrastructure setup | Complete | 4/4 |
 | 2 | Unit tests - pure logic | Complete | 6/6 |
-| 3 | Unit tests - Chrome API mocks | In Progress | 1/3 |
+| 3 | Unit tests - Chrome API mocks | In Progress | 2/3 |
 | 4 | Integration tests | Pending | 0/3 |
 | 5 | E2E tests | Pending | 0/3 |
 
@@ -70,14 +70,16 @@ Last activity: 2026-02-04 - Completed 03-01-PLAN.md (SearchEngine cache tests)
 ### v1.01 Phase 3 Decisions
 - Use vi.advanceTimersByTimeAsync() (async version) for debounced async function testing
 - Cache key testing pattern validates query:mode composite keys
+- Table-driven tests with it.each() for URL result types (URL_SUGGESTION, BOOKMARK, HISTORY, TOP_SITE)
+- Test only isBackgroundProvider: true path - content script message passing is Phase 4 scope
 
 ## Session Continuity
 
-Last session: 2026-02-04
-Stopped at: Completed 03-01-PLAN.md (SearchEngine cache tests)
-Next action: Execute 03-02-PLAN.md (Mock Integration Tests)
-Resume file: .planning/phases/03-unit-tests-chrome-api-mocks/03-01-SUMMARY.md
+Last session: 2026-02-05
+Stopped at: Completed 03-02-PLAN.md (Debounce and Action Routing Tests)
+Next action: Execute 03-03-PLAN.md (Message Passing Tests)
+Resume file: .planning/phases/03-unit-tests-chrome-api-mocks/03-02-SUMMARY.md
 
 ---
 
-*Last updated: 2026-02-04 - Phase 3 Plan 01 (SearchEngine Cache Tests) complete*
+*Last updated: 2026-02-05 - Phase 3 Plan 02 (Debounce and Action Routing Tests) complete*
