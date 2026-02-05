@@ -5,20 +5,20 @@
 See: .planning/PROJECT.md (updated 2026-02-04)
 
 **Core value:** Fast, keyboard-driven tab and URL navigation that feels native to Chrome
-**Current focus:** Milestone v1.01 (Testing Infrastructure) - Phase 3 complete, ready for Phase 4
+**Current focus:** Milestone v1.01 (Testing Infrastructure) - Phase 4 in progress
 
 ## Current Position
 
 ```
 Milestone: v1.01 Testing Infrastructure
-Phase: 3 - Unit Tests - Chrome API Mocks (complete)
-Plan: 03-01, 03-02 executed
-Status: Phase 3 complete (197 tests), ready for Phase 4
+Phase: 4 - Integration Tests (in progress)
+Plan: 04-01 executed
+Status: Phase 4 started (1/3 plans complete)
 ```
 
-Progress: [#############-------] 13/19 requirements (68%)
+Progress: [##############------] 14/19 requirements (74%)
 
-Last activity: 2026-02-05 - Phase 3 complete (46 Chrome API mock tests)
+Last activity: 2026-02-05 - Completed 04-01-PLAN.md (integration test setup)
 
 ## Milestone History
 
@@ -35,7 +35,7 @@ Last activity: 2026-02-05 - Phase 3 complete (46 Chrome API mock tests)
 | 1 | Test infrastructure setup | Complete | 4/4 |
 | 2 | Unit tests - pure logic | Complete | 6/6 |
 | 3 | Unit tests - Chrome API mocks | Complete | 3/3 |
-| 4 | Integration tests | Pending | 0/3 |
+| 4 | Integration tests | In Progress | 1/3 |
 | 5 | E2E tests | Pending | 0/3 |
 
 ## Accumulated Context
@@ -73,13 +73,18 @@ Last activity: 2026-02-05 - Phase 3 complete (46 Chrome API mock tests)
 - Table-driven tests with it.each() for URL result types (URL_SUGGESTION, BOOKMARK, HISTORY, TOP_SITE)
 - Test only isBackgroundProvider: true path - content script message passing is Phase 4 scope
 
+### v1.01 Phase 4 Decisions
+- Integration tests use real timers (not fake timers) for realistic behavior
+- vi.resetModules() called between tests for fresh SearchEngine instances
+- callListeners() pattern simulates Chrome runtime message dispatch
+
 ## Session Continuity
 
 Last session: 2026-02-05
-Stopped at: Phase 3 complete with 197 passing tests
-Next action: `/gsd:plan-phase 4` to plan Integration tests
-Resume file: .planning/phases/03-unit-tests-chrome-api-mocks/03-VERIFICATION.md
+Stopped at: Completed 04-01-PLAN.md (integration test setup)
+Next action: Execute 04-02-PLAN.md (search flow tests)
+Resume file: .planning/phases/04-integration-tests/04-01-SUMMARY.md
 
 ---
 
-*Last updated: 2026-02-05 - Phase 3 (Unit Tests - Chrome API Mocks) complete*
+*Last updated: 2026-02-05 - Phase 4 Plan 1 (Integration Test Setup) complete*
