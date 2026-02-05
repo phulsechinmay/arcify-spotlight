@@ -5,6 +5,9 @@ import { vi } from 'vitest';
  * Each method is a vi.fn() that returns a resolved Promise with empty/default data
  */
 
+// Private listener storage for runtime.onMessage
+let runtimeMessageListeners = [];
+
 export const chromeMock = {
   tabs: {
     query: vi.fn().mockResolvedValue([]),
@@ -39,8 +42,26 @@ export const chromeMock = {
   runtime: {
     sendMessage: vi.fn().mockResolvedValue(undefined),
     onMessage: {
-      addListener: vi.fn(),
-      removeListener: vi.fn()
+      addListener: vi.fn((callback) => {
+        runtimeMessageListeners.push(callback);
+      }),
+      removeListener: vi.fn((callback) => {
+        const idx = runtimeMessageListeners.indexOf(callback);
+        if (idx > -1) runtimeMessageListeners.splice(idx, 1);
+      }),
+      hasListener: vi.fn((callback) => runtimeMessageListeners.includes(callback)),
+      hasListeners: vi.fn(() => runtimeMessageListeners.length > 0),
+      callListeners: (message, sender = {}, sendResponse = vi.fn()) => {
+        let asyncResponse = false;
+        for (const listener of runtimeMessageListeners) {
+          const result = listener(message, sender, sendResponse);
+          if (result === true) asyncResponse = true;
+        }
+        return { asyncResponse, sendResponse };
+      },
+      clearListeners: () => {
+        runtimeMessageListeners = [];
+      }
     },
     getURL: vi.fn((path) => `chrome-extension://mock-id/${path}`)
   },
@@ -86,6 +107,9 @@ export function resetChromeMocks() {
   chromeMock.runtime.sendMessage.mockClear().mockResolvedValue(undefined);
   chromeMock.runtime.onMessage.addListener.mockClear();
   chromeMock.runtime.onMessage.removeListener.mockClear();
+  chromeMock.runtime.onMessage.hasListener.mockClear();
+  chromeMock.runtime.onMessage.hasListeners.mockClear();
+  runtimeMessageListeners = [];
 
   chromeMock.tabGroups.get.mockClear().mockResolvedValue({ color: 'grey', title: '' });
 
