@@ -37,9 +37,9 @@ Requirements for testing infrastructure. Each maps to roadmap phases.
 
 ### E2E Tests
 
-- [ ] **E2E-01**: Full search flow works (open spotlight → type → see results → select → navigate)
-- [ ] **E2E-02**: Keyboard navigation works (arrow keys, enter, escape)
-- [ ] **E2E-03**: Tab switching activates correct tab
+- [x] **E2E-01**: Full search flow works (open spotlight → type → see results → select → navigate)
+- [x] **E2E-02**: Keyboard navigation works (arrow keys, enter, escape)
+- [x] **E2E-03**: Tab switching activates correct tab
 
 ## Future Requirements
 
@@ -84,9 +84,9 @@ Deferred to later milestones.
 | INT-01 | Phase 4 | Complete |
 | INT-02 | Phase 4 | Complete |
 | INT-03 | Phase 4 | Complete |
-| E2E-01 | Phase 5 | Pending |
-| E2E-02 | Phase 5 | Pending |
-| E2E-03 | Phase 5 | Pending |
+| E2E-01 | Phase 5 | Complete |
+| E2E-02 | Phase 5 | Complete |
+| E2E-03 | Phase 5 | Complete |
 
 **Coverage:**
 - v1.01 requirements: 19 total
