@@ -5,27 +5,27 @@
 See: .planning/PROJECT.md (updated 2026-02-04)
 
 **Core value:** Fast, keyboard-driven tab and URL navigation that feels native to Chrome
-**Current focus:** Milestone v1.01 (Testing Infrastructure) - Phase 4 complete, ready for Phase 5
+**Current focus:** Milestone v1.01 (Testing Infrastructure) - COMPLETE
 
 ## Current Position
 
 ```
 Milestone: v1.01 Testing Infrastructure
-Phase: 4 - Integration Tests (complete)
-Plan: 04-01, 04-02 executed
-Status: Phase 4 complete (232 tests), ready for Phase 5
+Phase: 5 - E2E Tests (complete)
+Plan: 05-01 executed
+Status: Milestone v1.01 COMPLETE (240 tests)
 ```
 
-Progress: [################----] 16/19 requirements (84%)
+Progress: [####################] 19/19 requirements (100%)
 
-Last activity: 2026-02-04 - Phase 4 complete (35 integration tests)
+Last activity: 2026-02-04 - Phase 5 complete (8 E2E tests)
 
 ## Milestone History
 
 | Milestone | Goal | Status |
 |-----------|------|--------|
 | v1.0 Polish | Bug fixes + UX improvements | Complete (archived) |
-| v1.01 | Testing Infrastructure | In Progress |
+| v1.01 | Testing Infrastructure | COMPLETE |
 | v1.5 | Arcify bookmark integration | Deferred |
 
 ## Phase Summary (v1.01)
@@ -36,7 +36,17 @@ Last activity: 2026-02-04 - Phase 4 complete (35 integration tests)
 | 2 | Unit tests - pure logic | Complete | 6/6 |
 | 3 | Unit tests - Chrome API mocks | Complete | 3/3 |
 | 4 | Integration tests | Complete | 3/3 |
-| 5 | E2E tests | Pending | 0/3 |
+| 5 | E2E tests | Complete | 3/3 |
+
+## Test Summary (v1.01)
+
+| Category | Count | Description |
+|----------|-------|-------------|
+| Unit tests (pure logic) | 90 | URL utils, scoring, text processing |
+| Unit tests (mocked) | 107 | Chrome API mocks, data providers |
+| Integration tests | 35 | Multi-component interactions |
+| E2E tests | 8 | Full user flows with Puppeteer |
+| **Total** | **240** | Complete testing pyramid |
 
 ## Accumulated Context
 
@@ -58,7 +68,7 @@ Last activity: 2026-02-04 - Phase 4 complete (35 integration tests)
 ### Technical Debt Noted
 - Large monolithic components (sidebar.js is 3986 lines)
 - Some race conditions in message handlers
-- No automated tests (addressing in v1.01)
+- ~~No automated tests~~ (ADDRESSED in v1.01 - 240 tests)
 
 ### v1.01 Phase 2 Decisions
 - file.txt treated as valid URL - isURL() is intentionally permissive for domain patterns
@@ -81,13 +91,19 @@ Last activity: 2026-02-04 - Phase 4 complete (35 integration tests)
 - Chrome mock extended with commands, tabs.onActivated/onRemoved, tabGroups.TAB_GROUP_ID_NONE
 - vi.waitFor() with 3000ms timeout for real timer async tests
 
+### v1.01 Phase 5 Decisions
+- Use new tab page as test surface (avoids keyboard shortcut limitation in Puppeteer)
+- data-testid attributes added for stable E2E selectors (unaffected by CSS changes)
+- Adaptive tests handle single-result vs multi-result scenarios gracefully
+- Service worker detection via browser.waitForTarget() for extension readiness
+
 ## Session Continuity
 
 Last session: 2026-02-04
-Stopped at: Phase 4 complete with 232 passing tests
-Next action: `/gsd:plan-phase 5` to plan E2E tests
-Resume file: .planning/phases/04-integration-tests/04-VERIFICATION.md
+Stopped at: Milestone v1.01 COMPLETE with 240 passing tests
+Next action: Plan next milestone (v1.5 Arcify bookmark integration or other features)
+Resume file: .planning/phases/05-e2e-tests/05-01-SUMMARY.md
 
 ---
 
-*Last updated: 2026-02-04 - Phase 4 (Integration Tests) complete*
+*Last updated: 2026-02-04 - Milestone v1.01 (Testing Infrastructure) COMPLETE*
