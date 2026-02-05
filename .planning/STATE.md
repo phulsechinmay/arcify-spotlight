@@ -12,13 +12,13 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 ```
 Milestone: v1.01 Testing Infrastructure
 Phase: 4 - Integration Tests (in progress)
-Plan: 04-01 executed
-Status: Phase 4 started (1/3 plans complete)
+Plan: 04-02 executed
+Status: Phase 4 progressing (2/3 plans complete)
 ```
 
-Progress: [##############------] 14/19 requirements (74%)
+Progress: [###############-----] 15/19 requirements (79%)
 
-Last activity: 2026-02-05 - Completed 04-01-PLAN.md (integration test setup)
+Last activity: 2026-02-05 - Completed 04-02-PLAN.md (message passing and activation tests)
 
 ## Milestone History
 
@@ -35,7 +35,7 @@ Last activity: 2026-02-05 - Completed 04-01-PLAN.md (integration test setup)
 | 1 | Test infrastructure setup | Complete | 4/4 |
 | 2 | Unit tests - pure logic | Complete | 6/6 |
 | 3 | Unit tests - Chrome API mocks | Complete | 3/3 |
-| 4 | Integration tests | In Progress | 1/3 |
+| 4 | Integration tests | In Progress | 2/3 |
 | 5 | E2E tests | Pending | 0/3 |
 
 ## Accumulated Context
@@ -77,14 +77,17 @@ Last activity: 2026-02-05 - Completed 04-01-PLAN.md (integration test setup)
 - Integration tests use real timers (not fake timers) for realistic behavior
 - vi.resetModules() called between tests for fresh SearchEngine instances
 - callListeners() pattern simulates Chrome runtime message dispatch
+- OPEN_TAB result with new-tab mode switches to existing tab; current-tab mode navigates URL
+- Chrome mock extended with commands, tabs.onActivated/onRemoved, tabGroups.TAB_GROUP_ID_NONE
+- vi.waitFor() with 3000ms timeout for real timer async tests
 
 ## Session Continuity
 
 Last session: 2026-02-05
-Stopped at: Completed 04-01-PLAN.md (integration test setup)
-Next action: Execute 04-02-PLAN.md (search flow tests)
-Resume file: .planning/phases/04-integration-tests/04-01-SUMMARY.md
+Stopped at: Completed 04-02-PLAN.md (message passing and activation tests)
+Next action: Execute 04-03-PLAN.md (command keyboard shortcut tests)
+Resume file: .planning/phases/04-integration-tests/04-02-SUMMARY.md
 
 ---
 
-*Last updated: 2026-02-05 - Phase 4 Plan 1 (Integration Test Setup) complete*
+*Last updated: 2026-02-05 - Phase 4 Plan 2 (Message Passing and Activation Tests) complete*
