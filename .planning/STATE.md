@@ -5,20 +5,20 @@
 See: .planning/PROJECT.md (updated 2026-02-04)
 
 **Core value:** Fast, keyboard-driven tab and URL navigation that feels native to Chrome
-**Current focus:** Milestone v1.01 (Testing Infrastructure) - Phase 2 complete, ready for Phase 3
+**Current focus:** Milestone v1.01 (Testing Infrastructure) - Phase 3 in progress
 
 ## Current Position
 
 ```
 Milestone: v1.01 Testing Infrastructure
-Phase: 2 - Unit Tests - Pure Logic (complete)
-Plan: 02-01, 02-02, 02-03 executed
-Status: Phase 2 complete, ready for Phase 3
+Phase: 3 - Unit Tests - Chrome API Mocks (in progress)
+Plan: 03-01 executed
+Status: Plan 03-01 complete (157 tests), ready for 03-02
 ```
 
-Progress: [##########----------] 10/19 requirements (53%)
+Progress: [###########---------] 11/19 requirements (58%)
 
-Last activity: 2026-02-04 - Phase 2 complete (151 tests passing)
+Last activity: 2026-02-04 - Completed 03-01-PLAN.md (SearchEngine cache tests)
 
 ## Milestone History
 
@@ -34,7 +34,7 @@ Last activity: 2026-02-04 - Phase 2 complete (151 tests passing)
 |-------|------|--------|--------------|
 | 1 | Test infrastructure setup | Complete | 4/4 |
 | 2 | Unit tests - pure logic | Complete | 6/6 |
-| 3 | Unit tests - Chrome API mocks | Pending | 0/3 |
+| 3 | Unit tests - Chrome API mocks | In Progress | 1/3 |
 | 4 | Integration tests | Pending | 0/3 |
 | 5 | E2E tests | Pending | 0/3 |
 
@@ -67,13 +67,17 @@ Last activity: 2026-02-04 - Phase 2 complete (151 tests passing)
 - vi.stubGlobal for document.activeElement mocking instead of jsdom dependency
 - SelectionManager tests organized by method for clarity
 
+### v1.01 Phase 3 Decisions
+- Use vi.advanceTimersByTimeAsync() (async version) for debounced async function testing
+- Cache key testing pattern validates query:mode composite keys
+
 ## Session Continuity
 
 Last session: 2026-02-04
-Stopped at: Phase 2 complete with 151 passing tests
-Next action: `/gsd:plan-phase 3` to plan Chrome API mock tests
-Resume file: .planning/phases/02-unit-tests-pure-logic/02-VERIFICATION.md
+Stopped at: Completed 03-01-PLAN.md (SearchEngine cache tests)
+Next action: Execute 03-02-PLAN.md (Mock Integration Tests)
+Resume file: .planning/phases/03-unit-tests-chrome-api-mocks/03-01-SUMMARY.md
 
 ---
 
-*Last updated: 2026-02-04 - Phase 2 (Unit Tests - Pure Logic) complete*
+*Last updated: 2026-02-04 - Phase 3 Plan 01 (SearchEngine Cache Tests) complete*
