@@ -9,10 +9,10 @@ Requirements for Arcify integration. Each maps to roadmap phases.
 
 ### Detection & Caching
 
-- [ ] **DET-01**: Extension detects Arcify folder in Chrome bookmarks on startup
-- [ ] **DET-02**: Extension caches URL-to-space mapping with O(1) lookup performance
-- [ ] **DET-03**: Cache refreshes automatically when bookmarks change (onCreated, onRemoved, onMoved, onChanged)
-- [ ] **DET-04**: URL normalization ensures reliable matching (trailing slashes, protocols, www prefix)
+- [x] **DET-01**: Extension detects Arcify folder in Chrome bookmarks on startup
+- [x] **DET-02**: Extension caches URL-to-space mapping with O(1) lookup performance
+- [x] **DET-03**: Cache refreshes automatically when bookmarks change (onCreated, onRemoved, onMoved, onChanged)
+- [x] **DET-04**: URL normalization ensures reliable matching (trailing slashes, protocols, www prefix)
 
 ### Wording Changes
 
@@ -55,10 +55,10 @@ Deferred to later milestones.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DET-01 | Phase 6 | Pending |
-| DET-02 | Phase 6 | Pending |
-| DET-03 | Phase 6 | Pending |
-| DET-04 | Phase 6 | Pending |
+| DET-01 | Phase 6 | Complete |
+| DET-02 | Phase 6 | Complete |
+| DET-03 | Phase 6 | Complete |
+| DET-04 | Phase 6 | Complete |
 | WORD-01 | Phase 7 | Pending |
 | WORD-02 | Phase 7 | Pending |
 | WORD-03 | Phase 7 | Pending |
