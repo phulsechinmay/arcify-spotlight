@@ -315,4 +315,33 @@ export class SpotlightUtils {
 
         return `<span style="color: #888; font-size: 10px; margin-left: 8px;">[${type}:${score}${fuzzyMatch}]</span>`;
     }
+
+    // Get chip background and text colors for a given Chrome tab group color name
+    // Uses 15% opacity tint as background, full color as text -- all pass WCAG 3:1 contrast on #2D2D2D
+    static getChipColors(colorName) {
+        const chipColorMap = {
+            grey:   { bg: 'rgba(204, 204, 204, 0.15)', text: 'rgb(204, 204, 204)' },
+            blue:   { bg: 'rgba(139, 179, 243, 0.15)', text: 'rgb(139, 179, 243)' },
+            red:    { bg: 'rgba(255, 158, 151, 0.15)', text: 'rgb(255, 158, 151)' },
+            yellow: { bg: 'rgba(255, 226, 159, 0.15)', text: 'rgb(255, 226, 159)' },
+            green:  { bg: 'rgba(139, 218, 153, 0.15)', text: 'rgb(139, 218, 153)' },
+            pink:   { bg: 'rgba(251, 170, 215, 0.15)', text: 'rgb(251, 170, 215)' },
+            purple: { bg: 'rgba(214, 166, 255, 0.15)', text: 'rgb(214, 166, 255)' },
+            cyan:   { bg: 'rgba(165, 226, 234, 0.15)', text: 'rgb(165, 226, 234)' },
+            orange: { bg: 'rgba(255, 176, 103, 0.15)', text: 'rgb(255, 176, 103)' }
+        };
+        return chipColorMap[colorName] || chipColorMap.grey;
+    }
+
+    // Generate space chip HTML for Arcify results -- returns empty string when no spaceName
+    static generateSpaceChipHTML(result) {
+        const spaceName = result.metadata?.spaceName;
+        if (!spaceName) return '';
+
+        const spaceColor = result.metadata?.spaceColor || 'grey';
+        const chipColors = SpotlightUtils.getChipColors(spaceColor);
+        const truncatedName = spaceName.length > 18 ? spaceName.substring(0, 18) + '\u2026' : spaceName;
+
+        return `<span class="arcify-space-chip" style="background:${chipColors.bg};color:${chipColors.text}" title="${SpotlightUtils.escapeHtml(spaceName)}">${SpotlightUtils.escapeHtml(truncatedName)}</span>`;
+    }
 }
