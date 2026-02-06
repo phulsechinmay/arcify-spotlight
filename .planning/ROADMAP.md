@@ -1,186 +1,147 @@
-# Roadmap: Arcify Spotlight v1.01 Testing Infrastructure
+# Roadmap: Arcify Spotlight v1.5 Arcify Integration
 
-**Milestone:** v1.01 Testing Infrastructure
-**Created:** 2026-02-04
-**Phases:** 5
+**Milestone:** v1.5 Arcify Integration
+**Created:** 2026-02-05
+**Phases:** 3 (Phases 6-8, continuing from v1.01)
 **Depth:** Standard
 
 ## Overview
 
-This milestone establishes a comprehensive testing infrastructure for Arcify Spotlight. Following the testing pyramid approach, we build from infrastructure setup through unit tests (pure logic, then mocked APIs), integration tests for message passing, and finally E2E tests for critical user flows. The goal is fast feedback loops with high coverage of the codebase's isolated pure functions.
+This milestone integrates Arcify bookmark detection into Spotlight search. The extension detects tabs bookmarked in Arcify's folder structure, caches URL-to-space mappings for fast lookup, updates suggestion wording to distinguish pinned/favorite tabs, and displays colored space chips below Arcify suggestions. The implementation follows the existing data provider pattern, adding an ArcifyProvider component that enriches search results with space metadata.
+
+## Milestones
+
+- v1.0 MVP - Phases 1-4 (shipped 2026-02-04, archived)
+- v1.01 Testing - Phases 1-5 (shipped 2026-02-04)
+- **v1.5 Arcify Integration** - Phases 6-8 (in progress)
 
 ## Phases
 
-### Phase 1: Test Infrastructure Setup
+<details>
+<summary>v1.01 Testing Infrastructure (Phases 1-5) - COMPLETE</summary>
 
-**Goal:** Developer can run tests locally and in CI with coverage reporting
+See previous roadmap revision for v1.01 phase details.
+- Phase 1: Test Infrastructure Setup (4/4 requirements)
+- Phase 2: Unit Tests - Pure Logic (6/6 requirements)
+- Phase 3: Unit Tests - Chrome API Mocks (3/3 requirements)
+- Phase 4: Integration Tests (3/3 requirements)
+- Phase 5: E2E Tests (3/3 requirements)
 
-**Dependencies:** None (foundation phase)
+**Total:** 19/19 requirements, 240 tests
 
-**Plans:** 1 plan
+</details>
 
-Plans:
-- [x] 01-01-PLAN.md — Configure Vitest, Puppeteer, and GitHub Actions CI
+### v1.5 Arcify Integration (In Progress)
 
-**Requirements:**
-- INFRA-01: Developer can run unit tests with `npm test`
-- INFRA-02: Developer can run E2E tests with `npm run test:e2e`
-- INFRA-03: Tests run automatically on git push via CI/CD
-- INFRA-04: Test coverage reports are generated
-
-**Success Criteria:**
-1. `npm test` executes Vitest and exits cleanly (even with zero tests)
-2. `npm run test:e2e` executes Puppeteer test runner and exits cleanly
-3. Git push triggers CI workflow that runs tests and reports status
-4. Coverage report is generated showing 0% baseline (ready for tests)
+**Milestone Goal:** Detect Arcify-managed tabs and surface their status in Spotlight suggestions
 
 ---
 
-### Phase 2: Unit Tests - Pure Logic
+### Phase 6: Detection & Cache
 
-**Goal:** Core logic functions are tested with fast, deterministic unit tests
+**Goal:** Arcify bookmarks are detected and cached with O(1) lookup performance
 
-**Dependencies:** Phase 1 (infrastructure must exist)
-
-**Plans:** 3 plans
-
-Plans:
-- [x] 02-01-PLAN.md — URL utilities and deduplication tests (UNIT-01, UNIT-02, UNIT-05)
-- [x] 02-02-PLAN.md — Fuzzy matching and scoring tests (UNIT-03, UNIT-04)
-- [x] 02-03-PLAN.md — Selection manager tests (UNIT-06)
+**Dependencies:** None (foundation for v1.5)
 
 **Requirements:**
-- UNIT-01: URL normalization handles all edge cases
-- UNIT-02: Deduplication correctly prioritizes open tabs over history
-- UNIT-03: Fuzzy matching works for character-in-sequence patterns
-- UNIT-04: Relevance scoring applies bonuses correctly
-- UNIT-05: URL detection handles domains, localhost, IPs, rejects search queries
-- UNIT-06: Selection manager navigates correctly
+- DET-01: Extension detects Arcify folder in Chrome bookmarks on startup
+- DET-02: Extension caches URL-to-space mapping with O(1) lookup performance
+- DET-03: Cache refreshes automatically when bookmarks change
+- DET-04: URL normalization ensures reliable matching
 
 **Success Criteria:**
-1. URL normalization tests cover fragments, trailing slashes, www, and protocol edge cases
-2. Deduplication tests verify open tabs win over history/bookmarks for same URL
-3. Fuzzy matching tests verify "ghub" matches "GitHub" and rejects out-of-order characters
-4. Selection manager tests verify up/down/home/end navigation stays within bounds
+1. Extension finds Arcify folder regardless of Chrome locale or folder location
+2. URL lookup returns space info in constant time (no recursive traversal per query)
+3. Adding/removing/moving a bookmark triggers cache refresh within 1 second
+4. URLs with trailing slashes, www prefix, or protocol variations match correctly
+
+**Plans:** TBD
+
+Plans:
+- [ ] 06-01: ArcifyProvider with folder detection and cache implementation
 
 ---
 
-### Phase 3: Unit Tests - Chrome API Mocks
+### Phase 7: Result Enrichment
 
-**Goal:** Chrome API-dependent code is tested with mocked APIs
+**Goal:** Search results include Arcify metadata with correct action wording
 
-**Dependencies:** Phase 1 (infrastructure), Phase 2 (pure logic patterns established)
-
-**Plans:** 2 plans
-
-Plans:
-- [x] 03-01-PLAN.md — Extend Chrome mock + cache tests (MOCK-01)
-- [x] 03-02-PLAN.md — Debounce tests + action routing tests (MOCK-02, MOCK-03)
+**Dependencies:** Phase 6 (requires cache for lookups)
 
 **Requirements:**
-- MOCK-01: SearchEngine caching returns cached results within TTL
-- MOCK-02: SearchEngine debouncing prevents rapid-fire API calls
-- MOCK-03: Action routing calls correct Chrome APIs for each result type
+- WORD-01: Action text shows "Open pinned tab" for Arcify-bookmarked tabs
+- WORD-02: Action text shows "Open favorite tab" for Chrome-pinned Arcify tabs
+- WORD-03: Non-Arcify tabs keep existing "Switch to tab" wording unchanged
 
 **Success Criteria:**
-1. Cache tests verify second identical query returns cached results without API call
-2. Debounce tests verify rapid queries (< debounce window) trigger only one API call
-3. Action routing tests verify tab switch calls chrome.tabs.update, new URL calls chrome.tabs.create
+1. Arcify-bookmarked tab shows "Open pinned tab" instead of "Switch to tab"
+2. Chrome-pinned Arcify tab shows "Open favorite tab" (Chrome pin + Arcify bookmark)
+3. Regular tabs (not in Arcify folder) still show "Switch to tab"
+
+**Plans:** TBD
+
+Plans:
+- [ ] 07-01: Enrich results with space metadata and update action text
 
 ---
 
-### Phase 4: Integration Tests
+### Phase 8: Space Chip UI
 
-**Goal:** Message passing between content scripts and background script works correctly
+**Goal:** Space chips appear below Arcify suggestions with proper styling and accessibility
 
-**Dependencies:** Phase 3 (mocking patterns established)
-
-**Plans:** 2 plans
-
-Plans:
-- [x] 04-01-PLAN.md — Extend Chrome mock with callListeners + integration setup
-- [x] 04-02-PLAN.md — Message passing tests + activation flow tests
+**Dependencies:** Phase 7 (requires enriched results with space metadata)
 
 **Requirements:**
-- INT-01: Message passing delivers queries from overlay to background
-- INT-02: Message passing returns results from background to overlay
-- INT-03: Spotlight activation flow works end-to-end
+- CHIP-01: Space name chip appears below Arcify suggestion items
+- CHIP-02: Chip color matches tab group color
+- CHIP-03: Chip is static/non-interactive (keyboard navigation unchanged)
+- CHIP-04: Chip has WCAG 3:1 contrast ratio
+- CHIP-05: Feature degrades gracefully when Arcify folder not found
 
 **Success Criteria:**
-1. Search query message from content script reaches background and triggers search
-2. Search results message from background reaches content script with expected format
-3. Spotlight activation message sequence (inject -> activate -> ready) completes correctly
+1. Space chip appears below URL line for Arcify suggestions (not for regular tabs)
+2. Chip background color matches the space's tab group color
+3. Arrow keys skip over chips (focus stays on suggestion items)
+4. Chip text is readable against its background color (3:1 contrast minimum)
+5. Spotlight works normally when Arcify folder is missing (no chips, no errors)
 
----
-
-### Phase 5: E2E Tests
-
-**Goal:** Critical user flows work end-to-end in a real browser
-
-**Dependencies:** Phase 4 (integration tests validate components work together)
-
-**Plans:** 1 plan
+**Plans:** TBD
 
 Plans:
-- [x] 05-01-PLAN.md — E2E tests for search flow, keyboard navigation, and tab switching
-
-**Requirements:**
-- E2E-01: Full search flow works (open -> type -> see results -> select -> navigate)
-- E2E-02: Keyboard navigation works (arrow keys, enter, escape)
-- E2E-03: Tab switching activates correct tab
-
-**Success Criteria:**
-1. User can open spotlight, type a query, see results, and navigate to a result
-2. Arrow keys change selection, Enter activates, Escape closes spotlight
-3. Selecting an open tab result activates that tab (not opens new tab)
+- [ ] 08-01: Space chip rendering with color palette and accessibility
 
 ---
 
 ## Progress
 
-| Phase | Status | Requirements | Completed |
-|-------|--------|--------------|-----------|
-| 1 - Infrastructure | Complete | INFRA-01, INFRA-02, INFRA-03, INFRA-04 | 4/4 |
-| 2 - Unit Pure | Complete | UNIT-01, UNIT-02, UNIT-03, UNIT-04, UNIT-05, UNIT-06 | 6/6 |
-| 3 - Unit Mocks | Complete | MOCK-01, MOCK-02, MOCK-03 | 3/3 |
-| 4 - Integration | Complete | INT-01, INT-02, INT-03 | 3/3 |
-| 5 - E2E | Complete | E2E-01, E2E-02, E2E-03 | 3/3 |
+| Phase | Milestone | Status | Requirements | Completed |
+|-------|-----------|--------|--------------|-----------|
+| 1-5 | v1.01 | Complete | 19/19 | 2026-02-04 |
+| 6 - Detection & Cache | v1.5 | Not started | DET-01, DET-02, DET-03, DET-04 | - |
+| 7 - Result Enrichment | v1.5 | Not started | WORD-01, WORD-02, WORD-03 | - |
+| 8 - Space Chip UI | v1.5 | Not started | CHIP-01, CHIP-02, CHIP-03, CHIP-04, CHIP-05 | - |
 
-**Overall:** 19/19 requirements complete
+**v1.5 Progress:** 0/12 requirements complete
 
 ## Coverage
 
 | Requirement | Phase | Description |
 |-------------|-------|-------------|
-| INFRA-01 | 1 | npm test command |
-| INFRA-02 | 1 | npm run test:e2e command |
-| INFRA-03 | 1 | CI/CD pipeline |
-| INFRA-04 | 1 | Coverage reports |
-| UNIT-01 | 2 | URL normalization |
-| UNIT-02 | 2 | Deduplication |
-| UNIT-03 | 2 | Fuzzy matching |
-| UNIT-04 | 2 | Relevance scoring |
-| UNIT-05 | 2 | URL detection |
-| UNIT-06 | 2 | Selection manager |
-| MOCK-01 | 3 | SearchEngine caching |
-| MOCK-02 | 3 | SearchEngine debouncing |
-| MOCK-03 | 3 | Action routing |
-| INT-01 | 4 | Query delivery |
-| INT-02 | 4 | Results return |
-| INT-03 | 4 | Activation flow |
-| E2E-01 | 5 | Full search flow |
-| E2E-02 | 5 | Keyboard navigation |
-| E2E-03 | 5 | Tab switching |
+| DET-01 | 6 | Arcify folder detection on startup |
+| DET-02 | 6 | O(1) URL-to-space lookup cache |
+| DET-03 | 6 | Automatic cache refresh on bookmark changes |
+| DET-04 | 6 | URL normalization for reliable matching |
+| WORD-01 | 7 | "Open pinned tab" wording for Arcify tabs |
+| WORD-02 | 7 | "Open favorite tab" for Chrome-pinned Arcify tabs |
+| WORD-03 | 7 | Unchanged wording for non-Arcify tabs |
+| CHIP-01 | 8 | Space name chip below Arcify suggestions |
+| CHIP-02 | 8 | Chip color matches tab group |
+| CHIP-03 | 8 | Static chip (non-interactive) |
+| CHIP-04 | 8 | WCAG 3:1 contrast ratio |
+| CHIP-05 | 8 | Graceful degradation when folder missing |
 
-**Coverage:** 19/19 requirements mapped
+**Coverage:** 12/12 v1.5 requirements mapped
 
 ---
 
-*Roadmap created: 2026-02-04*
-*Phase 1 planned: 2026-02-04*
-*Phase 2 planned: 2026-02-04*
-*Phase 3 planned: 2026-02-04*
-*Phase 4 planned: 2026-02-05*
-*Phase 4 complete: 2026-02-04*
-*Phase 5 planned: 2026-02-04*
-*Phase 5 complete: 2026-02-04*
+*Roadmap created: 2026-02-05*

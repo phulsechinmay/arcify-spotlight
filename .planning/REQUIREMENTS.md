@@ -55,23 +55,24 @@ Deferred to later milestones.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DET-01 | TBD | Pending |
-| DET-02 | TBD | Pending |
-| DET-03 | TBD | Pending |
-| DET-04 | TBD | Pending |
-| WORD-01 | TBD | Pending |
-| WORD-02 | TBD | Pending |
-| WORD-03 | TBD | Pending |
-| CHIP-01 | TBD | Pending |
-| CHIP-02 | TBD | Pending |
-| CHIP-03 | TBD | Pending |
-| CHIP-04 | TBD | Pending |
-| CHIP-05 | TBD | Pending |
+| DET-01 | Phase 6 | Pending |
+| DET-02 | Phase 6 | Pending |
+| DET-03 | Phase 6 | Pending |
+| DET-04 | Phase 6 | Pending |
+| WORD-01 | Phase 7 | Pending |
+| WORD-02 | Phase 7 | Pending |
+| WORD-03 | Phase 7 | Pending |
+| CHIP-01 | Phase 8 | Pending |
+| CHIP-02 | Phase 8 | Pending |
+| CHIP-03 | Phase 8 | Pending |
+| CHIP-04 | Phase 8 | Pending |
+| CHIP-05 | Phase 8 | Pending |
 
 **Coverage:**
 - v1.5 requirements: 12 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 12
+- Mapped to phases: 12
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-05*
+*Phase mappings added: 2026-02-05*
