@@ -55,6 +55,14 @@ export class SharedSpotlightLogic {
         return results.map((result, index) => {
             const formatted = SpotlightUtils.formatResult(result, mode);
             const isSelected = index === 0; // First result is always selected by default
+            const chipHtml = SpotlightUtils.generateSpaceChipHTML(result);
+
+            // If chip exists, wrap URL text in span for flex layout; otherwise keep as text node
+            const urlContent = formatted.subtitle
+                ? (chipHtml
+                    ? `<span class="arcify-spotlight-result-url-text">${SpotlightUtils.escapeHtml(formatted.subtitle)}</span>${SpotlightUtils.formatDebugInfo(result)}${chipHtml}`
+                    : `${SpotlightUtils.escapeHtml(formatted.subtitle)}${SpotlightUtils.formatDebugInfo(result)}`)
+                : '';
 
             return `
                 <button class="arcify-spotlight-result-item ${isSelected ? 'selected' : ''}"
@@ -66,7 +74,7 @@ export class SharedSpotlightLogic {
                          data-fallback-icon="true">
                     <div class="arcify-spotlight-result-content">
                         <div class="arcify-spotlight-result-title">${SpotlightUtils.escapeHtml(formatted.title)}</div>
-                        <div class="arcify-spotlight-result-url">${SpotlightUtils.escapeHtml(formatted.subtitle)}${SpotlightUtils.formatDebugInfo(result)}</div>
+                        <div class="arcify-spotlight-result-url">${urlContent}</div>
                     </div>
                     <div class="arcify-spotlight-result-action">${SpotlightUtils.escapeHtml(formatted.action)}</div>
                 </button>

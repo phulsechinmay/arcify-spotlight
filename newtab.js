@@ -182,13 +182,40 @@ async function initializeSpotlight() {
             font-size: 12px;
             color: rgba(255, 255, 255, 0.6);
             margin: 0;
-            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
             overflow: hidden;
+            white-space: nowrap;
             text-overflow: ellipsis;
         }
 
         .arcify-spotlight-result-url:empty {
             display: none;
+        }
+
+        /* Space chip - inline with URL */
+        .arcify-spotlight-result-url-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .arcify-space-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 1px 8px;
+            border-radius: 9999px;
+            font-size: 10px;
+            font-weight: 500;
+            line-height: 16px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 140px;
+            flex-shrink: 0;
         }
 
         .arcify-spotlight-result-action {
