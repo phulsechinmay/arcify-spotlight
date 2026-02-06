@@ -78,10 +78,10 @@ Plans:
 2. Chrome-pinned Arcify tab shows "Open favorite tab" (Chrome pin + Arcify bookmark)
 3. Regular tabs (not in Arcify folder) still show "Switch to tab"
 
-**Plans:** TBD
+**Plans:** 1 plan
 
 Plans:
-- [ ] 07-01: Enrich results with space metadata and update action text
+- [ ] 07-01-PLAN.md — Enrich results with Arcify metadata and update action text
 
 ---
 
@@ -118,7 +118,7 @@ Plans:
 |-------|-----------|--------|--------------|-----------|
 | 1-5 | v1.01 | Complete | 19/19 | 2026-02-04 |
 | 6 - Detection & Cache | v1.5 | Complete | DET-01, DET-02, DET-03, DET-04 | 2026-02-06 |
-| 7 - Result Enrichment | v1.5 | Not started | WORD-01, WORD-02, WORD-03 | - |
+| 7 - Result Enrichment | v1.5 | Planned | WORD-01, WORD-02, WORD-03 | - |
 | 8 - Space Chip UI | v1.5 | Not started | CHIP-01, CHIP-02, CHIP-03, CHIP-04, CHIP-05 | - |
 
 **v1.5 Progress:** 4/12 requirements complete
@@ -147,3 +147,4 @@ Plans:
 *Roadmap created: 2026-02-05*
 *Phase 6 planned: 2026-02-05*
 *Phase 6 complete: 2026-02-06*
+*Phase 7 planned: 2026-02-06*
