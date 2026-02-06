@@ -532,6 +532,50 @@ export class BaseDataProvider {
         return normalizedUrl;
     }
 
+    /**
+     * Enrich results with Arcify space metadata
+     * Called after deduplication (to avoid redundant lookups) and before scoring
+     *
+     * For each result with a URL, checks if it belongs to an Arcify space.
+     * If found, injects space metadata (isArcify, spaceName, spaceId, bookmarkId, bookmarkTitle).
+     *
+     * Note: null spaceInfo is expected for non-Arcify URLs - this is NOT an error.
+     * Results without URLs or those already enriched (pinned tabs) are skipped.
+     *
+     * @param {Array<SearchResult>} results - Deduplicated results to enrich
+     * @returns {Promise<Array<SearchResult>>} Same array with Arcify metadata injected
+     */
+    async enrichWithArcifyInfo(results) {
+        // Lazy-load arcifyProvider to avoid circular dependencies
+        if (!this.arcifyProvider) {
+            const { arcifyProvider } = await import('./arcify-provider.js');
+            this.arcifyProvider = arcifyProvider;
+        }
+
+        for (const result of results) {
+            // Skip if no URL
+            if (!result.url) continue;
+
+            // Skip if already has space info (e.g., pinned tabs from getPinnedTabSuggestions)
+            if (result.metadata?.spaceName) continue;
+
+            // O(1) lookup via Map.get()
+            const spaceInfo = await this.arcifyProvider.getSpaceForUrl(result.url);
+
+            // null means not in Arcify folder - this is expected, not an error
+            if (spaceInfo) {
+                result.metadata = result.metadata || {};
+                result.metadata.isArcify = true;
+                result.metadata.spaceName = spaceInfo.spaceName;
+                result.metadata.spaceId = spaceInfo.spaceId;
+                result.metadata.bookmarkId = spaceInfo.bookmarkId;
+                result.metadata.bookmarkTitle = spaceInfo.bookmarkTitle;
+            }
+        }
+
+        return results;
+    }
+
     // Get result priority for deduplication (higher = better)
     // Priority order: open-tab > pinned-tab > bookmark > history > top-site
     // When same URL exists in multiple sources, higher priority source wins
