@@ -27,9 +27,6 @@ export class BackgroundDataProvider extends BaseDataProvider {
                 // No query = return all tabs
                 if (!query) return true;
 
-                // Minimum 2 characters before matching - user decision to avoid noise
-                if (query.length < 2) return false;
-
                 const queryLower = query.toLowerCase();
                 const titleLower = tab.title.toLowerCase();
                 const urlLower = tab.url.toLowerCase();
@@ -153,13 +150,7 @@ export class BackgroundDataProvider extends BaseDataProvider {
                     
                     // Apply query filter with fuzzy matching
                     if (query) {
-                        // Minimum 2 characters before matching - consistent with open tabs
-                        if (query.length < 2) {
-                            Logger.log('[BackgroundDataProvider] Query too short, skipping pinned tab:', bookmark.title);
-                            continue;
-                        }
-
-                        const queryLower = query.toLowerCase();
+                            const queryLower = query.toLowerCase();
                         const titleMatch = this.fuzzyMatch(queryLower, bookmark.title.toLowerCase());
                         const urlMatch = this.fuzzyMatch(queryLower, bookmark.url.toLowerCase());
                         if (!titleMatch && !urlMatch) {
