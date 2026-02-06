@@ -2,31 +2,31 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-04)
+See: .planning/PROJECT.md (updated 2026-02-05)
 
 **Core value:** Fast, keyboard-driven tab and URL navigation that feels native to Chrome
-**Current focus:** Milestone v1.01 (Testing Infrastructure) - COMPLETE
+**Current focus:** Milestone v1.5 (Arcify Integration) - Defining requirements
 
 ## Current Position
 
 ```
-Milestone: v1.01 Testing Infrastructure
-Phase: 5 - E2E Tests (complete)
-Plan: 05-01 executed
-Status: Milestone v1.01 COMPLETE (240 tests)
+Milestone: v1.5 Arcify Integration
+Phase: Not started
+Plan: —
+Status: Defining requirements
 ```
 
-Progress: [####################] 19/19 requirements (100%)
+Progress: [                    ] 0/? requirements
 
-Last activity: 2026-02-04 - Phase 5 complete (8 E2E tests)
+Last activity: 2026-02-05 - Milestone v1.5 started
 
 ## Milestone History
 
 | Milestone | Goal | Status |
 |-----------|------|--------|
 | v1.0 Polish | Bug fixes + UX improvements | Complete (archived) |
-| v1.01 | Testing Infrastructure | COMPLETE |
-| v1.5 | Arcify bookmark integration | Deferred |
+| v1.01 Testing | Testing Infrastructure (240 tests) | Complete |
+| v1.5 | Arcify Integration | Active |
 
 ## Phase Summary (v1.01)
 
@@ -99,11 +99,11 @@ Last activity: 2026-02-04 - Phase 5 complete (8 E2E tests)
 
 ## Session Continuity
 
-Last session: 2026-02-04
-Stopped at: Milestone v1.01 COMPLETE with 240 passing tests
-Next action: Plan next milestone (v1.5 Arcify bookmark integration or other features)
-Resume file: .planning/phases/05-e2e-tests/05-01-SUMMARY.md
+Last session: 2026-02-05
+Stopped at: Defining v1.5 requirements
+Next action: Complete requirements definition, then create roadmap
+Resume file: —
 
 ---
 
-*Last updated: 2026-02-04 - Milestone v1.01 (Testing Infrastructure) COMPLETE*
+*Last updated: 2026-02-05 - Milestone v1.5 (Arcify Integration) started*

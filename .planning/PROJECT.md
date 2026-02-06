@@ -26,9 +26,19 @@ Fast, keyboard-driven tab and URL navigation that feels native to Chrome, elimin
 - [x] UX: Reduce padding on suggestion items for better screen density
 - [x] UX: Dynamic color highlight matching active tab group color (purple fallback if no group)
 
-### Deferred (v1.5)
+### Completed (v1.01)
 
-- [ ] Integration: Detect when tab is in Arcify bookmark folder and change item wording accordingly
+- [x] Testing: Unit tests for pure logic (URL utils, scoring, fuzzy matching)
+- [x] Testing: Unit tests with Chrome API mocks (caching, debouncing, action routing)
+- [x] Testing: Integration tests for message passing
+- [x] Testing: E2E tests for critical user flows
+
+### Active (v1.5)
+
+- [ ] Detection: Identify tabs bookmarked in Arcify folder structure
+- [ ] Wording: Change "Switch to tab" to "Open pinned/favorite tab" for Arcify tabs
+- [ ] UI: Show colored space chip below Arcify tab suggestions
+- [ ] Performance: Cache Arcify bookmarks with refresh on changes
 
 ### Out of Scope
 
@@ -58,7 +68,7 @@ Fast, keyboard-driven tab and URL navigation that feels native to Chrome, elimin
 **Known Technical Debt:**
 - Large monolithic components (sidebar.js is 3986 lines)
 - Some race conditions in message handlers
-- No automated tests (addressing in v1.01)
+- ~~No automated tests~~ (Addressed in v1.01 — 240 tests)
 
 ## Constraints
 
@@ -67,30 +77,31 @@ Fast, keyboard-driven tab and URL navigation that feels native to Chrome, elimin
 - **Compatibility**: Chrome 88+ only (Manifest V3 requirement)
 - **Existing Architecture**: Work within current message-passing and data provider patterns
 
-## Current Milestone: v1.01 Testing Infrastructure
+## Current Milestone: v1.5 Arcify Integration
 
-**Goal:** Establish comprehensive testing foundation for regression prevention, refactoring confidence, and living documentation.
+**Goal:** Detect Arcify-managed tabs and surface their status in Spotlight suggestions.
 
 **Target features:**
-- Unit/integration tests for suggestion logic (ranking, deduplication, fuzzy matching)
-- E2E tests for UI interactions (hotkeys, keyboard navigation, tab switching)
-- Chrome extension-specific testing patterns
-- Balanced coverage across unit and E2E layers
+- Detect tabs bookmarked in Arcify folder structure
+- Distinguish "pinned" vs "favorite" tabs based on Chrome pinned state
+- Update suggestion wording ("Open pinned tab" / "Open favorite tab")
+- Show colored space chip below suggestion item
+- Cache Arcify bookmarks with refresh on changes
 
 ## Future Milestones
 
-### v1.5 (Deferred)
+### v2.0 (Planned)
 
-**Goal:** Arcify bookmark folder integration
-
-**Planned features:**
-- Detect tabs in Arcify bookmark folder
-- Change suggestion wording for Arcify-managed tabs
+**Goal:** TBD — potential features:
+- Cross-extension messaging with Arcify for richer integration
+- Accessibility improvements (axe-core audit)
+- Performance optimizations
 
 ## Completed Milestones
 
 See [MILESTONES.md](MILESTONES.md) for full history.
 
+- **v1.01 Testing** (2026-02-04): 240 tests — unit, integration, E2E with Vitest + Puppeteer
 - **v1.0 Polish** (2026-02-04): Bug fixes (deduplication, fuzzy matching) and UX improvements (URL preview, tab group colors)
 
 ## Key Decisions
@@ -103,4 +114,4 @@ See [MILESTONES.md](MILESTONES.md) for full history.
 | URL preview in input.value | Allows user to edit URL, flag prevents search re-trigger | ✓ Implemented |
 
 ---
-*Last updated: 2026-02-04 — v1.01 Testing Infrastructure milestone started*
+*Last updated: 2026-02-05 — v1.5 Arcify Integration milestone started*
