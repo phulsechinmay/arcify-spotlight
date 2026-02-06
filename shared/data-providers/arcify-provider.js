@@ -114,14 +114,22 @@ export class ArcifyProvider {
         // Get entire subtree in ONE API call - O(1) API calls
         const [subtree] = await chrome.bookmarks.getSubTree(arcifyFolder.id);
 
+        // Fetch spaces array from storage to cross-reference colors
+        const storage = await chrome.storage.local.get('spaces');
+        const spaces = storage.spaces || [];
+
         // Process subtree - first level children are space folders
         for (const spaceFolder of subtree.children || []) {
             // Skip if it's a bookmark (has url), not a folder
             if (spaceFolder.url) continue;
 
+            // Find matching space for color
+            const space = spaces.find(s => s.name === spaceFolder.title);
+
             const spaceInfo = {
                 spaceName: spaceFolder.title,
-                spaceId: spaceFolder.id
+                spaceId: spaceFolder.id,
+                spaceColor: space?.color || 'grey'
             };
 
             // Recursively process space contents (in-memory, no API calls)
@@ -189,6 +197,15 @@ export class ArcifyProvider {
         this.cache = null;
         chrome.storage.local.remove(CACHE_STORAGE_KEY);
         Logger.log('[ArcifyProvider] Cache invalidated');
+    }
+
+    /**
+     * Check if provider has usable data (cache built with Arcify folder found)
+     * Used by enrichWithArcifyInfo for early return when no Arcify data exists
+     * @returns {boolean} True if cache exists and Arcify folder was found
+     */
+    hasData() {
+        return this.cache !== null && this.arcifyFolderId !== null;
     }
 }
 

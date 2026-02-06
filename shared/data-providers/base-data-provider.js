@@ -153,7 +153,11 @@ export class BaseDataProvider {
         }
 
         // Apply deduplication to default results as well
-        return this.deduplicateResults(results);
+        const deduplicatedResults = this.deduplicateResults(results);
+
+        // Enrich with Arcify space info (so chips appear on default results too)
+        const enrichedResults = await this.enrichWithArcifyInfo(deduplicatedResults);
+        return enrichedResults;
     }
 
     // Chrome tabs API integration
@@ -555,6 +559,12 @@ export class BaseDataProvider {
             this.arcifyProvider = arcifyProvider;
         }
 
+        // Early return if no Arcify folder exists (skip compute)
+        await this.arcifyProvider.ensureCacheBuilt();
+        if (!this.arcifyProvider.hasData()) {
+            return results;
+        }
+
         for (const result of results) {
             // Skip if no URL
             if (!result.url) continue;
@@ -573,6 +583,7 @@ export class BaseDataProvider {
                 result.metadata.spaceId = spaceInfo.spaceId;
                 result.metadata.bookmarkId = spaceInfo.bookmarkId;
                 result.metadata.bookmarkTitle = spaceInfo.bookmarkTitle;
+                result.metadata.spaceColor = spaceInfo.spaceColor || 'grey';
             }
         }
 
