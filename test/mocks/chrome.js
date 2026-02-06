@@ -48,7 +48,32 @@ export const chromeMock = {
   },
 
   bookmarks: {
-    search: vi.fn().mockResolvedValue([])
+    search: vi.fn().mockResolvedValue([]),
+    getChildren: vi.fn().mockResolvedValue([]),
+    onCreated: {
+      addListener: vi.fn(),
+      removeListener: vi.fn()
+    },
+    onRemoved: {
+      addListener: vi.fn(),
+      removeListener: vi.fn()
+    },
+    onMoved: {
+      addListener: vi.fn(),
+      removeListener: vi.fn()
+    },
+    onChanged: {
+      addListener: vi.fn(),
+      removeListener: vi.fn()
+    },
+    onImportBegan: {
+      addListener: vi.fn(),
+      removeListener: vi.fn()
+    },
+    onImportEnded: {
+      addListener: vi.fn(),
+      removeListener: vi.fn()
+    }
   },
 
   history: {
@@ -126,6 +151,19 @@ export function resetChromeMocks() {
   chromeMock.storage.onChanged.removeListener.mockClear();
 
   chromeMock.bookmarks.search.mockClear().mockResolvedValue([]);
+  chromeMock.bookmarks.getChildren.mockClear().mockResolvedValue([]);
+  chromeMock.bookmarks.onCreated.addListener.mockClear();
+  chromeMock.bookmarks.onCreated.removeListener.mockClear();
+  chromeMock.bookmarks.onRemoved.addListener.mockClear();
+  chromeMock.bookmarks.onRemoved.removeListener.mockClear();
+  chromeMock.bookmarks.onMoved.addListener.mockClear();
+  chromeMock.bookmarks.onMoved.removeListener.mockClear();
+  chromeMock.bookmarks.onChanged.addListener.mockClear();
+  chromeMock.bookmarks.onChanged.removeListener.mockClear();
+  chromeMock.bookmarks.onImportBegan.addListener.mockClear();
+  chromeMock.bookmarks.onImportBegan.removeListener.mockClear();
+  chromeMock.bookmarks.onImportEnded.addListener.mockClear();
+  chromeMock.bookmarks.onImportEnded.removeListener.mockClear();
 
   chromeMock.history.search.mockClear().mockResolvedValue([]);
 
