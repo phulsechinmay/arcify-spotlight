@@ -303,7 +303,7 @@ export class SpotlightUtils {
     // DEBUG: Format debug info for result items (easy to remove)
     static formatDebugInfo(result) {
         // Use environment variable for debug mode (false by default, true for dev builds)
-        const DEBUG_ENABLED = true;
+        const DEBUG_ENABLED = false;
 
         if (!DEBUG_ENABLED) {
             return '';
@@ -333,15 +333,18 @@ export class SpotlightUtils {
         return chipColorMap[colorName] || chipColorMap.grey;
     }
 
-    // Generate space chip HTML for Arcify results -- returns empty string when no spaceName
+    // Generate space chip HTML for results with space or tab group info -- returns empty string when neither exists
     static generateSpaceChipHTML(result) {
         const spaceName = result.metadata?.spaceName;
-        if (!spaceName) return '';
+        const groupName = result.metadata?.groupName;
+        const chipName = spaceName || groupName;
+        if (!chipName) return '';
 
-        const spaceColor = result.metadata?.spaceColor || 'grey';
-        const chipColors = SpotlightUtils.getChipColors(spaceColor);
-        const truncatedName = spaceName.length > 18 ? spaceName.substring(0, 18) + '\u2026' : spaceName;
+        // Prefer live tab group color (Chrome API) over cached space color (storage)
+        const chipColor = result.metadata?.groupColor || result.metadata?.spaceColor || 'grey';
+        const chipColors = SpotlightUtils.getChipColors(chipColor);
+        const truncatedName = chipName.length > 18 ? chipName.substring(0, 18) + '\u2026' : chipName;
 
-        return `<span class="arcify-space-chip" style="background:${chipColors.bg};color:${chipColors.text}" title="${SpotlightUtils.escapeHtml(spaceName)}">${SpotlightUtils.escapeHtml(truncatedName)}</span>`;
+        return `<span class="arcify-space-chip" style="background:${chipColors.bg};color:${chipColors.text}" title="${SpotlightUtils.escapeHtml(chipName)}">${SpotlightUtils.escapeHtml(truncatedName)}</span>`;
     }
 }

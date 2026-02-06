@@ -199,7 +199,6 @@ async function initializeSpotlight() {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            flex: 1;
             min-width: 0;
         }
 

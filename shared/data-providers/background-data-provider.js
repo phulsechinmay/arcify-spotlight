@@ -19,7 +19,16 @@ export class BackgroundDataProvider extends BaseDataProvider {
     
     async getOpenTabsData(query = '') {
         try {
-            const tabs = await chrome.tabs.query({});
+            const [tabs, tabGroups] = await Promise.all([
+                chrome.tabs.query({}),
+                chrome.tabGroups.query({})
+            ]);
+
+            // Build groupId → {title, color} map
+            const groupMap = new Map();
+            for (const group of tabGroups) {
+                groupMap.set(group.id, { title: group.title, color: group.color });
+            }
 
             const filteredTabs = tabs.filter(tab => {
                 if (!tab.title || !tab.url) return false;
@@ -34,6 +43,13 @@ export class BackgroundDataProvider extends BaseDataProvider {
                 // Use fuzzy matching for both title and URL - user decision
                 return this.fuzzyMatch(queryLower, titleLower) ||
                        this.fuzzyMatch(queryLower, urlLower);
+            }).map(tab => {
+                const group = tab.groupId !== -1 ? groupMap.get(tab.groupId) : null;
+                if (group) {
+                    tab.groupName = group.title || '';
+                    tab.groupColor = group.color || null;
+                }
+                return tab;
             });
 
             return filteredTabs;
@@ -45,19 +61,33 @@ export class BackgroundDataProvider extends BaseDataProvider {
 
     async getRecentTabsData(limit = 5) {
         try {
-            const tabs = await chrome.tabs.query({});
+            const [tabs, tabGroups] = await Promise.all([
+                chrome.tabs.query({}),
+                chrome.tabGroups.query({})
+            ]);
             const storage = await chrome.storage.local.get([TAB_ACTIVITY_STORAGE_KEY]);
             const activityData = storage[TAB_ACTIVITY_STORAGE_KEY] || {};
-            
+
+            // Build groupId → {title, color} map
+            const groupMap = new Map();
+            for (const group of tabGroups) {
+                groupMap.set(group.id, { title: group.title, color: group.color });
+            }
+
             const recentTabs = tabs
                 .filter(tab => tab.url && tab.title)
-                .map(tab => ({
-                    ...tab,
-                    lastActivity: activityData[tab.id] || 0
-                }))
+                .map(tab => {
+                    const group = tab.groupId !== -1 ? groupMap.get(tab.groupId) : null;
+                    return {
+                        ...tab,
+                        lastActivity: activityData[tab.id] || 0,
+                        groupName: group?.title || null,
+                        groupColor: group?.color || null
+                    };
+                })
                 .sort((a, b) => (b.lastActivity || 0) - (a.lastActivity || 0))
                 .slice(0, limit);
-                
+
             return recentTabs;
         } catch (error) {
             Logger.error('[BackgroundDataProvider] Error getting recent tabs:', error);

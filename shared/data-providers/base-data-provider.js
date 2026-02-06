@@ -164,13 +164,18 @@ export class BaseDataProvider {
     async getOpenTabs(query = '') {
         try {
             const tabsData = await this.getOpenTabsData(query);
-            
+
             const results = tabsData.map(tab => new SearchResult({
                 type: ResultType.OPEN_TAB,
                 title: tab.title,
                 url: tab.url,
                 favicon: tab.favIconUrl,
-                metadata: { tabId: tab.id, windowId: tab.windowId }
+                metadata: {
+                    tabId: tab.id,
+                    windowId: tab.windowId,
+                    groupName: tab.groupName || null,
+                    groupColor: tab.groupColor || null
+                }
             }));
             return results;
         } catch (error) {
@@ -183,13 +188,18 @@ export class BaseDataProvider {
     async getRecentTabs(limit = 5) {
         try {
             const tabsData = await this.getRecentTabsData(limit);
-            
+
             const results = tabsData.map(tab => new SearchResult({
                 type: ResultType.OPEN_TAB,
                 title: tab.title,
                 url: tab.url,
                 favicon: tab.favIconUrl,
-                metadata: { tabId: tab.id, windowId: tab.windowId }
+                metadata: {
+                    tabId: tab.id,
+                    windowId: tab.windowId,
+                    groupName: tab.groupName || null,
+                    groupColor: tab.groupColor || null
+                }
             }));
             return results;
         } catch (error) {

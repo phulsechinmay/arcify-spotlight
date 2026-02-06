@@ -279,7 +279,6 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            flex: 1;
             min-width: 0;
         }
 
