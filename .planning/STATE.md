@@ -5,20 +5,20 @@
 See: .planning/PROJECT.md (updated 2026-02-05)
 
 **Core value:** Fast, keyboard-driven tab and URL navigation that feels native to Chrome
-**Current focus:** Phase 7 - Result Enrichment
+**Current focus:** Phase 8 - Space Chip UI
 
 ## Current Position
 
 ```
 Milestone: v1.5 Arcify Integration
-Phase: 7 of 8 (Result Enrichment)
-Plan: 1 of 1 complete
-Status: Phase complete
+Phase: 8 of 8 (Space Chip UI)
+Plan: 1 of 2 complete
+Status: In progress
 ```
 
-Progress: [########            ] 2/3 phases (7/12 requirements)
+Progress: [########=#          ] 2/3 phases (7/12 requirements)
 
-Last activity: 2026-02-06 - Completed 07-01-PLAN.md (Result Enrichment)
+Last activity: 2026-02-06 - Completed 08-01-PLAN.md (Extend Arcify Pipeline with spaceColor)
 
 ## Milestone History
 
@@ -34,7 +34,7 @@ Last activity: 2026-02-06 - Completed 07-01-PLAN.md (Result Enrichment)
 |-------|------|--------|--------------|
 | 6 | Detection & Cache | Complete | 4/4 |
 | 7 | Result Enrichment | Complete | 3/3 |
-| 8 | Space Chip UI | Not started | 0/5 |
+| 8 | Space Chip UI | In progress (1/2 plans) | 0/5 |
 
 ## Accumulated Context
 
@@ -46,6 +46,15 @@ Key insights from project research (see research/SUMMARY.md):
 - Reuse existing `normalizeUrlForDeduplication()` for URL matching
 - Watch for Chrome 134+ bookmark sync changes (dual bookmark trees)
 - Handle bookmark import thrashing with onImportBegan/onImportEnded events
+
+### Decisions (from Phase 8)
+
+| Decision | Rationale | Phase |
+|----------|-----------|-------|
+| Fetch spaces once during rebuildCache | Single storage call, not per-lookup (same pattern as getPinnedTabsData) | 08-01 |
+| Grey fallback for missing spaceColor | Safe default consistent with CONTEXT.md design decisions | 08-01 |
+| hasData() dual check (cache + folderId) | Confirms Arcify folder was actually found, not just empty cache | 08-01 |
+| Default results enrichment | Chips appear on empty query results too, consistent UX | 08-01 |
 
 ### Decisions (from Phase 7)
 
@@ -76,15 +85,14 @@ Key insights from project research (see research/SUMMARY.md):
 
 - Large monolithic components (sidebar.js is 3986 lines)
 - Some race conditions in message handlers
-- spaceColor not in arcifyProvider cache (Phase 8 may need to source differently)
 
 ## Session Continuity
 
 Last session: 2026-02-06
-Stopped at: Completed 07-01-PLAN.md
-Next action: Plan Phase 8 with `/gsd:plan-phase 8`
+Stopped at: Completed 08-01-PLAN.md
+Next action: Execute 08-02-PLAN.md (Chip rendering, CSS, and visual verification)
 Resume file: None
 
 ---
 
-*Last updated: 2026-02-06 - Phase 7 complete*
+*Last updated: 2026-02-06 - Phase 8 plan 1 complete*

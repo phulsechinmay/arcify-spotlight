@@ -105,10 +105,11 @@ Plans:
 4. Chip text is readable against its background color (3:1 contrast minimum)
 5. Spotlight works normally when Arcify folder is missing (no chips, no errors)
 
-**Plans:** TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 08-01: Space chip rendering with color palette and accessibility
+- [x] 08-01-PLAN.md -- Extend arcifyProvider cache with spaceColor and fix enrichment pipeline
+- [ ] 08-02-PLAN.md -- Chip rendering, CSS, and visual verification
 
 ---
 
