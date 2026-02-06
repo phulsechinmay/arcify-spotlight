@@ -1,97 +1,77 @@
-# Requirements: Arcify Spotlight v1.01
+# Requirements: Arcify Spotlight v1.5
 
-**Defined:** 2026-02-04
+**Defined:** 2026-02-05
 **Core Value:** Fast, keyboard-driven tab and URL navigation that feels native to Chrome
 
-## v1.01 Requirements
+## v1.5 Requirements
 
-Requirements for testing infrastructure. Each maps to roadmap phases.
+Requirements for Arcify integration. Each maps to roadmap phases.
 
-### Infrastructure
+### Detection & Caching
 
-- [x] **INFRA-01**: Developer can run unit tests with `npm test`
-- [x] **INFRA-02**: Developer can run E2E tests with `npm run test:e2e`
-- [x] **INFRA-03**: Tests run automatically on git push via CI/CD
-- [x] **INFRA-04**: Test coverage reports are generated
+- [ ] **DET-01**: Extension detects Arcify folder in Chrome bookmarks on startup
+- [ ] **DET-02**: Extension caches URL-to-space mapping with O(1) lookup performance
+- [ ] **DET-03**: Cache refreshes automatically when bookmarks change (onCreated, onRemoved, onMoved, onChanged)
+- [ ] **DET-04**: URL normalization ensures reliable matching (trailing slashes, protocols, www prefix)
 
-### Unit Tests - Pure Logic
+### Wording Changes
 
-- [x] **UNIT-01**: URL normalization handles all edge cases (fragments, trailing slashes, www, protocol)
-- [x] **UNIT-02**: Deduplication correctly prioritizes open tabs over history
-- [x] **UNIT-03**: Fuzzy matching works for character-in-sequence patterns (ghub→GitHub)
-- [x] **UNIT-04**: Relevance scoring applies bonuses correctly
-- [x] **UNIT-05**: URL detection (isURL) handles domains, localhost, IPs, and rejects search queries
-- [x] **UNIT-06**: Selection manager navigates correctly (up/down/home/end bounds)
+- [ ] **WORD-01**: Action text shows "Open pinned tab" for Arcify-bookmarked tabs
+- [ ] **WORD-02**: Action text shows "Open favorite tab" for Chrome-pinned Arcify tabs
+- [ ] **WORD-03**: Non-Arcify tabs keep existing "Switch to tab" wording unchanged
 
-### Unit Tests - Chrome API Mocks
+### Space Chip UI
 
-- [x] **MOCK-01**: SearchEngine caching returns cached results within TTL
-- [x] **MOCK-02**: SearchEngine debouncing prevents rapid-fire API calls
-- [x] **MOCK-03**: Action routing calls correct Chrome APIs for each result type
-
-### Integration Tests
-
-- [x] **INT-01**: Message passing delivers queries from overlay to background
-- [x] **INT-02**: Message passing returns results from background to overlay
-- [x] **INT-03**: Spotlight activation flow works end-to-end
-
-### E2E Tests
-
-- [x] **E2E-01**: Full search flow works (open spotlight → type → see results → select → navigate)
-- [x] **E2E-02**: Keyboard navigation works (arrow keys, enter, escape)
-- [x] **E2E-03**: Tab switching activates correct tab
+- [ ] **CHIP-01**: Space name chip appears below Arcify suggestion items
+- [ ] **CHIP-02**: Chip color matches tab group color (using existing color palette)
+- [ ] **CHIP-03**: Chip is static/non-interactive (keyboard navigation unchanged)
+- [ ] **CHIP-04**: Chip has WCAG 3:1 contrast ratio (dark text on light colors)
+- [ ] **CHIP-05**: Feature degrades gracefully when Arcify folder not found (no chips, no errors)
 
 ## Future Requirements
 
 Deferred to later milestones.
 
-### Accessibility Testing
+### Scoring Enhancements (v2.0)
 
-- **A11Y-01**: Spotlight dialog passes axe-core accessibility audit
-- **A11Y-02**: Screen reader announces selection changes
+- **SCORE-01**: Results from user's active space receive scoring boost
+- **SCORE-02**: Space filter chips allow narrowing search to specific space
 
-### Performance Testing
+### Accessibility (v2.0)
 
-- **PERF-01**: Cached search returns in under 50ms
-- **PERF-02**: Fresh search returns in under 200ms
+- **A11Y-01**: Screen reader announces space name for Arcify suggestions
+- **A11Y-02**: Spotlight dialog passes axe-core accessibility audit
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Visual regression tests | CSS is simple and stable |
-| Cross-browser testing | Chrome-only extension |
-| Mutation testing | Overkill for focused codebase |
-| Load/stress testing | Unlikely to hit scale issues |
+| Interactive space chips | Violates static badge pattern, causes focus confusion |
+| Multi-space indicators | Edge case (same URL in multiple spaces), rare scenario |
+| Cross-extension messaging | Adds complexity, bookmark detection is sufficient |
+| Space filter keyboard shortcuts | Power feature, not needed for MVP |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 1 | Complete |
-| INFRA-02 | Phase 1 | Complete |
-| INFRA-03 | Phase 1 | Complete |
-| INFRA-04 | Phase 1 | Complete |
-| UNIT-01 | Phase 2 | Complete |
-| UNIT-02 | Phase 2 | Complete |
-| UNIT-03 | Phase 2 | Complete |
-| UNIT-04 | Phase 2 | Complete |
-| UNIT-05 | Phase 2 | Complete |
-| UNIT-06 | Phase 2 | Complete |
-| MOCK-01 | Phase 3 | Complete |
-| MOCK-02 | Phase 3 | Complete |
-| MOCK-03 | Phase 3 | Complete |
-| INT-01 | Phase 4 | Complete |
-| INT-02 | Phase 4 | Complete |
-| INT-03 | Phase 4 | Complete |
-| E2E-01 | Phase 5 | Complete |
-| E2E-02 | Phase 5 | Complete |
-| E2E-03 | Phase 5 | Complete |
+| DET-01 | TBD | Pending |
+| DET-02 | TBD | Pending |
+| DET-03 | TBD | Pending |
+| DET-04 | TBD | Pending |
+| WORD-01 | TBD | Pending |
+| WORD-02 | TBD | Pending |
+| WORD-03 | TBD | Pending |
+| CHIP-01 | TBD | Pending |
+| CHIP-02 | TBD | Pending |
+| CHIP-03 | TBD | Pending |
+| CHIP-04 | TBD | Pending |
+| CHIP-05 | TBD | Pending |
 
 **Coverage:**
-- v1.01 requirements: 19 total
-- Mapped to phases: 19
-- Unmapped: 0 ✓
+- v1.5 requirements: 12 total
+- Mapped to phases: 0 (roadmap pending)
+- Unmapped: 12
 
 ---
-*Requirements defined: 2026-02-04*
+*Requirements defined: 2026-02-05*
