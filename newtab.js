@@ -362,8 +362,8 @@ async function initializeSpotlight() {
             return;
         }
 
-        // Use 'current-tab' mode since we're on the new tab page itself
-        SharedSpotlightLogic.updateResultsDisplay(resultsContainer, [], currentResults, 'current-tab');
+        // Use 'new-tab' mode for display so OPEN_TAB shows "Switch to Tab"
+        SharedSpotlightLogic.updateResultsDisplay(resultsContainer, [], currentResults, 'new-tab');
     }
 
     // Display empty state
@@ -394,7 +394,6 @@ async function initializeSpotlight() {
     });
 
     // Handle result selection
-    // Use 'current-tab' mode so navigation happens in the current tab (the new tab page itself)
     async function handleResultAction(result) {
         if (!result) {
             Logger.error('[NewTab Spotlight] No result provided');
@@ -402,7 +401,16 @@ async function initializeSpotlight() {
         }
 
         try {
-            await handleResultActionViaMessage(result, 'current-tab');
+            // For tab results, use 'new-tab' mode to switch to existing tab
+            // For other results, use 'current-tab' mode to navigate this page
+            const isTabSwitch = (result.type === 'open-tab' || result.type === 'pinned-tab');
+            const mode = isTabSwitch ? 'new-tab' : 'current-tab';
+            await handleResultActionViaMessage(result, mode);
+
+            // Close this new tab page after switching to another tab
+            if (isTabSwitch) {
+                window.close();
+            }
         } catch (error) {
             Logger.error('[NewTab Spotlight] Error in result action:', error);
         }
