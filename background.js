@@ -10,6 +10,42 @@ import { SearchEngine } from './shared/search-engine.js';
 import { BackgroundDataProvider } from './shared/data-providers/background-data-provider.js';
 import { Logger } from './logger.js';
 import { getSettings } from './utils.js';
+import { arcifyProvider } from './shared/data-providers/arcify-provider.js';
+
+// === Arcify Cache Event Listeners ===
+// MV3 REQUIREMENT: Register synchronously at top level for service worker restart handling
+// These listeners invalidate the URL-to-space cache when bookmarks change
+
+chrome.bookmarks.onCreated.addListener((id, bookmark) => {
+    // Invalidate cache when any bookmark is created
+    // The rebuild will determine if it's in Arcify folder
+    arcifyProvider.invalidateCache();
+});
+
+chrome.bookmarks.onRemoved.addListener((id, removeInfo) => {
+    arcifyProvider.invalidateCache();
+});
+
+chrome.bookmarks.onMoved.addListener((id, moveInfo) => {
+    arcifyProvider.invalidateCache();
+});
+
+chrome.bookmarks.onChanged.addListener((id, changeInfo) => {
+    arcifyProvider.invalidateCache();
+});
+
+// Import batching to prevent cache thrashing during bulk operations
+chrome.bookmarks.onImportBegan.addListener(() => {
+    arcifyProvider.isImporting = true;
+});
+
+chrome.bookmarks.onImportEnded.addListener(() => {
+    arcifyProvider.isImporting = false;
+    if (arcifyProvider.pendingInvalidation) {
+        arcifyProvider.pendingInvalidation = false;
+        arcifyProvider.invalidateCache();
+    }
+});
 
 // Enum for spotlight tab modes
 const SpotlightTabMode = {
