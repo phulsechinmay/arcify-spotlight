@@ -16,9 +16,9 @@ Requirements for Arcify integration. Each maps to roadmap phases.
 
 ### Wording Changes
 
-- [ ] **WORD-01**: Action text shows "Open pinned tab" for Arcify-bookmarked tabs
-- [ ] **WORD-02**: Action text shows "Open favorite tab" for Chrome-pinned Arcify tabs
-- [ ] **WORD-03**: Non-Arcify tabs keep existing "Switch to tab" wording unchanged
+- [x] **WORD-01**: Action text shows "Open pinned tab" for Arcify-bookmarked tabs
+- [x] **WORD-02**: Action text shows "Open favorite tab" for Chrome-pinned Arcify tabs
+- [x] **WORD-03**: Non-Arcify tabs keep existing "Switch to tab" wording unchanged
 
 ### Space Chip UI
 
@@ -59,9 +59,9 @@ Deferred to later milestones.
 | DET-02 | Phase 6 | Complete |
 | DET-03 | Phase 6 | Complete |
 | DET-04 | Phase 6 | Complete |
-| WORD-01 | Phase 7 | Pending |
-| WORD-02 | Phase 7 | Pending |
-| WORD-03 | Phase 7 | Pending |
+| WORD-01 | Phase 7 | Complete |
+| WORD-02 | Phase 7 | Complete |
+| WORD-03 | Phase 7 | Complete |
 | CHIP-01 | Phase 8 | Pending |
 | CHIP-02 | Phase 8 | Pending |
 | CHIP-03 | Phase 8 | Pending |
