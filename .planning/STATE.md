@@ -81,24 +81,31 @@ Key insights from project research (see research/SUMMARY.md):
 - Query parameters preserved
 - Use chrome.tabGroups.get() directly for tab group colors
 
+### Decisions (from Quick Tasks)
+
+| Decision | Rationale | Task |
+|----------|-----------|------|
+| Non-async first onMessage listener | Async listeners return Promise (truthy), stealing response channel from other listeners | quick-002 |
+| Overlay mode for tab group E2E tests | Content script overlay provides reliable message passing for E2E testing | quick-002 |
+
 ### Technical Debt Noted
 
 - Large monolithic components (sidebar.js is 3986 lines)
-- Some race conditions in message handlers
 
 ## Quick Tasks
 
 | Task | Goal | Status | Tests Added |
 |------|------|--------|-------------|
 | 001 | Arcify test coverage (Phases 6-8) | Complete | 62 (232 -> 294) |
+| 002 | E2E tab group space chip | Complete | 2 (9 -> 11 E2E) |
 
 ## Session Continuity
 
 Last session: 2026-02-06
-Stopped at: Completed quick-001 (Arcify Test Coverage)
+Stopped at: Completed quick-002 (E2E Tab Group Space Chip)
 Next action: Execute 08-02-PLAN.md (Chip rendering, CSS, and visual verification)
 Resume file: None
 
 ---
 
-*Last updated: 2026-02-06 - Quick task 001 complete (62 new Arcify tests, 294 total)*
+*Last updated: 2026-02-06 - Quick task 002 complete (2 new E2E tests, 11 total E2E; also fixed async onMessage listener bug)*
