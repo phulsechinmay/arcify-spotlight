@@ -55,10 +55,10 @@ See previous roadmap revision for v1.01 phase details.
 3. Adding/removing/moving a bookmark triggers cache refresh within 1 second
 4. URLs with trailing slashes, www prefix, or protocol variations match correctly
 
-**Plans:** TBD
+**Plans:** 1 plan
 
 Plans:
-- [ ] 06-01: ArcifyProvider with folder detection and cache implementation
+- [ ] 06-01-PLAN.md — ArcifyProvider with folder detection, O(1) cache, and event listeners
 
 ---
 
@@ -117,7 +117,7 @@ Plans:
 | Phase | Milestone | Status | Requirements | Completed |
 |-------|-----------|--------|--------------|-----------|
 | 1-5 | v1.01 | Complete | 19/19 | 2026-02-04 |
-| 6 - Detection & Cache | v1.5 | Not started | DET-01, DET-02, DET-03, DET-04 | - |
+| 6 - Detection & Cache | v1.5 | Planned | DET-01, DET-02, DET-03, DET-04 | - |
 | 7 - Result Enrichment | v1.5 | Not started | WORD-01, WORD-02, WORD-03 | - |
 | 8 - Space Chip UI | v1.5 | Not started | CHIP-01, CHIP-02, CHIP-03, CHIP-04, CHIP-05 | - |
 
@@ -145,3 +145,4 @@ Plans:
 ---
 
 *Roadmap created: 2026-02-05*
+*Phase 6 planned: 2026-02-05*
