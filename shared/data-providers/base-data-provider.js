@@ -127,8 +127,11 @@ export class BaseDataProvider {
             // Apply comprehensive deduplication across all sources
             const deduplicatedResults = this.deduplicateResults(allResults);
 
+            // Enrich with Arcify space info (after dedup to avoid redundant lookups)
+            const enrichedResults = await this.enrichWithArcifyInfo(deduplicatedResults);
+
             // Score and sort results
-            const finalResults = this.scoreAndSortResults(deduplicatedResults, trimmedQuery);
+            const finalResults = this.scoreAndSortResults(enrichedResults, trimmedQuery);
             return finalResults;
         } catch (error) {
             Logger.error('[SearchProvider] Search error:', error);
