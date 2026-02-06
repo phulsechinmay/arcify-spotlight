@@ -182,11 +182,14 @@ chrome.commands.onCommand.addListener(async function (command) {
 });
 
 // Listen for messages from the content script
-chrome.runtime.onMessage.addListener(async function (request, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+    // IMPORTANT: This listener must NOT be async. An async listener returns a Promise
+    // (truthy), which Chrome interprets as "I will call sendResponse later", stealing
+    // the response channel from other listeners and breaking message passing.
     if (request.command === "toggleSpotlight") {
-        await injectSpotlightScript(SpotlightTabMode.CURRENT_TAB);
+        injectSpotlightScript(SpotlightTabMode.CURRENT_TAB);
     } else if (request.command === "toggleSpotlightNewTab") {
-        await injectSpotlightScript(SpotlightTabMode.NEW_TAB);
+        injectSpotlightScript(SpotlightTabMode.NEW_TAB);
     }
 });
 
