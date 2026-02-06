@@ -434,4 +434,205 @@ describe('Spotlight E2E Tests', () => {
       await spotlightPage.close();
     });
   });
+
+  describe('E2E-05: Tab Group Space Chip', () => {
+    it('shows space chip with group name for a grouped tab suggestion', async () => {
+      const ext = await waitForExtension(browser);
+      const worker = ext.worker;
+
+      // 1. Open a target page that will be put into a tab group
+      const targetPage = await browser.newPage();
+      await targetPage.goto('https://example.com', {
+        waitUntil: 'domcontentloaded'
+      });
+      await wait();
+
+      // 2. Create a tab group via the service worker using Chrome APIs
+      //    Put the example.com tab into a group named "Research" with color "blue"
+      await worker.evaluate(async () => {
+        const tabs = await chrome.tabs.query({});
+        const exampleTab = tabs.find(t => t.url && t.url.includes('example.com'));
+        if (!exampleTab) throw new Error('Could not find example.com tab');
+
+        const groupId = await chrome.tabs.group({ tabIds: [exampleTab.id] });
+        await chrome.tabGroups.update(groupId, {
+          title: 'Research',
+          color: 'blue'
+        });
+      });
+      await wait();
+
+      // 3. Open a second (non-grouped) page and trigger Spotlight as overlay.
+      //    Using overlay mode on a regular page because the content script message
+      //    pipeline reliably delivers background search results in Puppeteer.
+      const searchPage = await browser.newPage();
+      await searchPage.goto('https://www.google.com', {
+        waitUntil: 'domcontentloaded'
+      });
+      await wait();
+
+      // Wait for content script to be ready
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Trigger spotlight via service worker
+      await worker.evaluate(async () => {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tab) {
+          await chrome.tabs.sendMessage(tab.id, {
+            action: 'activateSpotlight',
+            mode: 'current-tab',
+            tabUrl: tab.url,
+            tabId: tab.id
+          });
+        }
+      });
+      await wait();
+
+      // Wait for spotlight overlay to appear
+      await searchPage.waitForSelector('[data-testid="spotlight-overlay"]', {
+        timeout: 5000
+      });
+      await wait();
+
+      // 4. Search for the grouped tab by its title
+      await searchPage.type('[data-testid="spotlight-input"]', 'Example');
+
+      // Wait for results to appear (instant suggestion first)
+      await searchPage.waitForSelector('[data-testid="spotlight-result"]', {
+        timeout: 5000
+      });
+
+      // Wait for async tab results from background (150ms debounce + query time)
+      // Poll for the chip to appear as async results replace/augment the instant suggestion
+      await searchPage.waitForFunction(
+        () => {
+          const results = document.querySelectorAll('[data-testid="spotlight-result"]');
+          for (const result of results) {
+            if (result.querySelector('.arcify-space-chip')) return true;
+          }
+          return false;
+        },
+        { timeout: 8000, polling: 200 }
+      );
+
+      // 5. Find the result with the chip and verify its content
+      const chipData = await searchPage.evaluate(() => {
+        const results = document.querySelectorAll('[data-testid="spotlight-result"]');
+        for (const result of results) {
+          const chip = result.querySelector('.arcify-space-chip');
+          if (chip) {
+            return {
+              found: true,
+              text: chip.textContent.trim(),
+              title: chip.getAttribute('title'),
+              bgStyle: chip.style.background,
+              colorStyle: chip.style.color
+            };
+          }
+        }
+        return { found: false };
+      });
+
+      assert.ok(
+        chipData.found,
+        'A space chip should be visible on the grouped tab suggestion'
+      );
+
+      assert.strictEqual(
+        chipData.text,
+        'Research',
+        'Chip text should show the tab group name "Research"'
+      );
+
+      assert.strictEqual(
+        chipData.title,
+        'Research',
+        'Chip title attribute should show full group name'
+      );
+
+      // Verify blue color is applied (the chip uses blue color mapping)
+      assert.ok(
+        chipData.colorStyle.includes('139') && chipData.colorStyle.includes('179') && chipData.colorStyle.includes('243'),
+        `Chip text color should be blue (rgb(139, 179, 243)), got: ${chipData.colorStyle}`
+      );
+
+      assert.ok(
+        chipData.bgStyle.includes('139') && chipData.bgStyle.includes('179') && chipData.bgStyle.includes('243'),
+        `Chip background should use blue tint, got: ${chipData.bgStyle}`
+      );
+
+      await targetPage.close();
+      await searchPage.close();
+    });
+
+    it('does NOT show space chip for a non-grouped tab suggestion', async () => {
+      const ext = await waitForExtension(browser);
+      const worker = ext.worker;
+
+      // Open a non-grouped tab
+      const targetPage = await browser.newPage();
+      await targetPage.goto('https://example.com', {
+        waitUntil: 'domcontentloaded'
+      });
+      await wait();
+
+      // Open a second page and trigger Spotlight as overlay
+      const searchPage = await browser.newPage();
+      await searchPage.goto('https://www.google.com', {
+        waitUntil: 'domcontentloaded'
+      });
+      await wait();
+
+      // Wait for content script
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Trigger spotlight via service worker
+      await worker.evaluate(async () => {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tab) {
+          await chrome.tabs.sendMessage(tab.id, {
+            action: 'activateSpotlight',
+            mode: 'current-tab',
+            tabUrl: tab.url,
+            tabId: tab.id
+          });
+        }
+      });
+      await wait();
+
+      await searchPage.waitForSelector('[data-testid="spotlight-overlay"]', {
+        timeout: 5000
+      });
+      await wait();
+
+      // Search for the non-grouped tab
+      await searchPage.type('[data-testid="spotlight-input"]', 'Example');
+
+      await searchPage.waitForSelector('[data-testid="spotlight-result"]', {
+        timeout: 5000
+      });
+
+      // Give time for async results from background
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Verify NO chip is present on results for non-grouped tabs
+      const hasChip = await searchPage.evaluate(() => {
+        const results = document.querySelectorAll('[data-testid="spotlight-result"]');
+        for (const result of results) {
+          if (result.querySelector('.arcify-space-chip')) {
+            return true;
+          }
+        }
+        return false;
+      });
+
+      assert.ok(
+        !hasChip,
+        'Non-grouped tab suggestions should NOT have a space chip'
+      );
+
+      await targetPage.close();
+      await searchPage.close();
+    });
+  });
 });
