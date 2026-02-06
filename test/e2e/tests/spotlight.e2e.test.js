@@ -21,8 +21,8 @@ import {
   openNewTabPage
 } from '../setup.js';
 
-// Set to true to add delays between actions for visual observation
-const DEBUG = false;
+// Set DEBUG=true env var to add delays between actions and run with visible browser
+const DEBUG = process.env.DEBUG === 'true';
 const ACTION_DELAY = 800;
 const wait = (ms = ACTION_DELAY) =>
   DEBUG ? new Promise(resolve => setTimeout(resolve, ms)) : Promise.resolve();

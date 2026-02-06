@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const EXTENSION_PATH = path.join(__dirname, '..', '..', 'dist');
+const DEBUG = process.env.DEBUG === 'true';
 
 /**
  * Launch Chrome browser with the extension loaded
@@ -14,7 +15,7 @@ const EXTENSION_PATH = path.join(__dirname, '..', '..', 'dist');
  */
 export async function launchBrowserWithExtension(options = {}) {
   const browser = await puppeteer.launch({
-    headless: false, // Required for Chrome extensions
+    headless: DEBUG ? false : 'new',
     args: [
       `--disable-extensions-except=${EXTENSION_PATH}`,
       `--load-extension=${EXTENSION_PATH}`,
