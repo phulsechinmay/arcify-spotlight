@@ -5,20 +5,20 @@
 See: .planning/PROJECT.md (updated 2026-02-05)
 
 **Core value:** Fast, keyboard-driven tab and URL navigation that feels native to Chrome
-**Current focus:** Phase 6 - Detection & Cache
+**Current focus:** Phase 7 - Result Enrichment
 
 ## Current Position
 
 ```
 Milestone: v1.5 Arcify Integration
-Phase: 6 of 8 (Detection & Cache)
+Phase: 7 of 8 (Result Enrichment)
 Plan: 1 of 1 complete
 Status: Phase complete
 ```
 
-Progress: [####                ] 1/3 phases (4/12 requirements)
+Progress: [########            ] 2/3 phases (7/12 requirements)
 
-Last activity: 2026-02-06 - Completed 06-01-PLAN.md (Detection & Cache)
+Last activity: 2026-02-06 - Completed 07-01-PLAN.md (Result Enrichment)
 
 ## Milestone History
 
@@ -33,7 +33,7 @@ Last activity: 2026-02-06 - Completed 06-01-PLAN.md (Detection & Cache)
 | Phase | Goal | Status | Requirements |
 |-------|------|--------|--------------|
 | 6 | Detection & Cache | Complete | 4/4 |
-| 7 | Result Enrichment | Not started | 0/3 |
+| 7 | Result Enrichment | Complete | 3/3 |
 | 8 | Space Chip UI | Not started | 0/5 |
 
 ## Accumulated Context
@@ -46,6 +46,15 @@ Key insights from project research (see research/SUMMARY.md):
 - Reuse existing `normalizeUrlForDeduplication()` for URL matching
 - Watch for Chrome 134+ bookmark sync changes (dual bookmark trees)
 - Handle bookmark import thrashing with onImportBegan/onImportEnded events
+
+### Decisions (from Phase 7)
+
+| Decision | Rationale | Phase |
+|----------|-----------|-------|
+| Dynamic import for arcifyProvider | Avoids circular dependencies (base imports arcify, arcify imports base) | 07-01 |
+| Enrichment after dedup, before scoring | Prevents redundant lookups; enables future space-aware scoring | 07-01 |
+| Skip already-enriched results | Pinned tabs have space info from getPinnedTabSuggestions | 07-01 |
+| metadata.isArcify flag pattern | Simple boolean check for conditional UI behavior | 07-01 |
 
 ### Decisions (from Phase 6)
 
@@ -67,14 +76,15 @@ Key insights from project research (see research/SUMMARY.md):
 
 - Large monolithic components (sidebar.js is 3986 lines)
 - Some race conditions in message handlers
+- spaceColor not in arcifyProvider cache (Phase 8 may need to source differently)
 
 ## Session Continuity
 
 Last session: 2026-02-06
-Stopped at: Completed 06-01-PLAN.md
-Next action: Plan Phase 7 with `/gsd:plan-phase 7`
+Stopped at: Completed 07-01-PLAN.md
+Next action: Plan Phase 8 with `/gsd:plan-phase 8`
 Resume file: None
 
 ---
 
-*Last updated: 2026-02-06 - Phase 6 complete*
+*Last updated: 2026-02-06 - Phase 7 complete*
