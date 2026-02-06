@@ -422,6 +422,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         chrome.runtime.sendMessage(message);
         sendResponse({ success: true });
         return false;
+    } else if (message.action === 'getArcifySpaceForUrl') {
+        // Return Arcify space info for a URL - O(1) lookup via cached Map
+        (async () => {
+            try {
+                const spaceInfo = await arcifyProvider.getSpaceForUrl(message.url);
+                sendResponse({ success: true, spaceInfo: spaceInfo });
+            } catch (error) {
+                Logger.error('[Background] Error getting Arcify space for URL:', error);
+                sendResponse({ success: false, error: error.message, spaceInfo: null });
+            }
+        })();
+        return true; // Keep channel open for async response
     }
 
     return false;
