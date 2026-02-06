@@ -12,13 +12,13 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 ```
 Milestone: v1.5 Arcify Integration
 Phase: 6 of 8 (Detection & Cache)
-Plan: Not started
-Status: Ready to plan
+Plan: 1 of 1 complete
+Status: Phase complete
 ```
 
-Progress: [                    ] 0/12 requirements
+Progress: [####                ] 1/3 phases (4/12 requirements)
 
-Last activity: 2026-02-05 - Roadmap created for v1.5
+Last activity: 2026-02-06 - Completed 06-01-PLAN.md (Detection & Cache)
 
 ## Milestone History
 
@@ -32,7 +32,7 @@ Last activity: 2026-02-05 - Roadmap created for v1.5
 
 | Phase | Goal | Status | Requirements |
 |-------|------|--------|--------------|
-| 6 | Detection & Cache | Ready to plan | 0/4 |
+| 6 | Detection & Cache | Complete | 4/4 |
 | 7 | Result Enrichment | Not started | 0/3 |
 | 8 | Space Chip UI | Not started | 0/5 |
 
@@ -42,10 +42,19 @@ Last activity: 2026-02-05 - Roadmap created for v1.5
 
 Key insights from project research (see research/SUMMARY.md):
 - Use `chrome.bookmarks.getSubTree()` for single-call tree fetch (not recursive getChildren)
-- Use `chrome.storage.session` for cache persistence across service worker restarts
+- Use `chrome.storage.local` for cache persistence (NOT session - does not survive restarts)
 - Reuse existing `normalizeUrlForDeduplication()` for URL matching
 - Watch for Chrome 134+ bookmark sync changes (dual bookmark trees)
 - Handle bookmark import thrashing with onImportBegan/onImportEnded events
+
+### Decisions (from Phase 6)
+
+| Decision | Rationale | Phase |
+|----------|-----------|-------|
+| chrome.storage.local for cache | session does NOT survive service worker restarts | 06-01 |
+| getSubTree() for tree traversal | Single API call vs O(n) getChildren() calls | 06-01 |
+| Invalidate on any bookmark change | Simpler than checking if in Arcify folder; lazy rebuild | 06-01 |
+| MV3 sync event registration | Event listeners at module top-level for restart handling | 06-01 |
 
 ### Decisions (from v1.01, still relevant)
 
@@ -61,11 +70,11 @@ Key insights from project research (see research/SUMMARY.md):
 
 ## Session Continuity
 
-Last session: 2026-02-05
-Stopped at: Roadmap created for v1.5
-Next action: Plan Phase 6 with `/gsd:plan-phase 6`
-Resume file: -
+Last session: 2026-02-06
+Stopped at: Completed 06-01-PLAN.md
+Next action: Plan Phase 7 with `/gsd:plan-phase 7`
+Resume file: None
 
 ---
 
-*Last updated: 2026-02-05 - v1.5 roadmap created*
+*Last updated: 2026-02-06 - Phase 6 complete*
