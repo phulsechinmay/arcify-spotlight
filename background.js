@@ -389,9 +389,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         (async () => {
             try {
                 const query = message.query.trim();
-                const results = query
-                    ? await backgroundSearchEngine.getSpotlightSuggestionsUsingCache(query, message.mode)
-                    : await backgroundSearchEngine.getSpotlightSuggestionsImmediate('', message.mode);
+                // Use immediate path for all queries (PERF-02: single debounce layer)
+                // The UI-layer debounce (150ms in SharedSpotlightLogic.createInputHandler) is the only debounce point.
+                // getSpotlightSuggestionsUsingCache() is retained in SearchEngine for backward compatibility
+                // but is no longer called from the main message handler path.
+                const results = await backgroundSearchEngine.getSpotlightSuggestionsImmediate(
+                    query, message.mode
+                );
                 sendResponse({ success: true, results: results });
             } catch (error) {
                 Logger.error('[Background] Error getting spotlight suggestions:', error);
