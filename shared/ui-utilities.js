@@ -186,16 +186,14 @@ export class SpotlightUtils {
             [ResultType.OPEN_TAB]: {
                 title: result.title,
                 subtitle: result.domain,
-                action: mode === SpotlightTabMode.NEW_TAB
-                    ? 'Switch to Tab'
-                    : (result.metadata?.isArcify ? 'Open Pinned Tab' : '↵')
+                action: result.metadata?.groupName
+                    ? 'Open Pinned Tab'
+                    : (mode === SpotlightTabMode.NEW_TAB ? 'Switch to Tab' : '↵')
             },
             [ResultType.PINNED_TAB]: {
                 title: result.title,
                 subtitle: result.domain,
-                action: result.metadata?.isActive
-                    ? 'Switch to Tab'
-                    : (result.metadata?.isArcify ? 'Open Favorite Tab' : 'Open Pinned Tab')
+                action: 'Open Favorite Tab'
             },
             [ResultType.BOOKMARK]: {
                 title: result.title,

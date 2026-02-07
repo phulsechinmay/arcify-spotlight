@@ -144,31 +144,51 @@ export class SearchEngine {
                     break;
 
                 case ResultType.PINNED_TAB:
-                    Logger.log('[SearchEngine] Handling PINNED_TAB result:', result);
-                    if (!result.metadata?.spaceId) {
-                        throw new Error('PINNED_TAB result missing spaceId in metadata');
-                    }
+                    // Chrome-pinned tabs (Arcify "favorites") — same switch logic as OPEN_TAB
+                    if (mode === SpotlightTabMode.NEW_TAB) {
+                        if (!result.metadata?.tabId) {
+                            throw new Error('PINNED_TAB result missing tabId in metadata');
+                        }
 
-                    const pinnedTabMessage = {
-                        action: 'activatePinnedTab',
-                        spaceId: result.metadata.spaceId,
-                        spaceName: result.metadata.spaceName,
-                        bookmarkUrl: result.url,
-                        mode: mode
-                    };
-                    Logger.log('[SearchEngine] Sending activatePinnedTab message:', pinnedTabMessage);
-
-                    // Send message to sidebar to handle pinned tab activation
-                    if (this.isBackgroundContext) {
-                        // Send message to sidebar via runtime messaging
-                        chrome.runtime.sendMessage(pinnedTabMessage);
-                        Logger.log('[SearchEngine] Message sent from background context');
+                        if (this.isBackgroundContext) {
+                            await chrome.tabs.update(result.metadata.tabId, { active: true });
+                            if (result.metadata.windowId) {
+                                await chrome.windows.update(result.metadata.windowId, { focused: true });
+                            }
+                        } else {
+                            const response = await chrome.runtime.sendMessage({
+                                action: 'switchToTab',
+                                tabId: result.metadata.tabId,
+                                windowId: result.metadata.windowId
+                            });
+                            if (!response?.success) {
+                                throw new Error('Failed to switch tab');
+                            }
+                        }
                     } else {
-                        // From content script, send message to background which will forward to sidebar
-                        const response = await chrome.runtime.sendMessage(pinnedTabMessage);
-                        Logger.log('[SearchEngine] Message sent from content script, response:', response);
-                        if (!response?.success) {
-                            throw new Error('Failed to activate pinned tab');
+                        if (!result.url) {
+                            throw new Error('PINNED_TAB result missing URL for current tab navigation');
+                        }
+
+                        if (this.isBackgroundContext) {
+                            if (currentTabId) {
+                                await chrome.tabs.update(currentTabId, { url: result.url });
+                            } else {
+                                const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+                                if (activeTab) {
+                                    await chrome.tabs.update(activeTab.id, { url: result.url });
+                                } else {
+                                    throw new Error('No active tab found');
+                                }
+                            }
+                        } else {
+                            const response = await chrome.runtime.sendMessage({
+                                action: 'navigateCurrentTab',
+                                url: result.url
+                            });
+                            if (!response?.success) {
+                                throw new Error('Failed to navigate current tab');
+                            }
                         }
                     }
                     break;

@@ -166,7 +166,7 @@ export class BaseDataProvider {
             const tabsData = await this.getOpenTabsData(query);
 
             const results = tabsData.map(tab => new SearchResult({
-                type: ResultType.OPEN_TAB,
+                type: tab.pinned ? ResultType.PINNED_TAB : ResultType.OPEN_TAB,
                 title: tab.title,
                 url: tab.url,
                 favicon: tab.favIconUrl,
@@ -190,7 +190,7 @@ export class BaseDataProvider {
             const tabsData = await this.getRecentTabsData(limit);
 
             const results = tabsData.map(tab => new SearchResult({
-                type: ResultType.OPEN_TAB,
+                type: tab.pinned ? ResultType.PINNED_TAB : ResultType.OPEN_TAB,
                 title: tab.title,
                 url: tab.url,
                 favicon: tab.favIconUrl,
