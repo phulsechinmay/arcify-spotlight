@@ -12,26 +12,26 @@ See: .planning/PROJECT.md (updated 2026-02-06)
 ```
 Milestone: v2.0 Fuse.js Search
 Phase: 9 of 12 (Fuse.js Matching Engine)
-Plan: —
-Status: Ready to plan
+Plan: 1 of 4 complete
+Status: In progress
 ```
 
-Last activity: 2026-02-06 — Roadmap created for v2.0 (Phases 9-12)
+Last activity: 2026-02-07 — Completed 09-01-PLAN.md (Fuse.js foundation + tab/pinned tab migration)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██░░░░░░░░] ~8% (1/~12 plans estimated across 4 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0 (v2.0)
-- Average duration: —
-- Total execution time: —
+- Total plans completed: 1 (v2.0)
+- Average duration: 7min
+- Total execution time: 7min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 9 - Fuse.js Matching Engine | 1/4 | 7min | 7min |
 
 ## Milestone History
 
@@ -62,18 +62,22 @@ Key findings informing v2.0 architecture:
 | Deduplication in background data provider | Single place for dedup logic, before scoring | v1.0 |
 | Dynamic import for arcifyProvider | Avoids circular dependencies | v1.5 |
 | Non-async first onMessage listener | Async listeners return Promise (truthy), stealing response channel | quick-002 |
+| FuseSearchService with centralized config | Shared threshold/ignoreLocation/includeScore across all data sources | 09-01 |
+| Keys omitted from FUSE_DEFAULT_OPTIONS | Each data source passes own keys (title/url vs displayName/domain) via optionOverrides | 09-01 |
+| Score inversion inside FuseSearchService | Consumers get 1=perfect without manual conversion; Fuse's 0=perfect never leaks | 09-01 |
+| Batch Fuse filtering for pinned tabs | Collect all candidates first, then single Fuse.js search (vs per-item fuzzyMatch) | 09-01 |
 
 ### Blockers/Concerns
 
-None yet.
+None.
 
 ## Session Continuity
 
-Last session: 2026-02-06
-Stopped at: v2.0 roadmap created (Phases 9-12)
-Next action: Plan Phase 9 (Fuse.js Matching Engine)
+Last session: 2026-02-07
+Stopped at: Completed 09-01-PLAN.md
+Next action: Execute 09-02-PLAN.md (bookmark migration to Fuse.js)
 Resume file: None
 
 ---
 
-*Last updated: 2026-02-06 — v2.0 roadmap created*
+*Last updated: 2026-02-07 — Completed 09-01 (Fuse.js foundation + tab migration)*
