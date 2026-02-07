@@ -5,27 +5,27 @@
 See: .planning/PROJECT.md (updated 2026-02-06)
 
 **Core value:** Fast, keyboard-driven tab and URL navigation that feels native to Chrome
-**Current focus:** v2.0 Fuse.js Search — Phase 11: Performance
+**Current focus:** v2.0 Fuse.js Search — Phase 12: Regression Validation
 
 ## Current Position
 
 ```
 Milestone: v2.0 Fuse.js Search
-Phase: 11 of 12 (Performance)
+Phase: 12 of 12 (Regression Validation)
 Plan: 0 of TBD
 Status: Not started
 ```
 
-Last activity: 2026-02-07 — Completed Phase 10: Weighted Scoring System (2 plans, 320 tests, 5/5 SCORE requirements)
+Last activity: 2026-02-07 — Completed Phase 11: Performance (3 plans, 326 tests, 3/3 PERF requirements)
 
-Progress: [███████░░░] ~67% (8/~12 plans estimated across 4 phases)
+Progress: [█████████░] ~90% (11/~12 plans estimated across 4 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8 (v2.0)
-- Average duration: ~4min
-- Total execution time: ~30min
+- Total plans completed: 11 (v2.0)
+- Average duration: ~3min
+- Total execution time: ~36min
 
 **By Phase:**
 
@@ -33,6 +33,7 @@ Progress: [███████░░░] ~67% (8/~12 plans estimated across 4 
 |-------|-------|-------|----------|
 | 9 - Fuse.js Matching Engine | 4/4 | ~15min | ~4min |
 | 10 - Weighted Scoring System | 2/2 | ~8min | ~4min |
+| 11 - Performance | 3/3 | ~6min | ~2min |
 
 ## Milestone History
 
@@ -76,6 +77,10 @@ Key findings informing v2.0 architecture:
 | Log-scaled frequency (cap at 100) | Math.log1p(visitCount)/Math.log1p(100) — diminishing returns | 10-01 |
 | Conditional autocomplete boost | +40 max when localCount < 3, proportional scaling | 10-01 |
 | Synthetic matchScore fallback | String matching (exact=1.0, starts=0.8, contains=0.6, url=0.3) when Fuse.js score absent | 10-01 |
+| Promise.allSettled for parallel fetching | 6 sources fetched concurrently; failed sources return [] without blocking others | 11-01 |
+| Single debounce at UI layer (150ms) | Background handler uses immediate path; SearchEngine debounce method preserved but bypassed | 11-01 |
+| Two-phase progressive rendering | Local results first (~10-50ms), autocomplete appends (~200-500ms); stale query guard via counter | 11-02 |
+| Pragmatic Phase 2 merge via getSuggestions | Autocomplete merge reuses original all-in-one path for proper dedup/score/sort | 11-02 |
 
 ### Blockers/Concerns
 
@@ -90,10 +95,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Completed Phase 10 execution and verification
-Next action: Plan Phase 11 (Performance)
+Stopped at: Completed Phase 11 execution and verification
+Next action: Plan Phase 12 (Regression Validation)
 Resume file: None
 
 ---
 
-*Last updated: 2026-02-07 — Completed Phase 10: Weighted Scoring System*
+*Last updated: 2026-02-07 — Completed Phase 11: Performance*
