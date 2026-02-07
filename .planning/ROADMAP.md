@@ -136,7 +136,7 @@ Plans:
 **Plans:** 1 plan
 
 Plans:
-- [ ] 12-01-PLAN.md — Verify all 326 tests pass (REG-01) + write integration regression tests for dedup/enrichment/routing (REG-02)
+- [ ] 12-01-PLAN.md — Verify all tests pass (REG-01) + integration regression tests for dedup/enrichment/routing (REG-02)
 
 ---
 
