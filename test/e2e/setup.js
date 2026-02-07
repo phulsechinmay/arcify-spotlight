@@ -61,7 +61,23 @@ export async function getServiceWorker(browser, timeout = 5000) {
  */
 export async function waitForExtension(browser) {
   const worker = await getServiceWorker(browser);
-  const extensionId = await worker.evaluate(() => chrome.runtime.id);
+
+  // Retry — service worker target may exist before Chrome APIs are injected
+  let extensionId;
+  for (let i = 0; i < 20; i++) {
+    try {
+      extensionId = await worker.evaluate(() => chrome.runtime?.id);
+      if (extensionId) break;
+    } catch {
+      // chrome.runtime not yet available
+    }
+    await new Promise(r => setTimeout(r, 100));
+  }
+
+  if (!extensionId) {
+    throw new Error('Extension failed to initialize: chrome.runtime.id not available after 2s');
+  }
+
   return { worker, extensionId };
 }
 
