@@ -405,3 +405,274 @@ describe('SCORE_BONUSES constants', () => {
         expect(SCORE_BONUSES.TITLE_CONTAINS).toBeGreaterThan(SCORE_BONUSES.URL_CONTAINS);
     });
 });
+
+// --- New test suites for Phase 10 weighted scoring ---
+
+describe('SCORING_WEIGHTS constants', () => {
+    it('weights sum to 1.0', () => {
+        const sum = SCORING_WEIGHTS.TYPE + SCORING_WEIGHTS.MATCH +
+                    SCORING_WEIGHTS.RECENCY + SCORING_WEIGHTS.FREQUENCY;
+        expect(sum).toBeCloseTo(1.0, 5);
+    });
+
+    it('TYPE weight is the largest (preserves hierarchy)', () => {
+        expect(SCORING_WEIGHTS.TYPE).toBeGreaterThan(SCORING_WEIGHTS.MATCH);
+        expect(SCORING_WEIGHTS.TYPE).toBeGreaterThan(SCORING_WEIGHTS.RECENCY);
+        expect(SCORING_WEIGHTS.TYPE).toBeGreaterThan(SCORING_WEIGHTS.FREQUENCY);
+    });
+});
+
+describe('calculateRecencyScore', () => {
+    it('returns ~1 for visit just now', () => {
+        expect(calculateRecencyScore(Date.now())).toBeCloseTo(1, 1);
+    });
+
+    it('returns ~0.5 for visit 24 hours ago (half-life)', () => {
+        const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+        expect(calculateRecencyScore(oneDayAgo)).toBeCloseTo(0.5, 1);
+    });
+
+    it('returns near 0 for visit 7 days ago', () => {
+        const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+        expect(calculateRecencyScore(sevenDaysAgo)).toBeLessThan(0.01);
+    });
+
+    it('returns 0 for null/undefined lastVisitTime', () => {
+        expect(calculateRecencyScore(null)).toBe(0);
+        expect(calculateRecencyScore(undefined)).toBe(0);
+    });
+
+    it('returns 1 for future timestamp (clock skew)', () => {
+        expect(calculateRecencyScore(Date.now() + 60000)).toBe(1);
+    });
+
+    it('more recent visit scores higher than older visit', () => {
+        const fiveMinAgo = Date.now() - 5 * 60 * 1000;
+        const sixHoursAgo = Date.now() - 6 * 60 * 60 * 1000;
+        expect(calculateRecencyScore(fiveMinAgo)).toBeGreaterThan(calculateRecencyScore(sixHoursAgo));
+    });
+});
+
+describe('calculateFrequencyScore', () => {
+    it('returns 0 for visitCount 0', () => {
+        expect(calculateFrequencyScore(0)).toBe(0);
+    });
+
+    it('returns 0 for null/undefined visitCount', () => {
+        expect(calculateFrequencyScore(null)).toBe(0);
+        expect(calculateFrequencyScore(undefined)).toBe(0);
+    });
+
+    it('returns 1 for visitCount >= 100 (cap)', () => {
+        expect(calculateFrequencyScore(100)).toBeCloseTo(1, 2);
+        expect(calculateFrequencyScore(500)).toBe(1); // capped
+    });
+
+    it('higher visit count produces higher score', () => {
+        expect(calculateFrequencyScore(50)).toBeGreaterThan(calculateFrequencyScore(10));
+        expect(calculateFrequencyScore(10)).toBeGreaterThan(calculateFrequencyScore(2));
+    });
+
+    it('returns value between 0 and 1 for typical counts', () => {
+        const score = calculateFrequencyScore(25);
+        expect(score).toBeGreaterThan(0);
+        expect(score).toBeLessThan(1);
+    });
+});
+
+describe('weighted scoring - type hierarchy preserved (SCORE-02)', () => {
+    let provider;
+
+    beforeEach(() => {
+        provider = Object.create(BaseDataProvider.prototype);
+    });
+
+    it('open tab with same match outranks bookmark', () => {
+        const openTab = {
+            type: 'open-tab', title: 'GitHub Dashboard',
+            url: 'https://github.com', metadata: { matchScore: 0.9 }
+        };
+        const bookmark = {
+            type: 'bookmark', title: 'GitHub',
+            url: 'https://github.com', metadata: { matchScore: 0.9 }
+        };
+        expect(provider.calculateRelevanceScore(openTab, 'github'))
+            .toBeGreaterThan(provider.calculateRelevanceScore(bookmark, 'github'));
+    });
+
+    it('open tab outranks history with same match and moderate signals', () => {
+        const openTab = {
+            type: 'open-tab', title: 'GitHub',
+            url: 'https://github.com', metadata: { matchScore: 0.8 }
+        };
+        const history = {
+            type: 'history', title: 'GitHub',
+            url: 'https://github.com',
+            metadata: { matchScore: 0.8, lastVisitTime: Date.now() - 3600000, visitCount: 10 }
+        };
+        expect(provider.calculateRelevanceScore(openTab, 'github'))
+            .toBeGreaterThan(provider.calculateRelevanceScore(history, 'github'));
+    });
+
+    it('full type hierarchy for same matchScore', () => {
+        const makeResult = (type, extra = {}) => ({
+            type, title: 'GitHub', url: 'https://github.com',
+            metadata: { matchScore: 0.8, ...extra }
+        });
+        const scores = {
+            openTab: provider.calculateRelevanceScore(makeResult('open-tab'), 'github'),
+            pinnedTab: provider.calculateRelevanceScore(makeResult('pinned-tab'), 'github'),
+            bookmark: provider.calculateRelevanceScore(makeResult('bookmark'), 'github'),
+            history: provider.calculateRelevanceScore(
+                makeResult('history', { lastVisitTime: Date.now() - 60000, visitCount: 10 }), 'github'
+            ),
+            topSite: provider.calculateRelevanceScore(makeResult('top-site'), 'github'),
+        };
+        expect(scores.openTab).toBeGreaterThan(scores.pinnedTab);
+        expect(scores.pinnedTab).toBeGreaterThan(scores.bookmark);
+        expect(scores.bookmark).toBeGreaterThan(scores.history);
+        expect(scores.history).toBeGreaterThan(scores.topSite);
+    });
+});
+
+describe('weighted scoring - recency signal (SCORE-03)', () => {
+    let provider;
+
+    beforeEach(() => {
+        provider = Object.create(BaseDataProvider.prototype);
+    });
+
+    it('history visited 5 min ago outranks same page visited 3 weeks ago', () => {
+        const recent = {
+            type: 'history', title: 'Jira Board', url: 'https://jira.example.com',
+            metadata: { matchScore: 0.8, lastVisitTime: Date.now() - 5 * 60 * 1000, visitCount: 5 }
+        };
+        const old = {
+            type: 'history', title: 'Jira Board', url: 'https://jira.example.com/old',
+            metadata: { matchScore: 0.8, lastVisitTime: Date.now() - 21 * 24 * 60 * 60 * 1000, visitCount: 5 }
+        };
+        expect(provider.calculateRelevanceScore(recent, 'jira'))
+            .toBeGreaterThan(provider.calculateRelevanceScore(old, 'jira'));
+    });
+
+    it('recency has no effect on non-history types', () => {
+        // Bookmarks don't use recency, so lastVisitTime in metadata is ignored
+        const bookmark1 = {
+            type: 'bookmark', title: 'GitHub', url: 'https://github.com',
+            metadata: { matchScore: 0.8, lastVisitTime: Date.now() }
+        };
+        const bookmark2 = {
+            type: 'bookmark', title: 'GitHub', url: 'https://github.com',
+            metadata: { matchScore: 0.8 }
+        };
+        expect(provider.calculateRelevanceScore(bookmark1, 'github'))
+            .toBe(provider.calculateRelevanceScore(bookmark2, 'github'));
+    });
+});
+
+describe('weighted scoring - frequency signal (SCORE-04)', () => {
+    let provider;
+
+    beforeEach(() => {
+        provider = Object.create(BaseDataProvider.prototype);
+    });
+
+    it('history with 50 visits outranks same with 2 visits', () => {
+        const frequent = {
+            type: 'history', title: 'Docs', url: 'https://docs.example.com',
+            metadata: { matchScore: 0.8, lastVisitTime: Date.now() - 3600000, visitCount: 50 }
+        };
+        const infrequent = {
+            type: 'history', title: 'Docs', url: 'https://docs.example.com/other',
+            metadata: { matchScore: 0.8, lastVisitTime: Date.now() - 3600000, visitCount: 2 }
+        };
+        expect(provider.calculateRelevanceScore(frequent, 'docs'))
+            .toBeGreaterThan(provider.calculateRelevanceScore(infrequent, 'docs'));
+    });
+});
+
+describe('weighted scoring - autocomplete boost (SCORE-05)', () => {
+    let provider;
+
+    beforeEach(() => {
+        provider = Object.create(BaseDataProvider.prototype);
+    });
+
+    it('boosts autocomplete when 0 local results', () => {
+        const autocomplete = {
+            type: 'autocomplete-suggestion', title: 'test query',
+            url: '', score: 30, metadata: {}
+        };
+        const results = [autocomplete];
+        const sorted = provider.scoreAndSortResults(results, 'test');
+        // With 0 local results, boost = AUTOCOMPLETE_BOOST_MAX * (3/3) = 40
+        // Final score = 30 + 40 = 70
+        expect(sorted[0].score).toBeCloseTo(30 + AUTOCOMPLETE_BOOST_MAX, 0);
+    });
+
+    it('partially boosts autocomplete when 1 local result', () => {
+        const local = {
+            type: 'history', title: 'test page', url: 'https://test.com',
+            metadata: { matchScore: 0.8, lastVisitTime: Date.now(), visitCount: 5 }
+        };
+        const autocomplete = {
+            type: 'autocomplete-suggestion', title: 'test query',
+            url: '', score: 30, metadata: {}
+        };
+        const results = [local, autocomplete];
+        const sorted = provider.scoreAndSortResults(results, 'test');
+        const acResult = sorted.find(r => r.type === 'autocomplete-suggestion');
+        // With 1 local result, boost = 40 * (2/3) ~= 26.67
+        expect(acResult.score).toBeGreaterThan(30);
+        expect(acResult.score).toBeLessThan(30 + AUTOCOMPLETE_BOOST_MAX);
+    });
+
+    it('does not boost autocomplete when 3+ local results', () => {
+        const makeLocal = (i) => ({
+            type: 'history', title: `page ${i}`, url: `https://test${i}.com`,
+            metadata: { matchScore: 0.5, lastVisitTime: Date.now(), visitCount: 3 }
+        });
+        const autocomplete = {
+            type: 'autocomplete-suggestion', title: 'test query',
+            url: '', score: 30, metadata: {}
+        };
+        const results = [makeLocal(1), makeLocal(2), makeLocal(3), autocomplete];
+        const sorted = provider.scoreAndSortResults(results, 'test');
+        const acResult = sorted.find(r => r.type === 'autocomplete-suggestion');
+        expect(acResult.score).toBe(30); // No boost applied
+    });
+});
+
+describe('weighted scoring - non-history weight redistribution', () => {
+    let provider;
+
+    beforeEach(() => {
+        provider = Object.create(BaseDataProvider.prototype);
+    });
+
+    it('non-history type with perfect match scores at SCORE_SCALE', () => {
+        const result = {
+            type: 'open-tab', title: 'GitHub', url: 'https://github.com',
+            metadata: { matchScore: 1.0 }
+        };
+        const score = provider.calculateRelevanceScore(result, 'github');
+        // (0.533 * 1.0 + 0.467 * 1.0) * 115 = 115
+        expect(score).toBeCloseTo(SCORE_SCALE, 0);
+    });
+
+    it('non-history types can reach full score range', () => {
+        const perfect = {
+            type: 'open-tab', title: 'Test', url: 'https://test.com',
+            metadata: { matchScore: 1.0 }
+        };
+        const weak = {
+            type: 'top-site', title: 'Something', url: 'https://something.com',
+            metadata: { matchScore: 0.2 }
+        };
+        const perfectScore = provider.calculateRelevanceScore(perfect, 'test');
+        const weakScore = provider.calculateRelevanceScore(weak, 'something');
+        // Good spread across the range
+        expect(perfectScore).toBeGreaterThan(100);
+        expect(weakScore).toBeLessThan(60);
+    });
+});
