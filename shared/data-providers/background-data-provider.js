@@ -149,12 +149,30 @@ export class BackgroundDataProvider extends BaseDataProvider {
 
     async getHistoryData(query) {
         try {
+            // Use Chrome's history search for retrieval (respects recency natively)
             const historyItems = await chrome.history.search({
                 text: query,
-                maxResults: 10,
+                maxResults: 20, // Fetch more to allow Fuse.js to re-rank and filter
                 startTime: Date.now() - (7 * 24 * 60 * 60 * 1000) // Last 7 days
             });
-            return historyItems;
+
+            if (!historyItems || historyItems.length === 0) return [];
+
+            // Apply Fuse.js scoring to Chrome's results for match quality
+            const fuseResults = FuseSearchService.search(historyItems, query, {
+                keys: [
+                    { name: 'title', weight: 2 },
+                    { name: 'url', weight: 1 }
+                ]
+            });
+
+            // Map back with matchScore attached
+            // Items that Chrome returned but Fuse.js didn't match get filtered out
+            // (they were probably very loose substring matches)
+            return fuseResults.slice(0, 10).map(result => ({
+                ...result.item,
+                _matchScore: result.matchScore
+            }));
         } catch (error) {
             Logger.error('[BackgroundDataProvider] Error getting history:', error);
             return [];

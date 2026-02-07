@@ -268,7 +268,11 @@ export class BaseDataProvider {
                 type: ResultType.HISTORY,
                 title: item.title || item.url,
                 url: item.url,
-                metadata: { visitCount: item.visitCount, lastVisitTime: item.lastVisitTime }
+                metadata: {
+                    visitCount: item.visitCount,
+                    lastVisitTime: item.lastVisitTime,
+                    matchScore: item._matchScore || null
+                }
             }));
             return results;
         } catch (error) {
