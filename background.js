@@ -413,6 +413,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (sender.tab && sender.tab.id) {
             spotlightOpenTabs.add(sender.tab.id);
         }
+        arcifyProvider.invalidateCache();
         return false;
     } else if (message.action === 'spotlightClosed') {
         if (sender.tab && sender.tab.id) {

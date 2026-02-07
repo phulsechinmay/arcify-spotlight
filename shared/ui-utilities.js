@@ -187,7 +187,8 @@ export class SpotlightUtils {
                 title: result.title,
                 subtitle: result.domain,
                 action: result.metadata?.groupName
-                    ? 'Open Pinned Tab'
+                    ? (result.metadata?.isArcify && result.metadata?.spaceName === result.metadata?.groupName
+                        ? 'Open Pinned Tab' : 'Open Tab')
                     : (mode === SpotlightTabMode.NEW_TAB ? 'Switch to Tab' : '↵')
             },
             [ResultType.PINNED_TAB]: {
@@ -301,7 +302,7 @@ export class SpotlightUtils {
     // DEBUG: Format debug info for result items (easy to remove)
     static formatDebugInfo(result) {
         // Use environment variable for debug mode (false by default, true for dev builds)
-        const DEBUG_ENABLED = false;
+        const DEBUG_ENABLED = true;
 
         if (!DEBUG_ENABLED) {
             return '';
