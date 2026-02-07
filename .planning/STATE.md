@@ -16,7 +16,7 @@ Plan: 2 of 4 complete
 Status: In progress
 ```
 
-Last activity: 2026-02-07 — Completed 09-02-PLAN.md (bookmark + history Fuse.js migration)
+Last activity: 2026-02-07 — Completed quick task 006: fix flaky E2E arrow key tests
 
 Progress: [████░░░░░░] ~17% (2/~12 plans estimated across 4 phases)
 
@@ -73,6 +73,12 @@ Key findings informing v2.0 architecture:
 ### Blockers/Concerns
 
 None.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 006 | Fix flaky E2E arrow-down test | 2026-02-07 | a43ad1c | [006-investigate-and-fix-flaky-e2e-arrow-down](./quick/006-investigate-and-fix-flaky-e2e-arrow-down/) |
 
 ## Session Continuity
 
