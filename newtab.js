@@ -287,6 +287,7 @@ async function initializeSpotlight() {
     let currentResults = [];
     let instantSuggestion = null;
     let asyncSuggestions = [];
+    let searchQueryId = 0; // Query generation counter for stale response protection (PERF-03)
 
     // Send get suggestions message to background script
     // Use 'current-tab' mode so navigation happens in the current tab (the new tab page itself)
@@ -351,10 +352,13 @@ async function initializeSpotlight() {
         updateDisplay();
     }
 
-    // Handle async search (debounced)
-    // Use 'current-tab' mode since we're on the new tab page itself
+    // Handle async search (debounced) - Two-phase progressive rendering (PERF-03)
+    // Phase 1: Local results render immediately (~10-50ms)
+    // Phase 2: Autocomplete appends when ready (~200-500ms)
+    // Stale queries are discarded via query generation counter
     async function handleAsyncSearch() {
         const query = input.value.trim();
+        const queryId = ++searchQueryId;
 
         if (!query) {
             asyncSuggestions = [];
@@ -363,13 +367,28 @@ async function initializeSpotlight() {
         }
 
         try {
-            const results = await sendGetSuggestionsMessage(query, 'current-tab');
-            asyncSuggestions = results || [];
+            // Phase 1: Local results (fast)
+            const localResults = await SpotlightMessageClient.getLocalSuggestions(query, 'current-tab');
+            if (queryId !== searchQueryId) return; // Stale query -- discard
+            asyncSuggestions = localResults || [];
             updateDisplay();
+
+            // Phase 2: Autocomplete results (slow, network)
+            const autocompleteResults = await SpotlightMessageClient.getAutocompleteSuggestions(query);
+            if (queryId !== searchQueryId) return; // Stale query -- discard
+
+            if (autocompleteResults && autocompleteResults.length > 0) {
+                const allResults = await SpotlightMessageClient.getSuggestions(query, 'current-tab');
+                if (queryId !== searchQueryId) return; // Stale query -- discard
+                asyncSuggestions = allResults || [];
+                updateDisplay();
+            }
         } catch (error) {
             Logger.error('[NewTab Spotlight] Search error:', error);
-            asyncSuggestions = [];
-            updateDisplay();
+            if (queryId === searchQueryId) {
+                asyncSuggestions = [];
+                updateDisplay();
+            }
         }
     }
 

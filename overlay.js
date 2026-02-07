@@ -393,6 +393,7 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
     let currentResults = [];
     let instantSuggestion = null; // The real-time first suggestion
     let asyncSuggestions = []; // Debounced suggestions from background
+    let searchQueryId = 0; // Query generation counter for stale response protection (PERF-03)
 
     // Send get suggestions message to background script using shared client
     async function sendGetSuggestionsMessage(query, mode) {
@@ -471,9 +472,13 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
         updateDisplay();
     }
 
-    // Handle async search (debounced)
+    // Handle async search (debounced) - Two-phase progressive rendering (PERF-03)
+    // Phase 1: Local results render immediately (~10-50ms)
+    // Phase 2: Autocomplete appends when ready (~200-500ms)
+    // Stale queries are discarded via query generation counter
     async function handleAsyncSearch() {
         const query = input.value.trim();
+        const queryId = ++searchQueryId;
 
         if (!query) {
             asyncSuggestions = [];
@@ -483,13 +488,31 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
 
         try {
             const mode = spotlightTabMode === SpotlightTabMode.NEW_TAB ? 'new-tab' : 'current-tab';
-            const results = await sendGetSuggestionsMessage(query, mode);
-            asyncSuggestions = results || [];
+
+            // Phase 1: Local results (fast, ~10-50ms)
+            const localResults = await SpotlightMessageClient.getLocalSuggestions(query, mode);
+            if (queryId !== searchQueryId) return; // Stale query -- discard
+            asyncSuggestions = localResults || [];
             updateDisplay();
+
+            // Phase 2: Autocomplete results (slow, ~200-500ms network)
+            const autocompleteResults = await SpotlightMessageClient.getAutocompleteSuggestions(query);
+            if (queryId !== searchQueryId) return; // Stale query -- discard
+
+            if (autocompleteResults && autocompleteResults.length > 0) {
+                // Merge autocomplete with local results using the original all-in-one path
+                // for proper deduplication, scoring, and sorting
+                const allResults = await SpotlightMessageClient.getSuggestions(query, mode);
+                if (queryId !== searchQueryId) return; // Stale query -- discard
+                asyncSuggestions = allResults || [];
+                updateDisplay();
+            }
         } catch (error) {
             Logger.error('[Spotlight] Search error:', error);
-            asyncSuggestions = [];
-            updateDisplay();
+            if (queryId === searchQueryId) {
+                asyncSuggestions = [];
+                updateDisplay();
+            }
         }
     }
 
