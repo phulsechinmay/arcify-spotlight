@@ -2,70 +2,33 @@
 
 ## Completed Milestones
 
-### v1.0 Polish
+### v2.0 Fuse.js Search
 
-**Completed:** 2026-02-04
-**Timeline:** 2026-01-24 to 2026-02-04 (11 days)
-**Stats:** 25 commits, 4917 LOC
+**Completed:** 2026-02-07
+**Timeline:** 2026-02-06 to 2026-02-07 (1 day)
 
-**Goal:** Fix suggestion bugs and improve UX density and visual feedback.
+**Goal:** Replace the entire matching and scoring system with Fuse.js-based architecture for better search relevancy and performance.
 
-**Accomplishments:**
+**Phases completed:** 9-12 (10 plans total)
 
-Phase 1 - Bug Fixes:
-- URL deduplication: fragments, trailing slashes, www prefix, protocol normalization
-- Fuzzy matching for open tab title/URL search with characters-in-sequence algorithm
-- Priority-based deduplication ensuring open tabs rank higher than history entries
-- Minimum 2-character query enforcement to reduce noise
+**Key accomplishments:**
+- Migrated all 7 data sources from hand-rolled fuzzyMatch() to Fuse.js with configurable thresholds and field weights (title:2, url:1)
+- Replaced flat scoring with 4-signal weighted formula (TYPE 0.40 + MATCH 0.35 + RECENCY 0.15 + FREQUENCY 0.10)
+- Parallelized data fetching with Promise.allSettled (6 sources concurrent) and eliminated double debounce (300ms -> 150ms)
+- Implemented two-phase progressive rendering: local results in ~10-50ms, autocomplete appends at ~200-500ms
+- Added conditional autocomplete boost (+40 max) that surfaces suggestions when few local matches exist
+- 337 tests pass with zero failures, all behavioral contracts verified
 
-Phase 2 - UX Improvements:
-- URL preview updates input value on keyboard navigation (not just placeholder)
-- SelectionManager callback pattern for selection-driven UI updates
-- Tab group color theming via chrome.tabGroups.get() API
-- Complete Chrome tab group color map: grey, blue, red, yellow, green, pink, purple, cyan, orange
-- Purple fallback for ungrouped tabs
+**Stats:**
+- 13 code files modified
+- +1,584 / -515 lines changed (net +1,069)
+- 4 phases, 10 plans
+- 1 day from start to ship
+- 337 tests (326 existing + 11 new regression)
 
-**Requirements Satisfied:**
-- BUG-01: No duplicate suggestions when same URL exists in history and open tabs
-- BUG-02: Open tabs appear in suggestions when input matches tab title or URL
-- UX-01: URL bar updates to show selected suggestion URL on keyboard navigation
-- UX-02: Denser suggestion list with reduced padding
-- UX-03: Highlight color matches active tab group color (purple fallback)
+**Git range:** `ed06237` (docs: start milestone v2.0) -> `3993cf6` (docs: milestone audit passed)
 
-**Score:** 5/5 requirements, 16/16 must-haves, 3/3 E2E flows verified
-
-**Key Decisions:**
-- Two-phase approach: bugs first, UX second
-- Deduplication logic in background data provider layer
-- URL fragments stripped during deduplication (page#section1 = page#section2)
-- Query parameters preserved (page?id=1 != page?id=2)
-- Direct Tab Groups API usage instead of chrome.storage.local lookup
-- URL preview uses input.value with flag to prevent search re-trigger
-- Autocomplete suggestions prioritize metadata.query over URL/title
-
-**Deferred to v1.5:**
-- INT-01: Detect when tab is in Arcify bookmark folder
-
-**Archived:** .planning/archive/v1.0/
-
----
-
-### v1.01 Testing
-
-**Completed:** 2026-02-04
-**Stats:** 240 tests (unit, integration, E2E)
-
-**Goal:** Establish comprehensive testing infrastructure with Vitest + Puppeteer.
-
-**Accomplishments:**
-
-- Phase 1: Test infrastructure setup (Vitest, Chrome API mocks, Puppeteer E2E)
-- Phase 2: Unit tests for pure logic (URL utils, scoring, fuzzy matching)
-- Phase 3: Unit tests with Chrome API mocks (caching, debouncing, action routing)
-- Phase 4: Integration tests for message passing
-- Phase 5: E2E tests for critical user flows
-
-**Score:** 19/19 requirements, 240 tests
+**What's next:** v2.1+ — Space chip UI, selection learning, accessibility improvements
 
 ---
 
@@ -115,18 +78,71 @@ Phase 7 - Result Enrichment:
 
 ---
 
-## Upcoming Milestones
+### v1.01 Testing
 
-### v2.0 (Active)
+**Completed:** 2026-02-04
+**Stats:** 240 tests (unit, integration, E2E)
 
-**Goal:** Replace matching and scoring with Fuse.js-based search architecture
+**Goal:** Establish comprehensive testing infrastructure with Vitest + Puppeteer.
 
-**Scope:**
-- Replace fuzzyMatch() with Fuse.js fuzzy search library
-- Implement weighted multi-signal scoring (match quality + source priority + recency + frequency)
-- Fix performance issues (parallelize fetching, fix double debouncing)
-- Improve overall search relevancy
+**Accomplishments:**
+
+- Phase 1: Test infrastructure setup (Vitest, Chrome API mocks, Puppeteer E2E)
+- Phase 2: Unit tests for pure logic (URL utils, scoring, fuzzy matching)
+- Phase 3: Unit tests with Chrome API mocks (caching, debouncing, action routing)
+- Phase 4: Integration tests for message passing
+- Phase 5: E2E tests for critical user flows
+
+**Score:** 19/19 requirements, 240 tests
 
 ---
 
-*Last updated: 2026-02-06*
+### v1.0 Polish
+
+**Completed:** 2026-02-04
+**Timeline:** 2026-01-24 to 2026-02-04 (11 days)
+**Stats:** 25 commits, 4917 LOC
+
+**Goal:** Fix suggestion bugs and improve UX density and visual feedback.
+
+**Accomplishments:**
+
+Phase 1 - Bug Fixes:
+- URL deduplication: fragments, trailing slashes, www prefix, protocol normalization
+- Fuzzy matching for open tab title/URL search with characters-in-sequence algorithm
+- Priority-based deduplication ensuring open tabs rank higher than history entries
+- Minimum 2-character query enforcement to reduce noise
+
+Phase 2 - UX Improvements:
+- URL preview updates input value on keyboard navigation (not just placeholder)
+- SelectionManager callback pattern for selection-driven UI updates
+- Tab group color theming via chrome.tabGroups.get() API
+- Complete Chrome tab group color map: grey, blue, red, yellow, green, pink, purple, cyan, orange
+- Purple fallback for ungrouped tabs
+
+**Requirements Satisfied:**
+- BUG-01: No duplicate suggestions when same URL exists in history and open tabs
+- BUG-02: Open tabs appear in suggestions when input matches tab title or URL
+- UX-01: URL bar updates to show selected suggestion URL on keyboard navigation
+- UX-02: Denser suggestion list with reduced padding
+- UX-03: Highlight color matches active tab group color (purple fallback)
+
+**Score:** 5/5 requirements, 16/16 must-haves, 3/3 E2E flows verified
+
+**Key Decisions:**
+- Two-phase approach: bugs first, UX second
+- Deduplication logic in background data provider layer
+- URL fragments stripped during deduplication (page#section1 = page#section2)
+- Query parameters preserved (page?id=1 != page?id=2)
+- Direct Tab Groups API usage instead of chrome.storage.local lookup
+- URL preview uses input.value with flag to prevent search re-trigger
+- Autocomplete suggestions prioritize metadata.query over URL/title
+
+**Deferred to v1.5:**
+- INT-01: Detect when tab is in Arcify bookmark folder
+
+**Archived:** .planning/archive/v1.0/
+
+---
+
+*Last updated: 2026-02-07 — v2.0 Fuse.js Search shipped*

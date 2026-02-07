@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A Chrome extension that brings Arc Browser's spotlight search experience to Chrome. Provides an overlay search bar for quick tab/URL navigation via keyboard shortcuts, with autocomplete suggestions from open tabs, history, and bookmarks. Used daily as the primary new tab and current tab navigation workflow.
+A Chrome extension that brings Arc Browser's spotlight search experience to Chrome. Provides an overlay search bar for quick tab/URL navigation via keyboard shortcuts, with Fuse.js-powered fuzzy search across open tabs, history, and bookmarks, ranked by a weighted multi-signal scoring formula.
 
 ## Core Value
 
@@ -17,46 +17,34 @@ Fast, keyboard-driven tab and URL navigation that feels native to Chrome, elimin
 - ✓ New tab page override for pages that don't allow script injection — existing
 - ✓ Chrome storage integration for settings and state — existing
 - ✓ Keyboard navigation through suggestions — existing
-
-### Completed (v1.0)
-
-- [x] Fix: Eliminate duplicate items in suggestions (same item from history + open tabs)
-- [x] Fix: Correctly show open tabs in suggestions when input matches tab name/URL
-- [x] UX: Update spotlight URL bar to reflect selected suggestion when scrolling with keyboard
-- [x] UX: Reduce padding on suggestion items for better screen density
-- [x] UX: Dynamic color highlight matching active tab group color (purple fallback if no group)
-
-### Completed (v1.01)
-
-- [x] Testing: Unit tests for pure logic (URL utils, scoring, fuzzy matching)
-- [x] Testing: Unit tests with Chrome API mocks (caching, debouncing, action routing)
-- [x] Testing: Integration tests for message passing
-- [x] Testing: E2E tests for critical user flows
-
-### Completed (v1.5)
-
-- [x] Detection: Identify tabs bookmarked in Arcify folder structure
-- [x] Wording: Change "Switch to tab" to "Open pinned/favorite tab" for Arcify tabs
-- [x] Performance: Cache Arcify bookmarks with refresh on changes
-
-### Active (v2.0)
-
-- [ ] Replace fuzzyMatch() with Fuse.js fuzzy search library
-- [ ] Implement weighted multi-signal scoring (match quality + source priority + recency + frequency)
-- [ ] Parallelize data source fetching with Promise.all()
-- [ ] Fix double debouncing (overlay 150ms + SearchEngine 150ms)
-- [ ] Incorporate recency and frequency signals into history scoring
-- [ ] Consistent fuzzy matching across all data sources (tabs, bookmarks, history)
+- ✓ Fix: Eliminate duplicate items in suggestions — v1.0
+- ✓ Fix: Correctly show open tabs in suggestions when input matches tab name/URL — v1.0
+- ✓ UX: URL bar reflects selected suggestion on keyboard scroll — v1.0
+- ✓ UX: Reduced padding on suggestion items — v1.0
+- ✓ UX: Dynamic color highlight matching active tab group color — v1.0
+- ✓ Testing: Comprehensive test suite (unit, integration, E2E) — v1.01
+- ✓ Detection: Identify tabs bookmarked in Arcify folder structure — v1.5
+- ✓ Wording: "Open pinned/favorite tab" for Arcify tabs — v1.5
+- ✓ Performance: Cache Arcify bookmarks with refresh on changes — v1.5
+- ✓ All data sources use Fuse.js fuzzy matching — v2.0
+- ✓ Weighted multi-signal scoring (type + match + recency + frequency) — v2.0
+- ✓ Parallel data source fetching (Promise.allSettled) — v2.0
+- ✓ Single debounce layer (eliminated double debounce) — v2.0
+- ✓ History recency and frequency signals in scoring — v2.0
+- ✓ Progressive rendering (local first, autocomplete appends) — v2.0
 
 ### Deferred
 
-- Space chip UI (CHIP-01 to CHIP-05) — deferred from v1.5, revisit after v2.0
+- Space chip UI (CHIP-01 to CHIP-05) — deferred from v1.5, revisit in v2.1+
+- Selection learning (LEARN-01, LEARN-02) — deferred to v2.1+
 
 ### Out of Scope
 
 - Mobile browser support — Chrome desktop extension only
 - Voice search — keyboard-driven workflow is core
 - Tab group creation from spotlight — use Arcify extension for that
+- Pre-built unified search index — over-engineering for current data volume
+- Offline mode — real-time data is core value
 
 ## Context
 
@@ -65,12 +53,15 @@ Fast, keyboard-driven tab and URL navigation that feels native to Chrome, elimin
 - Built with Vite v6.0.0
 - JavaScript (ES6 modules), no TypeScript
 - Uses Chrome APIs: tabs, storage, bookmarks, history, search
+- Fuse.js v7.1.0 for fuzzy matching
+- Vitest for testing (337 tests)
 
 **Existing Codebase:**
 - Two related extensions: arcify (sidebar) and arcify-spotlight (this project)
 - Spotlight uses overlay.js for content script injection
 - Message passing between background service worker and overlay
 - Data providers for tabs, bookmarks, history queries
+- ~8,400 lines of JavaScript (shared/ + test/)
 
 **User Context:**
 - Personal productivity tool, used daily
@@ -80,7 +71,7 @@ Fast, keyboard-driven tab and URL navigation that feels native to Chrome, elimin
 **Known Technical Debt:**
 - Large monolithic components (sidebar.js is 3986 lines)
 - Some race conditions in message handlers
-- ~~No automated tests~~ (Addressed in v1.01 — 240 tests)
+- Phase 9 missing VERIFICATION.md and 2 plan summaries (documentation only)
 
 ## Constraints
 
@@ -89,17 +80,14 @@ Fast, keyboard-driven tab and URL navigation that feels native to Chrome, elimin
 - **Compatibility**: Chrome 88+ only (Manifest V3 requirement)
 - **Existing Architecture**: Work within current message-passing and data provider patterns
 
-## Current Milestone: v2.0 Fuse.js Search
+## Completed Milestones
 
-**Goal:** Replace the entire matching and scoring system with Fuse.js-based architecture for dramatically better search relevancy and performance.
+See [MILESTONES.md](MILESTONES.md) for full history.
 
-**Target features:**
-- Replace hand-rolled fuzzyMatch() with Fuse.js fuzzy search library
-- Implement weighted multi-signal scoring (match quality + source priority + recency + frequency)
-- Parallelize data source fetching (Promise.all instead of sequential awaits)
-- Fix double debouncing (300ms → 150ms effective delay)
-- Incorporate history recency and frequency into scoring
-- Consistent fuzzy matching across all data sources
+- **v2.0 Fuse.js Search** (2026-02-07): Fuse.js matching, weighted scoring, parallel fetch, progressive rendering (15/15 req, 337 tests)
+- **v1.5 Arcify Integration** (2026-02-06): Arcify bookmark detection, cache, enrichment pipeline, action text wording (7/12 req; CHIP UI deferred)
+- **v1.01 Testing** (2026-02-04): 240 tests — unit, integration, E2E with Vitest + Puppeteer
+- **v1.0 Polish** (2026-02-04): Bug fixes (deduplication, fuzzy matching) and UX improvements (URL preview, tab group colors)
 
 ## Future Milestones
 
@@ -111,22 +99,20 @@ Fast, keyboard-driven tab and URL navigation that feels native to Chrome, elimin
 - Cross-extension messaging with Arcify
 - Accessibility improvements (axe-core audit)
 
-## Completed Milestones
-
-See [MILESTONES.md](MILESTONES.md) for full history.
-
-- **v1.5 Arcify Integration** (2026-02-06): Arcify bookmark detection, cache, enrichment pipeline, action text wording (7/12 req; CHIP UI deferred)
-- **v1.01 Testing** (2026-02-04): 240 tests — unit, integration, E2E with Vitest + Puppeteer
-- **v1.0 Polish** (2026-02-04): Bug fixes (deduplication, fuzzy matching) and UX improvements (URL preview, tab group colors)
-
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Two-phase approach (bugs → UX) for v1.0 | Address stability first, then polish. Integration deferred to v1.5 | ✓ Completed |
+| Two-phase approach (bugs → UX) for v1.0 | Address stability first, then polish | ✓ Completed |
 | URL fragments stripped during deduplication | page#section1 = page#section2, but query params preserved | ✓ Implemented |
 | Direct Tab Groups API usage | chrome.tabGroups.get() instead of chrome.storage.local lookup | ✓ Implemented |
 | URL preview in input.value | Allows user to edit URL, flag prevents search re-trigger | ✓ Implemented |
+| FuseSearchService with centralized config | Shared threshold/ignoreLocation across all sources | ✓ v2.0 |
+| Score inversion inside FuseSearchService | Consumers get 1=perfect without manual conversion | ✓ v2.0 |
+| 4-signal weighted formula | TYPE(0.40)+MATCH(0.35)+RECENCY(0.15)+FREQUENCY(0.10) | ✓ v2.0 |
+| Promise.allSettled for parallel fetching | Failed sources return [] without blocking others | ✓ v2.0 |
+| Two-phase progressive rendering | Local first, autocomplete appends, stale query guard | ✓ v2.0 |
+| Bookmark cache + Fuse.js pattern | Chrome API retrieval + Fuse.js re-scoring for quality | ✓ v2.0 |
 
 ---
-*Last updated: 2026-02-06 — v2.0 Fuse.js Search milestone started*
+*Last updated: 2026-02-07 after v2.0 milestone*
