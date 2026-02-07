@@ -89,10 +89,11 @@ Plans:
 4. A page visited 50 times ranks higher than a page visited twice for the same query
 5. When a query has zero or few local matches, Google autocomplete suggestions appear in results (not buried below empty slots)
 
-**Plans:** TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 10-01: TBD
+- [ ] 10-01-PLAN.md — Weighted multi-signal scoring formula + autocomplete boost
+- [ ] 10-02-PLAN.md — Update and expand scoring tests for new formula
 
 ---
 
@@ -149,7 +150,7 @@ Note: Phase 11 (Performance) is technically independent of Phases 9-10 but is se
 | 6-7 | v1.5 | Complete | 7/7 | 2026-02-06 |
 | 8 | v1.5 | Deferred | CHIP UI (5 req) | - |
 | 9 - Fuse.js Matching Engine | v2.0 | Planned (4 plans) | MATCH-01 to MATCH-05 | - |
-| 10 - Weighted Scoring System | v2.0 | Not started | SCORE-01 to SCORE-05 | - |
+| 10 - Weighted Scoring System | v2.0 | Planned (2 plans) | SCORE-01 to SCORE-05 | - |
 | 11 - Performance | v2.0 | Not started | PERF-01 to PERF-03 | - |
 | 12 - Regression Validation | v2.0 | Not started | REG-01, REG-02 | - |
 
