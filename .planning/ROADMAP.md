@@ -64,11 +64,13 @@ See previous roadmap revision for v1.01 phase details.
 4. Each search result carries a numeric match quality score between 0 and 1
 5. Bookmark results use Fuse.js fuzzy matching (not Chrome's substring-only search)
 
-**Plans:** TBD
+**Plans:** 4 plans
 
 Plans:
-- [ ] 09-01: TBD
-- [ ] 09-02: TBD
+- [ ] 09-01-PLAN.md — Install Fuse.js, create FuseSearchService, migrate tabs + pinned tabs
+- [ ] 09-02-PLAN.md — Migrate bookmarks (cache + Fuse.js) and history
+- [ ] 09-03-PLAN.md — Migrate popular-sites + top-sites, integrate matchScore, remove fuzzyMatch
+- [ ] 09-04-PLAN.md — Update all unit tests for Fuse.js behavior
 
 ---
 
@@ -146,7 +148,7 @@ Note: Phase 11 (Performance) is technically independent of Phases 9-10 but is se
 | 1-5 | v1.01 | Complete | 19/19 | 2026-02-04 |
 | 6-7 | v1.5 | Complete | 7/7 | 2026-02-06 |
 | 8 | v1.5 | Deferred | CHIP UI (5 req) | - |
-| 9 - Fuse.js Matching Engine | v2.0 | Not started | MATCH-01 to MATCH-05 | - |
+| 9 - Fuse.js Matching Engine | v2.0 | Planned (4 plans) | MATCH-01 to MATCH-05 | - |
 | 10 - Weighted Scoring System | v2.0 | Not started | SCORE-01 to SCORE-05 | - |
 | 11 - Performance | v2.0 | Not started | PERF-01 to PERF-03 | - |
 | 12 - Regression Validation | v2.0 | Not started | REG-01, REG-02 | - |
