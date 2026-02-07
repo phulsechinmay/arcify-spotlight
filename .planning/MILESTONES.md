@@ -50,16 +50,83 @@ Phase 2 - UX Improvements:
 
 ---
 
-## Upcoming Milestones
+### v1.01 Testing
 
-### v1.5 (Planned)
+**Completed:** 2026-02-04
+**Stats:** 240 tests (unit, integration, E2E)
 
-**Goal:** Arcify bookmark folder integration
+**Goal:** Establish comprehensive testing infrastructure with Vitest + Puppeteer.
 
-**Scope:**
-- Detect tabs in Arcify bookmark folder
-- Change suggestion wording for Arcify-managed tabs
+**Accomplishments:**
+
+- Phase 1: Test infrastructure setup (Vitest, Chrome API mocks, Puppeteer E2E)
+- Phase 2: Unit tests for pure logic (URL utils, scoring, fuzzy matching)
+- Phase 3: Unit tests with Chrome API mocks (caching, debouncing, action routing)
+- Phase 4: Integration tests for message passing
+- Phase 5: E2E tests for critical user flows
+
+**Score:** 19/19 requirements, 240 tests
 
 ---
 
-*Last updated: 2026-02-04*
+### v1.5 Arcify Integration
+
+**Completed:** 2026-02-06
+**Timeline:** 2026-02-05 to 2026-02-06
+
+**Goal:** Detect Arcify-managed tabs and surface their status in Spotlight suggestions.
+
+**Accomplishments:**
+
+Phase 6 - Detection & Cache:
+- ArcifyProvider with O(1) URL-to-space cache via chrome.storage.local
+- Folder detection using getSubTree() single API call
+- Event-driven cache invalidation (onCreated, onRemoved, onMoved, onChanged)
+- URL normalization for reliable matching
+
+Phase 7 - Result Enrichment:
+- Enrichment pipeline with spaceName, spaceColor, isArcify metadata
+- "Open pinned tab" wording for Arcify-bookmarked tabs
+- "Open favorite tab" for Chrome-pinned Arcify tabs
+- Dynamic import pattern for arcifyProvider to avoid circular deps
+
+**Requirements Satisfied:**
+- DET-01: Extension detects Arcify folder in Chrome bookmarks on startup
+- DET-02: Extension caches URL-to-space mapping with O(1) lookup performance
+- DET-03: Cache refreshes automatically when bookmarks change
+- DET-04: URL normalization ensures reliable matching
+- WORD-01: Action text shows "Open pinned tab" for Arcify-bookmarked tabs
+- WORD-02: Action text shows "Open favorite tab" for Chrome-pinned Arcify tabs
+- WORD-03: Non-Arcify tabs keep existing "Switch to tab" wording unchanged
+
+**Score:** 7/12 requirements (Phase 8 Space Chip UI deferred)
+
+**Deferred to future:**
+- CHIP-01 to CHIP-05: Space chip UI rendering (5 requirements)
+
+**Quick Tasks Completed:** 5 (62 new tests, E2E tab group chips, chip fix, bookmark action text, search algorithm research)
+
+**Key Decisions:**
+- chrome.storage.local for cache (session doesn't survive restarts)
+- getSubTree() for single-call tree traversal
+- Lazy cache invalidation on any bookmark change
+- Dynamic import for arcifyProvider (avoids circular deps)
+- Enrichment after dedup, before scoring
+
+---
+
+## Upcoming Milestones
+
+### v2.0 (Active)
+
+**Goal:** Replace matching and scoring with Fuse.js-based search architecture
+
+**Scope:**
+- Replace fuzzyMatch() with Fuse.js fuzzy search library
+- Implement weighted multi-signal scoring (match quality + source priority + recency + frequency)
+- Fix performance issues (parallelize fetching, fix double debouncing)
+- Improve overall search relevancy
+
+---
+
+*Last updated: 2026-02-06*

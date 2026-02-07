@@ -33,12 +33,24 @@ Fast, keyboard-driven tab and URL navigation that feels native to Chrome, elimin
 - [x] Testing: Integration tests for message passing
 - [x] Testing: E2E tests for critical user flows
 
-### Active (v1.5)
+### Completed (v1.5)
 
-- [ ] Detection: Identify tabs bookmarked in Arcify folder structure
-- [ ] Wording: Change "Switch to tab" to "Open pinned/favorite tab" for Arcify tabs
-- [ ] UI: Show colored space chip below Arcify tab suggestions
-- [ ] Performance: Cache Arcify bookmarks with refresh on changes
+- [x] Detection: Identify tabs bookmarked in Arcify folder structure
+- [x] Wording: Change "Switch to tab" to "Open pinned/favorite tab" for Arcify tabs
+- [x] Performance: Cache Arcify bookmarks with refresh on changes
+
+### Active (v2.0)
+
+- [ ] Replace fuzzyMatch() with Fuse.js fuzzy search library
+- [ ] Implement weighted multi-signal scoring (match quality + source priority + recency + frequency)
+- [ ] Parallelize data source fetching with Promise.all()
+- [ ] Fix double debouncing (overlay 150ms + SearchEngine 150ms)
+- [ ] Incorporate recency and frequency signals into history scoring
+- [ ] Consistent fuzzy matching across all data sources (tabs, bookmarks, history)
+
+### Deferred
+
+- Space chip UI (CHIP-01 to CHIP-05) — deferred from v1.5, revisit after v2.0
 
 ### Out of Scope
 
@@ -77,30 +89,33 @@ Fast, keyboard-driven tab and URL navigation that feels native to Chrome, elimin
 - **Compatibility**: Chrome 88+ only (Manifest V3 requirement)
 - **Existing Architecture**: Work within current message-passing and data provider patterns
 
-## Current Milestone: v1.5 Arcify Integration
+## Current Milestone: v2.0 Fuse.js Search
 
-**Goal:** Detect Arcify-managed tabs and surface their status in Spotlight suggestions.
+**Goal:** Replace the entire matching and scoring system with Fuse.js-based architecture for dramatically better search relevancy and performance.
 
 **Target features:**
-- Detect tabs bookmarked in Arcify folder structure
-- Distinguish "pinned" vs "favorite" tabs based on Chrome pinned state
-- Update suggestion wording ("Open pinned tab" / "Open favorite tab")
-- Show colored space chip below suggestion item
-- Cache Arcify bookmarks with refresh on changes
+- Replace hand-rolled fuzzyMatch() with Fuse.js fuzzy search library
+- Implement weighted multi-signal scoring (match quality + source priority + recency + frequency)
+- Parallelize data source fetching (Promise.all instead of sequential awaits)
+- Fix double debouncing (300ms → 150ms effective delay)
+- Incorporate history recency and frequency into scoring
+- Consistent fuzzy matching across all data sources
 
 ## Future Milestones
 
-### v2.0 (Planned)
+### v2.1 (Planned)
 
 **Goal:** TBD — potential features:
-- Cross-extension messaging with Arcify for richer integration
+- Space chip UI (deferred from v1.5)
+- Selection learning (boost previously selected results)
+- Cross-extension messaging with Arcify
 - Accessibility improvements (axe-core audit)
-- Performance optimizations
 
 ## Completed Milestones
 
 See [MILESTONES.md](MILESTONES.md) for full history.
 
+- **v1.5 Arcify Integration** (2026-02-06): Arcify bookmark detection, cache, enrichment pipeline, action text wording (7/12 req; CHIP UI deferred)
 - **v1.01 Testing** (2026-02-04): 240 tests — unit, integration, E2E with Vitest + Puppeteer
 - **v1.0 Polish** (2026-02-04): Bug fixes (deduplication, fuzzy matching) and UX improvements (URL preview, tab group colors)
 
@@ -114,4 +129,4 @@ See [MILESTONES.md](MILESTONES.md) for full history.
 | URL preview in input.value | Allows user to edit URL, flag prevents search re-trigger | ✓ Implemented |
 
 ---
-*Last updated: 2026-02-05 — v1.5 Arcify Integration milestone started*
+*Last updated: 2026-02-06 — v2.0 Fuse.js Search milestone started*
