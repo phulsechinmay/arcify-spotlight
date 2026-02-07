@@ -110,10 +110,12 @@ Plans:
 2. Only one debounce layer exists between keystroke and search execution (not the current overlay 150ms + SearchEngine 150ms stack)
 3. Local results (tabs, bookmarks, history) render immediately, and autocomplete suggestions append into the list when they arrive (no waiting for slowest source)
 
-**Plans:** TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 11-01: TBD
+- [ ] 11-01-PLAN.md — Parallel data fetching (Promise.allSettled) + eliminate double debouncing
+- [ ] 11-02-PLAN.md — Progressive rendering (local results first, autocomplete appends)
+- [ ] 11-03-PLAN.md — Update debounce/cache tests for new architecture
 
 ---
 
