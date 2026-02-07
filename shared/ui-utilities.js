@@ -199,7 +199,7 @@ export class SpotlightUtils {
             [ResultType.BOOKMARK]: {
                 title: result.title,
                 subtitle: result.domain,
-                action: '↵'
+                action: result.metadata?.isArcify ? 'Open Pinned Tab' : '↵'
             },
             [ResultType.HISTORY]: {
                 title: result.title,
