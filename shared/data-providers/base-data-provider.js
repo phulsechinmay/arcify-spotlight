@@ -54,63 +54,23 @@ export class BaseDataProvider {
         }
 
         try {
-            // Get results from different sources with individual error handling
-            let openTabs = [];
-            let pinnedTabs = [];
-            let bookmarks = [];
-            let history = [];
-            let topSites = [];
-            let autocomplete = [];
+            // Fetch all 6 data sources in parallel (PERF-01)
+            // Individual source failures are caught and logged without affecting other sources
+            const settled = await Promise.allSettled([
+                this.getOpenTabs(trimmedQuery),
+                this.getPinnedTabSuggestions(trimmedQuery),
+                this.getBookmarkSuggestions(trimmedQuery),
+                this.getHistorySuggestions(trimmedQuery),
+                this.getTopSites(),
+                this.getAutocompleteSuggestions(trimmedQuery),
+            ]);
 
-            // Get tabs (in both modes)
-            try {
-                openTabs = await this.getOpenTabs(trimmedQuery);
-            } catch (error) {
-                Logger.error('[SearchProvider] Failed to get open tabs:', error);
-                openTabs = [];
-            }
-
-            // Get pinned tabs
-            try {
-                Logger.log('[BaseDataProvider] Getting pinned tab suggestions for query:', trimmedQuery);
-                pinnedTabs = await this.getPinnedTabSuggestions(trimmedQuery);
-                Logger.log('[BaseDataProvider] Got pinned tab suggestions:', pinnedTabs.length);
-            } catch (error) {
-                Logger.error('[SearchProvider] Failed to get pinned tabs:', error);
-                pinnedTabs = [];
-            }
-
-            // Get bookmarks (excluding Arcify pinned tabs)
-            try {
-                bookmarks = await this.getBookmarkSuggestions(trimmedQuery);
-            } catch (error) {
-                Logger.error('[SearchProvider] Failed to get bookmarks:', error);
-                bookmarks = [];
-            }
-
-            // Get history
-            try {
-                history = await this.getHistorySuggestions(trimmedQuery);
-            } catch (error) {
-                Logger.error('[SearchProvider] Failed to get history:', error);
-                history = [];
-            }
-
-            // Get top sites
-            try {
-                topSites = await this.getTopSites();
-            } catch (error) {
-                Logger.error('[SearchProvider] Failed to get top sites:', error);
-                topSites = [];
-            }
-
-            // Get autocomplete suggestions
-            try {
-                autocomplete = await this.getAutocompleteSuggestions(trimmedQuery);
-            } catch (error) {
-                Logger.error('[SearchProvider] Failed to get autocomplete:', error);
-                autocomplete = [];
-            }
+            const [openTabs, pinnedTabs, bookmarks, history, topSites, autocomplete] =
+                settled.map(result => {
+                    if (result.status === 'fulfilled') return result.value;
+                    Logger.error('[SearchProvider] Source failed:', result.reason);
+                    return [];
+                });
 
             // Skip URL/search suggestions - these are handled by instant suggestions in the UI
             // Collect all results first
