@@ -87,6 +87,8 @@ Key insights from project research (see research/SUMMARY.md):
 |----------|-----------|------|
 | Non-async first onMessage listener | Async listeners return Promise (truthy), stealing response channel from other listeners | quick-002 |
 | Overlay mode for tab group E2E tests | Content script overlay provides reliable message passing for E2E testing | quick-002 |
+| groupName gates chip rendering | No tab group = no chip, even with Arcify space metadata | quick-003 |
+| groupColor only (no spaceColor fallback) | Chip derives from actual Chrome tab group, spaceColor is irrelevant | quick-003 |
 
 ### Technical Debt Noted
 
@@ -98,14 +100,15 @@ Key insights from project research (see research/SUMMARY.md):
 |------|------|--------|-------------|
 | 001 | Arcify test coverage (Phases 6-8) | Complete | 62 (232 -> 294) |
 | 002 | E2E tab group space chip | Complete | 2 (9 -> 11 E2E) |
+| 003 | Fix chip tab group mismatch | Complete | 3 new (294 -> 297) |
 
 ## Session Continuity
 
 Last session: 2026-02-06
-Stopped at: Completed quick-002 (E2E Tab Group Space Chip)
+Stopped at: Completed quick-003 (Fix Chip Tab Group Mismatch)
 Next action: Execute 08-02-PLAN.md (Chip rendering, CSS, and visual verification)
 Resume file: None
 
 ---
 
-*Last updated: 2026-02-06 - Quick task 002 complete (2 new E2E tests, 11 total E2E; also fixed async onMessage listener bug)*
+*Last updated: 2026-02-06 - Quick task 003 complete (fixed chip group mismatch, 3 new tests, 297 total)*
