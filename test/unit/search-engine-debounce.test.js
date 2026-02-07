@@ -2,6 +2,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { SearchEngine } from '../../shared/search-engine.js';
 import { SpotlightTabMode } from '../../shared/search-types.js';
 
+// NOTE: As of Phase 11, getSpotlightSuggestionsUsingCache is no longer called from
+// background.js (which uses getSpotlightSuggestionsImmediate instead). The UI-layer
+// debounce in SharedSpotlightLogic.createInputHandler() is the single debounce point.
+// These tests verify the method's internal debounce behavior is preserved.
 describe('SearchEngine debouncing', () => {
     let engine;
     let mockProvider;
@@ -178,5 +182,80 @@ describe('SearchEngine debouncing', () => {
             expect(mockProvider.getSpotlightSuggestions).toHaveBeenCalledTimes(1);
             expect(mockProvider.getSpotlightSuggestions).toHaveBeenCalledWith('test', SpotlightTabMode.NEW_TAB);
         });
+    });
+});
+
+describe('SearchEngine.getSpotlightSuggestionsImmediate', () => {
+    let engine;
+    let mockProvider;
+
+    beforeEach(() => {
+        mockProvider = {
+            isBackgroundProvider: true,
+            getSpotlightSuggestions: vi.fn().mockResolvedValue([
+                { type: 'open-tab', title: 'Test', url: 'https://test.com' }
+            ])
+        };
+        engine = new SearchEngine(mockProvider);
+    });
+
+    it('calls provider immediately without debounce delay', async () => {
+        const results = await engine.getSpotlightSuggestionsImmediate('test', SpotlightTabMode.CURRENT_TAB);
+
+        expect(mockProvider.getSpotlightSuggestions).toHaveBeenCalledTimes(1);
+        expect(mockProvider.getSpotlightSuggestions).toHaveBeenCalledWith('test', SpotlightTabMode.CURRENT_TAB);
+        expect(results).toEqual([{ type: 'open-tab', title: 'Test', url: 'https://test.com' }]);
+    });
+
+    it('returns empty array on provider error', async () => {
+        mockProvider.getSpotlightSuggestions.mockRejectedValue(new Error('Provider error'));
+
+        const results = await engine.getSpotlightSuggestionsImmediate('test', SpotlightTabMode.CURRENT_TAB);
+
+        expect(results).toEqual([]);
+    });
+
+    it('trims query before passing to provider', async () => {
+        await engine.getSpotlightSuggestionsImmediate('  test  ', SpotlightTabMode.CURRENT_TAB);
+
+        expect(mockProvider.getSpotlightSuggestions).toHaveBeenCalledWith('test', SpotlightTabMode.CURRENT_TAB);
+    });
+
+    it('uses CURRENT_TAB as default mode', async () => {
+        await engine.getSpotlightSuggestionsImmediate('test');
+
+        expect(mockProvider.getSpotlightSuggestions).toHaveBeenCalledWith('test', SpotlightTabMode.CURRENT_TAB);
+    });
+});
+
+describe('SearchEngine.getLocalSuggestionsImmediate', () => {
+    let engine;
+    let mockProvider;
+
+    beforeEach(() => {
+        mockProvider = {
+            isBackgroundProvider: true,
+            getSpotlightSuggestions: vi.fn().mockResolvedValue([]),
+            getLocalSuggestions: vi.fn().mockResolvedValue([
+                { type: 'open-tab', title: 'Local Tab', url: 'https://local.com' }
+            ])
+        };
+        engine = new SearchEngine(mockProvider);
+    });
+
+    it('calls dataProvider.getLocalSuggestions for local-only results', async () => {
+        const results = await engine.getLocalSuggestionsImmediate('test', SpotlightTabMode.CURRENT_TAB);
+
+        expect(mockProvider.getLocalSuggestions).toHaveBeenCalledTimes(1);
+        expect(mockProvider.getLocalSuggestions).toHaveBeenCalledWith('test', SpotlightTabMode.CURRENT_TAB);
+        expect(results).toEqual([{ type: 'open-tab', title: 'Local Tab', url: 'https://local.com' }]);
+    });
+
+    it('returns empty array on provider error', async () => {
+        mockProvider.getLocalSuggestions.mockRejectedValue(new Error('Local error'));
+
+        const results = await engine.getLocalSuggestionsImmediate('test', SpotlightTabMode.CURRENT_TAB);
+
+        expect(results).toEqual([]);
     });
 });
