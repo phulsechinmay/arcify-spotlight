@@ -5,33 +5,34 @@
 See: .planning/PROJECT.md (updated 2026-02-06)
 
 **Core value:** Fast, keyboard-driven tab and URL navigation that feels native to Chrome
-**Current focus:** v2.0 Fuse.js Search — Phase 9: Fuse.js Matching Engine
+**Current focus:** v2.0 Fuse.js Search — Phase 11: Performance
 
 ## Current Position
 
 ```
 Milestone: v2.0 Fuse.js Search
-Phase: 9 of 12 (Fuse.js Matching Engine)
-Plan: 2 of 4 complete
-Status: In progress
+Phase: 11 of 12 (Performance)
+Plan: 0 of TBD
+Status: Not started
 ```
 
-Last activity: 2026-02-07 — Completed quick task 006: fix flaky E2E arrow key tests
+Last activity: 2026-02-07 — Completed Phase 10: Weighted Scoring System (2 plans, 320 tests, 5/5 SCORE requirements)
 
-Progress: [████░░░░░░] ~17% (2/~12 plans estimated across 4 phases)
+Progress: [███████░░░] ~67% (8/~12 plans estimated across 4 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2 (v2.0)
-- Average duration: 5min
-- Total execution time: 10min
+- Total plans completed: 8 (v2.0)
+- Average duration: ~4min
+- Total execution time: ~30min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 9 - Fuse.js Matching Engine | 2/4 | 10min | 5min |
+| 9 - Fuse.js Matching Engine | 4/4 | ~15min | ~4min |
+| 10 - Weighted Scoring System | 2/2 | ~8min | ~4min |
 
 ## Milestone History
 
@@ -69,6 +70,12 @@ Key findings informing v2.0 architecture:
 | Bookmark cache in BookmarkUtils | BookmarkUtils is the bookmark utility layer; cache lives alongside Arcify folder logic | 09-02 |
 | History: Chrome retrieval + Fuse.js re-scoring | Chrome's history.search respects recency natively; Fuse adds match quality | 09-02 |
 | History maxResults 10->20 with slice to 10 | Compensates for Fuse.js filtering loose Chrome substring matches after re-ranking | 09-02 |
+| Weighted additive formula (4 signals) | TYPE(0.40)+MATCH(0.35)+RECENCY(0.15)+FREQUENCY(0.10) scaled to 0-115 | 10-01 |
+| Weight redistribution for non-history | Non-history types use TYPE/MATCH only, renormalized to sum=1.0 | 10-01 |
+| Exponential recency decay (24h half-life) | Math.pow(0.5, ageHours/24) — rapid dropoff past 1 day | 10-01 |
+| Log-scaled frequency (cap at 100) | Math.log1p(visitCount)/Math.log1p(100) — diminishing returns | 10-01 |
+| Conditional autocomplete boost | +40 max when localCount < 3, proportional scaling | 10-01 |
+| Synthetic matchScore fallback | String matching (exact=1.0, starts=0.8, contains=0.6, url=0.3) when Fuse.js score absent | 10-01 |
 
 ### Blockers/Concerns
 
@@ -83,10 +90,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Completed quick-006 (fix flaky E2E arrow key tests)
-Next action: Execute 09-03-PLAN.md (top sites + popular sites Fuse.js migration)
+Stopped at: Completed Phase 10 execution and verification
+Next action: Plan Phase 11 (Performance)
 Resume file: None
 
 ---
 
-*Last updated: 2026-02-07 — Completed quick-006 (fix flaky E2E arrow key tests)*
+*Last updated: 2026-02-07 — Completed Phase 10: Weighted Scoring System*

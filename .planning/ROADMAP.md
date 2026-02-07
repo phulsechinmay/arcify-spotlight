@@ -67,10 +67,10 @@ See previous roadmap revision for v1.01 phase details.
 **Plans:** 4 plans
 
 Plans:
-- [ ] 09-01-PLAN.md — Install Fuse.js, create FuseSearchService, migrate tabs + pinned tabs
-- [ ] 09-02-PLAN.md — Migrate bookmarks (cache + Fuse.js) and history
-- [ ] 09-03-PLAN.md — Migrate popular-sites + top-sites, integrate matchScore, remove fuzzyMatch
-- [ ] 09-04-PLAN.md — Update all unit tests for Fuse.js behavior
+- [x] 09-01-PLAN.md — Install Fuse.js, create FuseSearchService, migrate tabs + pinned tabs
+- [x] 09-02-PLAN.md — Migrate bookmarks (cache + Fuse.js) and history
+- [x] 09-03-PLAN.md — Migrate popular-sites + top-sites, integrate matchScore, remove fuzzyMatch
+- [x] 09-04-PLAN.md — Update all unit tests for Fuse.js behavior
 
 ---
 
@@ -92,8 +92,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 10-01-PLAN.md — Weighted multi-signal scoring formula + autocomplete boost
-- [ ] 10-02-PLAN.md — Update and expand scoring tests for new formula
+- [x] 10-01-PLAN.md — Weighted multi-signal scoring formula + autocomplete boost
+- [x] 10-02-PLAN.md — Update and expand scoring tests for new formula
 
 ---
 
@@ -149,12 +149,12 @@ Note: Phase 11 (Performance) is technically independent of Phases 9-10 but is se
 | 1-5 | v1.01 | Complete | 19/19 | 2026-02-04 |
 | 6-7 | v1.5 | Complete | 7/7 | 2026-02-06 |
 | 8 | v1.5 | Deferred | CHIP UI (5 req) | - |
-| 9 - Fuse.js Matching Engine | v2.0 | Planned (4 plans) | MATCH-01 to MATCH-05 | - |
-| 10 - Weighted Scoring System | v2.0 | Planned (2 plans) | SCORE-01 to SCORE-05 | - |
+| 9 - Fuse.js Matching Engine | v2.0 | Complete (4 plans) | MATCH-01 to MATCH-05 | 2026-02-07 |
+| 10 - Weighted Scoring System | v2.0 | Complete (2 plans) | SCORE-01 to SCORE-05 | 2026-02-07 |
 | 11 - Performance | v2.0 | Not started | PERF-01 to PERF-03 | - |
 | 12 - Regression Validation | v2.0 | Not started | REG-01, REG-02 | - |
 
-**v2.0 Progress:** 0/15 requirements complete
+**v2.0 Progress:** 10/15 requirements complete
 
 ## Coverage
 
