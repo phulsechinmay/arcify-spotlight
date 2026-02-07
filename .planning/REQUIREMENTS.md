@@ -1,78 +1,90 @@
-# Requirements: Arcify Spotlight v1.5
+# Requirements: Arcify Spotlight v2.0
 
-**Defined:** 2026-02-05
+**Defined:** 2026-02-06
 **Core Value:** Fast, keyboard-driven tab and URL navigation that feels native to Chrome
 
-## v1.5 Requirements
+## v2.0 Requirements
 
-Requirements for Arcify integration. Each maps to roadmap phases.
+Requirements for Fuse.js search architecture. Each maps to roadmap phases.
 
-### Detection & Caching
+### Matching Engine
 
-- [x] **DET-01**: Extension detects Arcify folder in Chrome bookmarks on startup
-- [x] **DET-02**: Extension caches URL-to-space mapping with O(1) lookup performance
-- [x] **DET-03**: Cache refreshes automatically when bookmarks change (onCreated, onRemoved, onMoved, onChanged)
-- [x] **DET-04**: URL normalization ensures reliable matching (trailing slashes, protocols, www prefix)
+- [ ] **MATCH-01**: All data sources use Fuse.js for fuzzy matching instead of hand-rolled fuzzyMatch()
+- [ ] **MATCH-02**: Title matches weighted higher than URL matches via Fuse.js field weights
+- [ ] **MATCH-03**: Match threshold configured to eliminate false positives on short queries (e.g., 2-3 char)
+- [ ] **MATCH-04**: Each result includes a match quality score (0-1) from Fuse.js
+- [ ] **MATCH-05**: Bookmarks use Fuse.js matching (replacing Chrome's substring-only search)
 
-### Wording Changes
+### Scoring System
 
-- [x] **WORD-01**: Action text shows "Open pinned tab" for Arcify-bookmarked tabs
-- [x] **WORD-02**: Action text shows "Open favorite tab" for Chrome-pinned Arcify tabs
-- [x] **WORD-03**: Non-Arcify tabs keep existing "Switch to tab" wording unchanged
+- [ ] **SCORE-01**: Scoring uses weighted multi-signal formula (type + matchQuality + recency + frequency)
+- [ ] **SCORE-02**: Source type priority preserved (open tabs > pinned tabs > bookmarks > history > top sites > autocomplete)
+- [ ] **SCORE-03**: History results incorporate recency signal (recently visited pages score higher)
+- [ ] **SCORE-04**: History results incorporate frequency signal (frequently visited pages score higher)
+- [ ] **SCORE-05**: Autocomplete suggestions score competitively when few local results match
 
-### Space Chip UI
+### Performance
 
-- [ ] **CHIP-01**: Space name chip appears below Arcify suggestion items
-- [ ] **CHIP-02**: Chip color matches tab group color (using existing color palette)
-- [ ] **CHIP-03**: Chip is static/non-interactive (keyboard navigation unchanged)
-- [ ] **CHIP-04**: Chip has WCAG 3:1 contrast ratio (dark text on light colors)
-- [ ] **CHIP-05**: Feature degrades gracefully when Arcify folder not found (no chips, no errors)
+- [ ] **PERF-01**: Data sources fetched in parallel via Promise.all() instead of sequential awaits
+- [ ] **PERF-02**: Double debouncing eliminated (single debounce layer, not overlay 150ms + SearchEngine 150ms)
+- [ ] **PERF-03**: Local results display immediately while autocomplete results append when ready (progressive rendering)
+
+### Regression Safety
+
+- [ ] **REG-01**: All existing tests pass after migration (300+ tests)
+- [ ] **REG-02**: Deduplication, Arcify enrichment, and action routing unchanged
 
 ## Future Requirements
 
 Deferred to later milestones.
 
-### Scoring Enhancements (v2.0)
+### Search Learning (v2.1+)
 
-- **SCORE-01**: Results from user's active space receive scoring boost
-- **SCORE-02**: Space filter chips allow narrowing search to specific space
+- **LEARN-01**: User selections tracked and used to boost frequently chosen results
+- **LEARN-02**: Selection history pruned automatically to prevent unbounded storage growth
 
-### Accessibility (v2.0)
+### Space Chip UI (deferred from v1.5)
 
-- **A11Y-01**: Screen reader announces space name for Arcify suggestions
-- **A11Y-02**: Spotlight dialog passes axe-core accessibility audit
+- **CHIP-01**: Space name chip appears below Arcify suggestion items
+- **CHIP-02**: Chip color matches tab group color
+- **CHIP-03**: Chip is static/non-interactive
+- **CHIP-04**: Chip has WCAG 3:1 contrast ratio
+- **CHIP-05**: Feature degrades gracefully when Arcify folder not found
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Interactive space chips | Violates static badge pattern, causes focus confusion |
-| Multi-space indicators | Edge case (same URL in multiple spaces), rare scenario |
-| Cross-extension messaging | Adds complexity, bookmark detection is sufficient |
-| Space filter keyboard shortcuts | Power feature, not needed for MVP |
+| Pre-built unified search index | Over-engineering for current data volume; Fuse.js per-source is sufficient |
+| Selection learning | High effort, deferred to v2.1+ |
+| Dynamic result count | Minor UX improvement, not part of core architecture change |
+| Space-aware scoring boost | Depends on CHIP UI which is deferred |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DET-01 | Phase 6 | Complete |
-| DET-02 | Phase 6 | Complete |
-| DET-03 | Phase 6 | Complete |
-| DET-04 | Phase 6 | Complete |
-| WORD-01 | Phase 7 | Complete |
-| WORD-02 | Phase 7 | Complete |
-| WORD-03 | Phase 7 | Complete |
-| CHIP-01 | Phase 8 | Pending |
-| CHIP-02 | Phase 8 | Pending |
-| CHIP-03 | Phase 8 | Pending |
-| CHIP-04 | Phase 8 | Pending |
-| CHIP-05 | Phase 8 | Pending |
+| MATCH-01 | — | Pending |
+| MATCH-02 | — | Pending |
+| MATCH-03 | — | Pending |
+| MATCH-04 | — | Pending |
+| MATCH-05 | — | Pending |
+| SCORE-01 | — | Pending |
+| SCORE-02 | — | Pending |
+| SCORE-03 | — | Pending |
+| SCORE-04 | — | Pending |
+| SCORE-05 | — | Pending |
+| PERF-01 | — | Pending |
+| PERF-02 | — | Pending |
+| PERF-03 | — | Pending |
+| REG-01 | — | Pending |
+| REG-02 | — | Pending |
 
 **Coverage:**
-- v1.5 requirements: 12 total
-- Mapped to phases: 12
-- Unmapped: 0
+- v2.0 requirements: 15 total
+- Mapped to phases: 0
+- Unmapped: 15
 
 ---
-*Requirements defined: 2026-02-05*
-*Phase mappings added: 2026-02-05*
+*Requirements defined: 2026-02-06*
+*Last updated: 2026-02-06 after initial definition*
