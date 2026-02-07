@@ -1,16 +1,19 @@
 /**
  * Popular Sites - Curated mapping of popular website domains to display names
- * 
+ *
  * Purpose: Provides clean display names for popular websites and enables fuzzy domain matching
- * Key Functions: Domain to name mapping, fuzzy search support for partial domain completion
- * Architecture: Simple object export with organized categories
- * 
+ * Key Functions: Domain to name mapping, Fuse.js-based fuzzy search for partial domain completion
+ * Architecture: Simple object export with organized categories, FuseSearchService for matching
+ *
  * Critical Notes:
  * - Used by website name extractor for clean display names
  * - Enables fuzzy matching for partial typing (e.g., "squaresp" → "squarespace.com")
  * - Organized by categories for maintainability
  * - Includes both domain and common subdomain variations
+ * - findMatchingDomains uses FuseSearchService with displayName:2/domainShort:1.5/domain:1 weighting
  */
+
+import { FuseSearchService } from './fuse-search-service.js';
 
 // Popular sites mapping organized by category
 export const POPULAR_SITES = {
@@ -219,47 +222,29 @@ export const getAllDomains = () => Object.keys(POPULAR_SITES);
 // Get display name for a domain
 export const getDisplayName = (domain) => POPULAR_SITES[domain] || null;
 
-// Fuzzy matching function for partial domain completion
+// Pre-build searchable array for Fuse.js (built once at module load)
+const _popularSitesList = Object.entries(POPULAR_SITES).map(([domain, displayName]) => ({
+    domain,
+    displayName,
+    domainShort: domain.split('.')[0]
+}));
+
+// Fuzzy matching function for partial domain completion (Fuse.js-based)
 export const findMatchingDomains = (partial, maxResults = 10) => {
-    const partialLower = partial.toLowerCase();
-    const domains = getAllDomains();
-    const matches = [];
+    if (!partial) return [];
 
-    for (const domain of domains) {
-        const domainLower = domain.toLowerCase();
-        const domainWithoutTld = domainLower.split('.')[0]; // e.g., "squarespace" from "squarespace.com"
+    const fuseResults = FuseSearchService.search(_popularSitesList, partial, {
+        keys: [
+            { name: 'displayName', weight: 2 },
+            { name: 'domainShort', weight: 1.5 },
+            { name: 'domain', weight: 1 }
+        ],
+        threshold: 0.3
+    });
 
-        // Exact start match gets highest score
-        if (domainWithoutTld.startsWith(partialLower)) {
-            matches.push({
-                domain,
-                displayName: POPULAR_SITES[domain],
-                score: 100 - (domainWithoutTld.length - partialLower.length), // Prefer shorter domains
-                matchType: 'start'
-            });
-        }
-        // Contains match gets lower score
-        else if (domainWithoutTld.includes(partialLower)) {
-            matches.push({
-                domain,
-                displayName: POPULAR_SITES[domain],
-                score: 50,
-                matchType: 'contains'
-            });
-        }
-        // Display name match
-        else if (POPULAR_SITES[domain].toLowerCase().includes(partialLower)) {
-            matches.push({
-                domain,
-                displayName: POPULAR_SITES[domain],
-                score: 30,
-                matchType: 'name'
-            });
-        }
-    }
-
-    // Sort by score (highest first) and return top results
-    return matches
-        .sort((a, b) => b.score - a.score)
-        .slice(0, maxResults);
+    return fuseResults.slice(0, maxResults).map(result => ({
+        domain: result.item.domain,
+        displayName: result.item.displayName,
+        matchScore: result.matchScore
+    }));
 };

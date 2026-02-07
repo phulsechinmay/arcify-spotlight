@@ -7,6 +7,9 @@ import {
 } from '../../shared/scoring-constants.js';
 import { BaseDataProvider } from '../../shared/data-providers/base-data-provider.js';
 
+// Note: getFuzzyMatchScore is deprecated but still exported from scoring-constants.js.
+// It is no longer used by base-data-provider.js (replaced by Fuse.js matchScore integration).
+
 describe('getAutocompleteScore', () => {
     it('returns BASE_SCORES.AUTOCOMPLETE_SUGGESTION for index 0', () => {
         expect(getAutocompleteScore(0)).toBe(BASE_SCORES.AUTOCOMPLETE_SUGGESTION);
@@ -35,7 +38,7 @@ describe('getAutocompleteScore', () => {
     });
 });
 
-describe('getFuzzyMatchScore', () => {
+describe('getFuzzyMatchScore (DEPRECATED - replaced by Fuse.js matchScore)', () => {
     describe('matchType scores', () => {
         it.each([
             ['start', 'returns score >= 62 (minimum is FUZZY_MATCH_NAME)'],
@@ -183,43 +186,102 @@ describe('BaseDataProvider.calculateRelevanceScore', () => {
         });
     });
 
-    describe('fuzzy match passthrough', () => {
-        it('returns result.score directly when metadata.fuzzyMatch is true', () => {
+    describe('matchScore integration', () => {
+        it('adds matchScore bonus when matchScore is present in metadata', () => {
             const result = {
-                type: 'top-site',
+                type: 'open-tab',
+                title: 'GitHub',
+                url: 'https://github.com',
+                metadata: { matchScore: 0.9 }
+            };
+            const score = provider.calculateRelevanceScore(result, 'github');
+            expect(score).toBe(BASE_SCORES.OPEN_TAB + 0.9 * 25);
+        });
+
+        it('perfect matchScore gives maximum bonus', () => {
+            const result = {
+                type: 'bookmark',
                 title: 'Test',
                 url: 'https://test.com',
-                score: 64.5,
-                metadata: { fuzzyMatch: true }
+                metadata: { matchScore: 1.0 }
             };
             const score = provider.calculateRelevanceScore(result, 'test');
-            expect(score).toBe(64.5);
+            expect(score).toBe(BASE_SCORES.BOOKMARK + 25);
         });
 
-        it('does not apply bonuses when metadata.fuzzyMatch is true', () => {
+        it('low matchScore gives small bonus', () => {
             const result = {
-                type: 'top-site',
-                title: 'github',
-                url: 'https://github.com',
-                score: 65,
-                metadata: { fuzzyMatch: true }
+                type: 'history',
+                title: 'Test',
+                url: 'https://test.com',
+                metadata: { matchScore: 0.2 }
             };
-            // Even though title exactly matches query, fuzzyMatch flag skips recalculation
-            const score = provider.calculateRelevanceScore(result, 'github');
-            expect(score).toBe(65);
+            const score = provider.calculateRelevanceScore(result, 'test');
+            expect(score).toBe(BASE_SCORES.HISTORY + 0.2 * 25);
         });
 
-        it('calculates normally when fuzzyMatch is false or undefined', () => {
+        it('skips string matching bonuses when matchScore is present', () => {
             const result = {
-                type: 'top-site',
+                type: 'history',
                 title: 'github',
                 url: 'https://github.com',
-                score: 65,
-                metadata: { fuzzyMatch: false }
+                metadata: { matchScore: 0.95 }
             };
             const score = provider.calculateRelevanceScore(result, 'github');
-            const expectedScore = BASE_SCORES.TOP_SITE + SCORE_BONUSES.EXACT_TITLE_MATCH + SCORE_BONUSES.URL_CONTAINS;
-            expect(score).toBe(expectedScore);
+            // Should use matchScore bonus (23.75), NOT string bonuses (20+5=25)
+            expect(score).toBe(BASE_SCORES.HISTORY + 0.95 * 25);
+        });
+
+        it('falls back to string matching when matchScore is null', () => {
+            const result = {
+                type: 'history',
+                title: 'github',
+                url: 'https://github.com',
+                metadata: { matchScore: null }
+            };
+            const score = provider.calculateRelevanceScore(result, 'github');
+            expect(score).toBe(BASE_SCORES.HISTORY + SCORE_BONUSES.EXACT_TITLE_MATCH + SCORE_BONUSES.URL_CONTAINS);
+        });
+
+        it('falls back to string matching when metadata has no matchScore', () => {
+            const result = {
+                type: 'history',
+                title: 'github',
+                url: 'https://github.com',
+                metadata: {}
+            };
+            const score = provider.calculateRelevanceScore(result, 'github');
+            expect(score).toBe(BASE_SCORES.HISTORY + SCORE_BONUSES.EXACT_TITLE_MATCH + SCORE_BONUSES.URL_CONTAINS);
+        });
+
+        it('preserves type hierarchy even with matchScore', () => {
+            const tabResult = {
+                type: 'open-tab',
+                title: 'Test',
+                url: 'https://test.com',
+                metadata: { matchScore: 0.5 }
+            };
+            const bookmarkResult = {
+                type: 'bookmark',
+                title: 'Test',
+                url: 'https://test.com',
+                metadata: { matchScore: 0.5 }
+            };
+            const tabScore = provider.calculateRelevanceScore(tabResult, 'test');
+            const bookmarkScore = provider.calculateRelevanceScore(bookmarkResult, 'test');
+            expect(tabScore).toBeGreaterThan(bookmarkScore);
+        });
+
+        it('does not add bonus when matchScore is 0', () => {
+            const result = {
+                type: 'history',
+                title: 'Test',
+                url: 'https://test.com',
+                metadata: { matchScore: 0 }
+            };
+            const score = provider.calculateRelevanceScore(result, 'nomatch');
+            // matchScore is 0, so falls through to string matching path
+            expect(score).toBe(BASE_SCORES.HISTORY);
         });
     });
 

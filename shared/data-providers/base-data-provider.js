@@ -2,9 +2,10 @@
 
 import { SearchResult, ResultType } from '../search-types.js';
 import { findMatchingDomains } from '../popular-sites.js';
-import { BASE_SCORES, SCORE_BONUSES, getFuzzyMatchScore } from '../scoring-constants.js';
+import { BASE_SCORES, SCORE_BONUSES } from '../scoring-constants.js';
 import { SpotlightUtils } from '../ui-utilities.js';
 import { Logger } from '../../logger.js';
+import { FuseSearchService } from '../fuse-search-service.js';
 
 export class BaseDataProvider {
     constructor() {
@@ -357,11 +358,6 @@ export class BaseDataProvider {
 
     // Relevance scoring algorithm
     calculateRelevanceScore(result, query) {
-        // If this is a fuzzy match, use its pre-calculated score
-        if (result.metadata?.fuzzyMatch) {
-            return result.score;
-        }
-        
         let baseScore = 0;
 
         switch (result.type) {
@@ -375,6 +371,15 @@ export class BaseDataProvider {
             case ResultType.AUTOCOMPLETE_SUGGESTION: baseScore = BASE_SCORES.AUTOCOMPLETE_SUGGESTION; break;
         }
 
+        // If matchScore is available from Fuse.js, use it as bonus (0-25 points)
+        // This skips string matching bonuses since Fuse.js already evaluated match quality
+        const matchScore = result.metadata?.matchScore;
+        if (matchScore != null && matchScore > 0) {
+            baseScore += matchScore * 25;
+            return Math.max(0, baseScore);
+        }
+
+        // Fallback: string matching bonuses for results without matchScore
         const queryLower = query.toLowerCase();
         const titleLower = result.title.toLowerCase();
         const urlLower = result.url.toLowerCase();
@@ -388,95 +393,38 @@ export class BaseDataProvider {
         return Math.max(0, baseScore);
     }
 
-    // Enhanced top sites matching with fuzzy domain matching
+    // Top sites matching using Fuse.js fuzzy search
     findMatchingTopSites(topSites, query) {
-        const queryLower = query.toLowerCase();
-        
-        return topSites.filter(site => {
-            const titleLower = site.title.toLowerCase();
-            const urlLower = site.url.toLowerCase();
-            
-            // Exact matches
-            if (titleLower.includes(queryLower) || urlLower.includes(queryLower)) {
-                return true;
-            }
-            
-            // Extract domain from URL for fuzzy matching
-            try {
-                const url = new URL(site.url);
-                let hostname = url.hostname.toLowerCase();
-                
-                // Remove www. prefix
-                if (hostname.startsWith('www.')) {
-                    hostname = hostname.substring(4);
-                }
-                
-                // Check if query matches start of domain name
-                const domainParts = hostname.split('.');
-                const mainDomain = domainParts[0]; // e.g., "squarespace" from "squarespace.com"
-                
-                // Fuzzy matching: query is start of domain name
-                if (mainDomain.startsWith(queryLower)) {
-                    return true;
-                }
-                
-            } catch (error) {
-                // Ignore URL parsing errors
-            }
-            
-            return false;
+        if (!query || topSites.length === 0) return [];
+
+        const fuseResults = FuseSearchService.search(topSites, query, {
+            keys: [
+                { name: 'title', weight: 2 },
+                { name: 'url', weight: 1 }
+            ]
+        });
+
+        return fuseResults.map(result => {
+            const site = result.item;
+            site.metadata = site.metadata || {};
+            site.metadata.matchScore = result.matchScore;
+            return site;
         });
     }
 
-    // Get fuzzy domain matches from popular sites
+    // Get fuzzy domain matches from popular sites (Fuse.js-based)
     getFuzzyDomainMatches(query) {
         const matches = findMatchingDomains(query, 5); // Limit to top 5 matches
-        
-        return matches.map(match => {
-            // Calculate fuzzy match score using centralized scoring function
-            const fuzzyScore = getFuzzyMatchScore(match.matchType, match.domain.length, query.length);
-            
-            return new SearchResult({
-                type: ResultType.TOP_SITE,
-                title: match.displayName,
-                url: `https://${match.domain}`,
-                score: fuzzyScore,
-                metadata: { 
-                    fuzzyMatch: true,
-                    matchType: match.matchType,
-                    originalQuery: query
-                }
-            });
-        });
-    }
 
-    /**
-     * Simple fuzzy match - checks if all characters in query appear in text in order
-     * Examples: "ghub" matches "GitHub", "yt" matches "YouTube", "gml" matches "Gmail"
-     * @param {string} query - The search query (lowercase)
-     * @param {string} text - The text to search in (lowercase)
-     * @returns {boolean} - True if fuzzy match found
-     */
-    fuzzyMatch(query, text) {
-        if (!query || !text) return false;
-
-        const queryLower = query.toLowerCase();
-        const textLower = text.toLowerCase();
-
-        // Quick check: if query is contained, it's a match
-        if (textLower.includes(queryLower)) {
-            return true;
-        }
-
-        // Fuzzy match: all query characters must appear in order
-        let queryIndex = 0;
-        for (let i = 0; i < textLower.length && queryIndex < queryLower.length; i++) {
-            if (textLower[i] === queryLower[queryIndex]) {
-                queryIndex++;
+        return matches.map(match => new SearchResult({
+            type: ResultType.TOP_SITE,
+            title: match.displayName,
+            url: `https://${match.domain}`,
+            metadata: {
+                matchScore: match.matchScore,
+                originalQuery: query
             }
-        }
-
-        return queryIndex === queryLower.length;
+        }));
     }
 
     // Comprehensive deduplication across all result sources
@@ -616,8 +564,7 @@ export class BaseDataProvider {
             'pinned-tab': BASE_SCORES.PINNED_TAB,
             'bookmark': BASE_SCORES.BOOKMARK,
             'history': BASE_SCORES.HISTORY,
-            'top-site': result.metadata?.fuzzyMatch ? 
-                BASE_SCORES.FUZZY_MATCH_START : BASE_SCORES.TOP_SITE,
+            'top-site': BASE_SCORES.TOP_SITE,
             'autocomplete-suggestion': BASE_SCORES.AUTOCOMPLETE_SUGGESTION,
             'search-query': BASE_SCORES.SEARCH_QUERY,
             'url-suggestion': BASE_SCORES.URL_SUGGESTION
