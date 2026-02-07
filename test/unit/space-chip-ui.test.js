@@ -363,4 +363,40 @@ describe('SpotlightUtils.formatResult - Arcify action text', () => {
         const formatted = SpotlightUtils.formatResult(result, SpotlightTabMode.CURRENT_TAB);
         expect(formatted.action).toBe('Open Favorite Tab');
     });
+
+    it('BOOKMARK with isArcify shows "Open Pinned Tab"', () => {
+        const result = new SearchResult({
+            type: ResultType.BOOKMARK,
+            title: 'GitHub',
+            url: 'https://github.com',
+            metadata: { bookmarkId: 'b1', isArcify: true, spaceName: 'Work', spaceColor: 'blue' }
+        });
+
+        const formatted = SpotlightUtils.formatResult(result, SpotlightTabMode.CURRENT_TAB);
+        expect(formatted.action).toBe('Open Pinned Tab');
+    });
+
+    it('BOOKMARK without isArcify shows enter arrow', () => {
+        const result = new SearchResult({
+            type: ResultType.BOOKMARK,
+            title: 'Example',
+            url: 'https://example.com',
+            metadata: { bookmarkId: 'b2' }
+        });
+
+        const formatted = SpotlightUtils.formatResult(result, SpotlightTabMode.CURRENT_TAB);
+        expect(formatted.action).toBe('\u21b5');
+    });
+
+    it('BOOKMARK with isArcify shows "Open Pinned Tab" in NEW_TAB mode', () => {
+        const result = new SearchResult({
+            type: ResultType.BOOKMARK,
+            title: 'GitHub',
+            url: 'https://github.com',
+            metadata: { bookmarkId: 'b1', isArcify: true, spaceName: 'Work', spaceColor: 'blue' }
+        });
+
+        const formatted = SpotlightUtils.formatResult(result, SpotlightTabMode.NEW_TAB);
+        expect(formatted.action).toBe('Open Pinned Tab');
+    });
 });
