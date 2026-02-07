@@ -4,6 +4,7 @@ import { BaseDataProvider } from './base-data-provider.js';
 import { AutocompleteProvider } from './autocomplete-provider.js';
 import { BookmarkUtils } from '../../bookmark-utils.js';
 import { Logger } from '../../logger.js';
+import { FuseSearchService } from '../fuse-search-service.js';
 
 const TAB_ACTIVITY_STORAGE_KEY = 'tabLastActivity';
 
@@ -30,20 +31,32 @@ export class BackgroundDataProvider extends BaseDataProvider {
                 groupMap.set(group.id, { title: group.title, color: group.color });
             }
 
-            const filteredTabs = tabs.filter(tab => {
-                if (!tab.title || !tab.url) return false;
+            // Filter out tabs without required fields
+            const validTabs = tabs.filter(tab => tab.title && tab.url);
 
-                // No query = return all tabs
-                if (!query) return true;
+            // No query = return all valid tabs
+            if (!query) {
+                return validTabs.map(tab => {
+                    const group = tab.groupId !== -1 ? groupMap.get(tab.groupId) : null;
+                    if (group) {
+                        tab.groupName = group.title || '';
+                        tab.groupColor = group.color || null;
+                    }
+                    return tab;
+                });
+            }
 
-                const queryLower = query.toLowerCase();
-                const titleLower = tab.title.toLowerCase();
-                const urlLower = tab.url.toLowerCase();
+            // Fuse.js fuzzy matching with title weighted 2x over URL
+            const fuseResults = FuseSearchService.search(validTabs, query, {
+                keys: [
+                    { name: 'title', weight: 2 },
+                    { name: 'url', weight: 1 }
+                ]
+            });
 
-                // Use fuzzy matching for both title and URL - user decision
-                return this.fuzzyMatch(queryLower, titleLower) ||
-                       this.fuzzyMatch(queryLower, urlLower);
-            }).map(tab => {
+            const filteredTabs = fuseResults.map(result => {
+                const tab = result.item;
+                tab._matchScore = result.matchScore;
                 const group = tab.groupId !== -1 ? groupMap.get(tab.groupId) : null;
                 if (group) {
                     tab.groupName = group.title || '';

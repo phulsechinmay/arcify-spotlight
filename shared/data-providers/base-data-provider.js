@@ -174,7 +174,8 @@ export class BaseDataProvider {
                     tabId: tab.id,
                     windowId: tab.windowId,
                     groupName: tab.groupName || null,
-                    groupColor: tab.groupColor || null
+                    groupColor: tab.groupColor || null,
+                    matchScore: tab._matchScore || null
                 }
             }));
             return results;
