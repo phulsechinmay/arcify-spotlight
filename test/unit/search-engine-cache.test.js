@@ -2,6 +2,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { SearchEngine } from '../../shared/search-engine.js';
 import { SpotlightTabMode } from '../../shared/search-types.js';
 
+// NOTE: As of Phase 11, getSpotlightSuggestionsUsingCache is no longer called from
+// background.js, but the cache mechanism is preserved for backward compatibility.
+// These tests verify the caching behavior is intact.
 describe('SearchEngine.getSpotlightSuggestionsUsingCache', () => {
     let engine;
     let mockProvider;
