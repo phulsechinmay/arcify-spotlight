@@ -31,5 +31,8 @@
     "productivity"
   ],
   "author": "Nisarg Kolhe",
-  "license": "GPL-3.0"
+  "license": "GPL-3.0",
+  "dependencies": {
+    "fuse.js": "^7.1.0"
+  }
 }
