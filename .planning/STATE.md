@@ -12,26 +12,26 @@ See: .planning/PROJECT.md (updated 2026-02-06)
 ```
 Milestone: v2.0 Fuse.js Search
 Phase: 9 of 12 (Fuse.js Matching Engine)
-Plan: 1 of 4 complete
+Plan: 2 of 4 complete
 Status: In progress
 ```
 
-Last activity: 2026-02-07 — Completed 09-01-PLAN.md (Fuse.js foundation + tab/pinned tab migration)
+Last activity: 2026-02-07 — Completed 09-02-PLAN.md (bookmark + history Fuse.js migration)
 
-Progress: [██░░░░░░░░] ~8% (1/~12 plans estimated across 4 phases)
+Progress: [████░░░░░░] ~17% (2/~12 plans estimated across 4 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1 (v2.0)
-- Average duration: 7min
-- Total execution time: 7min
+- Total plans completed: 2 (v2.0)
+- Average duration: 5min
+- Total execution time: 10min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 9 - Fuse.js Matching Engine | 1/4 | 7min | 7min |
+| 9 - Fuse.js Matching Engine | 2/4 | 10min | 5min |
 
 ## Milestone History
 
@@ -66,6 +66,9 @@ Key findings informing v2.0 architecture:
 | Keys omitted from FUSE_DEFAULT_OPTIONS | Each data source passes own keys (title/url vs displayName/domain) via optionOverrides | 09-01 |
 | Score inversion inside FuseSearchService | Consumers get 1=perfect without manual conversion; Fuse's 0=perfect never leaks | 09-01 |
 | Batch Fuse filtering for pinned tabs | Collect all candidates first, then single Fuse.js search (vs per-item fuzzyMatch) | 09-01 |
+| Bookmark cache in BookmarkUtils | BookmarkUtils is the bookmark utility layer; cache lives alongside Arcify folder logic | 09-02 |
+| History: Chrome retrieval + Fuse.js re-scoring | Chrome's history.search respects recency natively; Fuse adds match quality | 09-02 |
+| History maxResults 10->20 with slice to 10 | Compensates for Fuse.js filtering loose Chrome substring matches after re-ranking | 09-02 |
 
 ### Blockers/Concerns
 
@@ -74,10 +77,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Completed 09-01-PLAN.md
-Next action: Execute 09-02-PLAN.md (bookmark migration to Fuse.js)
+Stopped at: Completed 09-02-PLAN.md
+Next action: Execute 09-03-PLAN.md (top sites + popular sites Fuse.js migration)
 Resume file: None
 
 ---
 
-*Last updated: 2026-02-07 — Completed 09-01 (Fuse.js foundation + tab migration)*
+*Last updated: 2026-02-07 — Completed 09-02 (bookmark + history Fuse.js migration)*
