@@ -14,7 +14,7 @@ This milestone replaces the hand-rolled matching and scoring system with Fuse.js
 - v1.0 MVP - Phases 1-4 (shipped 2026-02-04, archived)
 - v1.01 Testing - Phases 1-5 (shipped 2026-02-04)
 - v1.5 Arcify Integration - Phases 6-8 (shipped 2026-02-06, CHIP UI deferred)
-- **v2.0 Fuse.js Search** - Phases 9-12 (in progress)
+- **v2.0 Fuse.js Search** - Phases 9-12 (complete)
 
 ## Phases
 
@@ -43,7 +43,7 @@ See previous roadmap revision for v1.01 phase details.
 
 </details>
 
-### v2.0 Fuse.js Search (In Progress)
+### v2.0 Fuse.js Search (Complete)
 
 **Milestone Goal:** Replace the entire matching and scoring system with Fuse.js-based architecture for better search relevancy and performance.
 
@@ -136,7 +136,7 @@ Plans:
 **Plans:** 1 plan
 
 Plans:
-- [ ] 12-01-PLAN.md — Verify all tests pass (REG-01) + integration regression tests for dedup/enrichment/routing (REG-02)
+- [x] 12-01-PLAN.md — Verify all tests pass (REG-01) + integration regression tests for dedup/enrichment/routing (REG-02)
 
 ---
 
@@ -154,9 +154,9 @@ Note: Phase 11 (Performance) is technically independent of Phases 9-10 but is se
 | 9 - Fuse.js Matching Engine | v2.0 | Complete (4 plans) | MATCH-01 to MATCH-05 | 2026-02-07 |
 | 10 - Weighted Scoring System | v2.0 | Complete (2 plans) | SCORE-01 to SCORE-05 | 2026-02-07 |
 | 11 - Performance | v2.0 | Complete (3 plans) | PERF-01 to PERF-03 | 2026-02-07 |
-| 12 - Regression Validation | v2.0 | Not started | REG-01, REG-02 | - |
+| 12 - Regression Validation | v2.0 | Complete (1 plan) | REG-01, REG-02 | 2026-02-07 |
 
-**v2.0 Progress:** 13/15 requirements complete
+**v2.0 Progress:** 15/15 requirements complete
 
 ## Coverage
 

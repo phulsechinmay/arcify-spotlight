@@ -31,8 +31,8 @@ Requirements for Fuse.js search architecture. Each maps to roadmap phases.
 
 ### Regression Safety
 
-- [ ] **REG-01**: All existing tests pass after migration (300+ tests)
-- [ ] **REG-02**: Deduplication, Arcify enrichment, and action routing unchanged
+- [x] **REG-01**: All existing tests pass after migration (300+ tests)
+- [x] **REG-02**: Deduplication, Arcify enrichment, and action routing unchanged
 
 ## Future Requirements
 
@@ -77,8 +77,8 @@ Deferred to later milestones.
 | PERF-01 | Phase 11 | Complete |
 | PERF-02 | Phase 11 | Complete |
 | PERF-03 | Phase 11 | Complete |
-| REG-01 | Phase 12 | Pending |
-| REG-02 | Phase 12 | Pending |
+| REG-01 | Phase 12 | Complete |
+| REG-02 | Phase 12 | Complete |
 
 **Coverage:**
 - v2.0 requirements: 15 total
@@ -87,4 +87,4 @@ Deferred to later milestones.
 
 ---
 *Requirements defined: 2026-02-06*
-*Last updated: 2026-02-07 — 13/15 requirements complete (MATCH, SCORE, PERF done; REG pending)*
+*Last updated: 2026-02-07 — 15/15 requirements complete (all v2.0 requirements satisfied)*
