@@ -221,13 +221,14 @@ export class BaseDataProvider {
                     type: ResultType.PINNED_TAB,
                     title: pinnedTab.title,
                     url: pinnedTab.url,
-                    metadata: { 
+                    metadata: {
                         bookmarkId: pinnedTab.id,
                         spaceId: pinnedTab.spaceId,
                         spaceName: pinnedTab.spaceName,
                         spaceColor: pinnedTab.spaceColor,
                         tabId: pinnedTab.tabId,
-                        isActive: pinnedTab.isActive
+                        isActive: pinnedTab.isActive,
+                        matchScore: pinnedTab._matchScore || null
                     }
                 });
                 Logger.log('[BaseDataProvider] Created PINNED_TAB SearchResult:', result);

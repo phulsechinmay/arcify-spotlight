@@ -159,11 +159,11 @@ export class BackgroundDataProvider extends BaseDataProvider {
             const storage = await chrome.storage.local.get('spaces');
             const spaces = storage.spaces || [];
             Logger.log('[BackgroundDataProvider] Found spaces:', spaces.length, spaces.map(s => s.name));
-            
+
             // Get current tabs
             const tabs = await chrome.tabs.query({});
             Logger.log('[BackgroundDataProvider] Found tabs:', tabs.length);
-            
+
             // Get Arcify folder structure using robust method
             const arcifyFolder = await BookmarkUtils.findArcifyFolder();
             if (!arcifyFolder) {
@@ -174,7 +174,9 @@ export class BackgroundDataProvider extends BaseDataProvider {
 
             const spaceFolders = await chrome.bookmarks.getChildren(arcifyFolder.id);
             Logger.log('[BackgroundDataProvider] Found space folders:', spaceFolders.length, spaceFolders.map(f => f.title));
-            const pinnedTabs = [];
+
+            // Collect ALL pinned tab candidates first (no query filtering in loop)
+            const allCandidates = [];
 
             // Process each space folder
             for (const spaceFolder of spaceFolders) {
@@ -185,22 +187,11 @@ export class BackgroundDataProvider extends BaseDataProvider {
                 // Get all bookmarks in this space folder (recursively)
                 const bookmarks = await BookmarkUtils.getBookmarksFromFolderRecursive(spaceFolder.id);
                 Logger.log('[BackgroundDataProvider] Found bookmarks in', spaceFolder.title, ':', bookmarks.length);
-                
+
                 for (const bookmark of bookmarks) {
                     // Check if there's a matching open tab
                     const matchingTab = BookmarkUtils.findTabByUrl(tabs, bookmark.url);
                     Logger.log('[BackgroundDataProvider] Processing bookmark:', bookmark.title, 'matching tab:', !!matchingTab);
-                    
-                    // Apply query filter with fuzzy matching
-                    if (query) {
-                            const queryLower = query.toLowerCase();
-                        const titleMatch = this.fuzzyMatch(queryLower, bookmark.title.toLowerCase());
-                        const urlMatch = this.fuzzyMatch(queryLower, bookmark.url.toLowerCase());
-                        if (!titleMatch && !urlMatch) {
-                            Logger.log('[BackgroundDataProvider] Bookmark filtered out by query:', bookmark.title);
-                            continue;
-                        }
-                    }
 
                     const pinnedTab = {
                         ...bookmark,
@@ -211,12 +202,31 @@ export class BackgroundDataProvider extends BaseDataProvider {
                         isActive: !!matchingTab
                     };
                     Logger.log('[BackgroundDataProvider] Adding pinned tab:', pinnedTab);
-                    pinnedTabs.push(pinnedTab);
+                    allCandidates.push(pinnedTab);
                 }
             }
 
-            Logger.log('[BackgroundDataProvider] Returning', pinnedTabs.length, 'pinned tabs');
-            return pinnedTabs;
+            // Apply Fuse.js filtering if query is provided
+            if (query) {
+                const fuseResults = FuseSearchService.search(allCandidates, query, {
+                    keys: [
+                        { name: 'title', weight: 2 },
+                        { name: 'url', weight: 1 }
+                    ]
+                });
+
+                const filteredPinnedTabs = fuseResults.map(result => {
+                    const pinnedTab = result.item;
+                    pinnedTab._matchScore = result.matchScore;
+                    return pinnedTab;
+                });
+
+                Logger.log('[BackgroundDataProvider] Returning', filteredPinnedTabs.length, 'pinned tabs (filtered by query)');
+                return filteredPinnedTabs;
+            }
+
+            Logger.log('[BackgroundDataProvider] Returning', allCandidates.length, 'pinned tabs');
+            return allCandidates;
         } catch (error) {
             Logger.error('[BackgroundDataProvider] Error getting pinned tabs data:', error);
             return [];
