@@ -133,10 +133,10 @@ Plans:
 3. Arcify enrichment still works (Arcify-bookmarked tabs show "Open pinned tab" wording)
 4. Action routing unchanged (selecting a tab switches to it, selecting a URL navigates to it, selecting a bookmark opens it)
 
-**Plans:** TBD
+**Plans:** 1 plan
 
 Plans:
-- [ ] 12-01: TBD
+- [ ] 12-01-PLAN.md — Verify all 326 tests pass (REG-01) + write integration regression tests for dedup/enrichment/routing (REG-02)
 
 ---
 
