@@ -1,19 +1,20 @@
-# Roadmap: Arcify Spotlight v1.5 Arcify Integration
+# Roadmap: Arcify Spotlight
 
-**Milestone:** v1.5 Arcify Integration
-**Created:** 2026-02-05
-**Phases:** 3 (Phases 6-8, continuing from v1.01)
+**Current Milestone:** v2.0 Fuse.js Search
+**Created:** 2026-02-06
+**Phases:** 4 (Phases 9-12, continuing from v1.5)
 **Depth:** Standard
 
 ## Overview
 
-This milestone integrates Arcify bookmark detection into Spotlight search. The extension detects tabs bookmarked in Arcify's folder structure, caches URL-to-space mappings for fast lookup, updates suggestion wording to distinguish pinned/favorite tabs, and displays colored space chips below Arcify suggestions. The implementation follows the existing data provider pattern, adding an ArcifyProvider component that enriches search results with space metadata.
+This milestone replaces the hand-rolled matching and scoring system with Fuse.js-based architecture. Fuse.js integration comes first (matching foundation), then scoring is rebuilt on top of Fuse.js match quality signals, then performance bottlenecks are eliminated (parallel fetching, debounce, progressive rendering), and finally regression safety is verified end-to-end.
 
 ## Milestones
 
 - v1.0 MVP - Phases 1-4 (shipped 2026-02-04, archived)
 - v1.01 Testing - Phases 1-5 (shipped 2026-02-04)
-- **v1.5 Arcify Integration** - Phases 6-8 (in progress)
+- v1.5 Arcify Integration - Phases 6-8 (shipped 2026-02-06, CHIP UI deferred)
+- **v2.0 Fuse.js Search** - Phases 9-12 (in progress)
 
 ## Phases
 
@@ -31,122 +32,149 @@ See previous roadmap revision for v1.01 phase details.
 
 </details>
 
-### v1.5 Arcify Integration (In Progress)
+<details>
+<summary>v1.5 Arcify Integration (Phases 6-8) - COMPLETE (CHIP UI deferred)</summary>
 
-**Milestone Goal:** Detect Arcify-managed tabs and surface their status in Spotlight suggestions
+- Phase 6: Detection & Cache (DET-01 to DET-04) - Complete
+- Phase 7: Result Enrichment (WORD-01 to WORD-03) - Complete
+- Phase 8: Space Chip UI (CHIP-01 to CHIP-05) - Deferred to v2.1+
 
----
+**Total:** 7/12 requirements complete, 5 deferred
 
-### Phase 6: Detection & Cache
+</details>
 
-**Goal:** Arcify bookmarks are detected and cached with O(1) lookup performance
+### v2.0 Fuse.js Search (In Progress)
 
-**Dependencies:** None (foundation for v1.5)
-
-**Requirements:**
-- DET-01: Extension detects Arcify folder in Chrome bookmarks on startup
-- DET-02: Extension caches URL-to-space mapping with O(1) lookup performance
-- DET-03: Cache refreshes automatically when bookmarks change
-- DET-04: URL normalization ensures reliable matching
-
-**Success Criteria:**
-1. Extension finds Arcify folder regardless of Chrome locale or folder location
-2. URL lookup returns space info in constant time (no recursive traversal per query)
-3. Adding/removing/moving a bookmark triggers cache refresh within 1 second
-4. URLs with trailing slashes, www prefix, or protocol variations match correctly
-
-**Plans:** 1 plan
-
-Plans:
-- [x] 06-01-PLAN.md — ArcifyProvider with folder detection, O(1) cache, and event listeners
+**Milestone Goal:** Replace the entire matching and scoring system with Fuse.js-based architecture for better search relevancy and performance.
 
 ---
 
-### Phase 7: Result Enrichment
+### Phase 9: Fuse.js Matching Engine
 
-**Goal:** Search results include Arcify metadata with correct action wording
+**Goal:** All data sources use Fuse.js for fuzzy matching with configurable thresholds and field weights
 
-**Dependencies:** Phase 6 (requires cache for lookups)
+**Dependencies:** None (foundation for v2.0)
 
-**Requirements:**
-- WORD-01: Action text shows "Open pinned tab" for Arcify-bookmarked tabs
-- WORD-02: Action text shows "Open favorite tab" for Chrome-pinned Arcify tabs
-- WORD-03: Non-Arcify tabs keep existing "Switch to tab" wording unchanged
+**Requirements:** MATCH-01, MATCH-02, MATCH-03, MATCH-04, MATCH-05
 
-**Success Criteria:**
-1. Arcify-bookmarked tab shows "Open pinned tab" instead of "Switch to tab"
-2. Chrome-pinned Arcify tab shows "Open favorite tab" (Chrome pin + Arcify bookmark)
-3. Regular tabs (not in Arcify folder) still show "Switch to tab"
+**Success Criteria** (what must be TRUE):
+1. Typing a query returns fuzzy-matched results from tabs, bookmarks, and history using Fuse.js (not the old fuzzyMatch function)
+2. A title match ranks higher than a URL-only match for the same query (e.g., searching "git" ranks a tab titled "GitHub" above a tab with "git" only in the URL)
+3. Short queries (2-3 characters) do not produce obviously wrong matches (e.g., "ab" does not match "xyz123")
+4. Each search result carries a numeric match quality score between 0 and 1
+5. Bookmark results use Fuse.js fuzzy matching (not Chrome's substring-only search)
 
-**Plans:** 1 plan
+**Plans:** TBD
 
 Plans:
-- [x] 07-01-PLAN.md — Enrich results with Arcify metadata and update action text
+- [ ] 09-01: TBD
+- [ ] 09-02: TBD
 
 ---
 
-### Phase 8: Space Chip UI
+### Phase 10: Weighted Scoring System
 
-**Goal:** Space chips appear below Arcify suggestions with proper styling and accessibility
+**Goal:** Results are ranked by a multi-signal formula combining match quality, source type, recency, and frequency
 
-**Dependencies:** Phase 7 (requires enriched results with space metadata)
+**Dependencies:** Phase 9 (requires Fuse.js match quality scores)
 
-**Requirements:**
-- CHIP-01: Space name chip appears below Arcify suggestion items
-- CHIP-02: Chip color matches tab group color
-- CHIP-03: Chip is static/non-interactive (keyboard navigation unchanged)
-- CHIP-04: Chip has WCAG 3:1 contrast ratio
-- CHIP-05: Feature degrades gracefully when Arcify folder not found
+**Requirements:** SCORE-01, SCORE-02, SCORE-03, SCORE-04, SCORE-05
 
-**Success Criteria:**
-1. Space chip appears below URL line for Arcify suggestions (not for regular tabs)
-2. Chip background color matches the space's tab group color
-3. Arrow keys skip over chips (focus stays on suggestion items)
-4. Chip text is readable against its background color (3:1 contrast minimum)
-5. Spotlight works normally when Arcify folder is missing (no chips, no errors)
+**Success Criteria** (what must be TRUE):
+1. Results are ordered by a combined score that visibly weighs match quality, source type, recency, and visit frequency (not just flat per-type scores)
+2. Open tabs still appear above bookmarks and history for equally strong matches (source priority preserved)
+3. A page visited 5 minutes ago ranks higher than the same page visited 3 weeks ago for the same query
+4. A page visited 50 times ranks higher than a page visited twice for the same query
+5. When a query has zero or few local matches, Google autocomplete suggestions appear in results (not buried below empty slots)
 
-**Plans:** 2 plans
+**Plans:** TBD
 
 Plans:
-- [x] 08-01-PLAN.md -- Extend arcifyProvider cache with spaceColor and fix enrichment pipeline
-- [ ] 08-02-PLAN.md -- Chip rendering, CSS, and visual verification
+- [ ] 10-01: TBD
+
+---
+
+### Phase 11: Performance
+
+**Goal:** Search results appear faster through parallel data fetching, single debounce, and progressive rendering
+
+**Dependencies:** None (independent of Phases 9-10, can execute in parallel or after)
+
+**Requirements:** PERF-01, PERF-02, PERF-03
+
+**Success Criteria** (what must be TRUE):
+1. All data sources (tabs, bookmarks, history, top sites, autocomplete) are fetched in parallel via Promise.all, not sequentially
+2. Only one debounce layer exists between keystroke and search execution (not the current overlay 150ms + SearchEngine 150ms stack)
+3. Local results (tabs, bookmarks, history) render immediately, and autocomplete suggestions append into the list when they arrive (no waiting for slowest source)
+
+**Plans:** TBD
+
+Plans:
+- [ ] 11-01: TBD
+
+---
+
+### Phase 12: Regression Validation
+
+**Goal:** All existing functionality works correctly after the v2.0 migration
+
+**Dependencies:** Phases 9, 10, 11 (validates everything together)
+
+**Requirements:** REG-01, REG-02
+
+**Success Criteria** (what must be TRUE):
+1. All 300+ existing tests pass with zero failures after the full migration
+2. Duplicate results are still deduplicated (same URL from history + open tabs shows once)
+3. Arcify enrichment still works (Arcify-bookmarked tabs show "Open pinned tab" wording)
+4. Action routing unchanged (selecting a tab switches to it, selecting a URL navigates to it, selecting a bookmark opens it)
+
+**Plans:** TBD
+
+Plans:
+- [ ] 12-01: TBD
 
 ---
 
 ## Progress
 
+**Execution Order:** Phase 9 -> Phase 10 -> Phase 11 -> Phase 12
+
+Note: Phase 11 (Performance) is technically independent of Phases 9-10 but is sequenced after them to avoid concurrent refactoring of the same search pipeline. Phase 12 runs last as final validation.
+
 | Phase | Milestone | Status | Requirements | Completed |
 |-------|-----------|--------|--------------|-----------|
 | 1-5 | v1.01 | Complete | 19/19 | 2026-02-04 |
-| 6 - Detection & Cache | v1.5 | Complete | DET-01, DET-02, DET-03, DET-04 | 2026-02-06 |
-| 7 - Result Enrichment | v1.5 | Complete | WORD-01, WORD-02, WORD-03 | 2026-02-06 |
-| 8 - Space Chip UI | v1.5 | Not started | CHIP-01, CHIP-02, CHIP-03, CHIP-04, CHIP-05 | - |
+| 6-7 | v1.5 | Complete | 7/7 | 2026-02-06 |
+| 8 | v1.5 | Deferred | CHIP UI (5 req) | - |
+| 9 - Fuse.js Matching Engine | v2.0 | Not started | MATCH-01 to MATCH-05 | - |
+| 10 - Weighted Scoring System | v2.0 | Not started | SCORE-01 to SCORE-05 | - |
+| 11 - Performance | v2.0 | Not started | PERF-01 to PERF-03 | - |
+| 12 - Regression Validation | v2.0 | Not started | REG-01, REG-02 | - |
 
-**v1.5 Progress:** 7/12 requirements complete
+**v2.0 Progress:** 0/15 requirements complete
 
 ## Coverage
 
 | Requirement | Phase | Description |
 |-------------|-------|-------------|
-| DET-01 | 6 | Arcify folder detection on startup |
-| DET-02 | 6 | O(1) URL-to-space lookup cache |
-| DET-03 | 6 | Automatic cache refresh on bookmark changes |
-| DET-04 | 6 | URL normalization for reliable matching |
-| WORD-01 | 7 | "Open pinned tab" wording for Arcify tabs |
-| WORD-02 | 7 | "Open favorite tab" for Chrome-pinned Arcify tabs |
-| WORD-03 | 7 | Unchanged wording for non-Arcify tabs |
-| CHIP-01 | 8 | Space name chip below Arcify suggestions |
-| CHIP-02 | 8 | Chip color matches tab group |
-| CHIP-03 | 8 | Static chip (non-interactive) |
-| CHIP-04 | 8 | WCAG 3:1 contrast ratio |
-| CHIP-05 | 8 | Graceful degradation when folder missing |
+| MATCH-01 | 9 | All data sources use Fuse.js for fuzzy matching |
+| MATCH-02 | 9 | Title matches weighted higher than URL matches |
+| MATCH-03 | 9 | Threshold configured to eliminate false positives |
+| MATCH-04 | 9 | Each result includes match quality score (0-1) |
+| MATCH-05 | 9 | Bookmarks use Fuse.js matching |
+| SCORE-01 | 10 | Weighted multi-signal scoring formula |
+| SCORE-02 | 10 | Source type priority preserved |
+| SCORE-03 | 10 | History recency signal |
+| SCORE-04 | 10 | History frequency signal |
+| SCORE-05 | 10 | Autocomplete scores competitively when few local matches |
+| PERF-01 | 11 | Parallel data source fetching |
+| PERF-02 | 11 | Single debounce layer |
+| PERF-03 | 11 | Progressive rendering |
+| REG-01 | 12 | All existing tests pass |
+| REG-02 | 12 | Deduplication, enrichment, routing unchanged |
 
-**Coverage:** 12/12 v1.5 requirements mapped
+**Coverage:** 15/15 v2.0 requirements mapped
 
 ---
 
-*Roadmap created: 2026-02-05*
-*Phase 6 planned: 2026-02-05*
-*Phase 6 complete: 2026-02-06*
-*Phase 7 planned: 2026-02-06*
-*Phase 7 complete: 2026-02-06*
+*Roadmap created: 2026-02-06 (v2.0 Fuse.js Search)*

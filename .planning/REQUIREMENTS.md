@@ -64,27 +64,27 @@ Deferred to later milestones.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MATCH-01 | — | Pending |
-| MATCH-02 | — | Pending |
-| MATCH-03 | — | Pending |
-| MATCH-04 | — | Pending |
-| MATCH-05 | — | Pending |
-| SCORE-01 | — | Pending |
-| SCORE-02 | — | Pending |
-| SCORE-03 | — | Pending |
-| SCORE-04 | — | Pending |
-| SCORE-05 | — | Pending |
-| PERF-01 | — | Pending |
-| PERF-02 | — | Pending |
-| PERF-03 | — | Pending |
-| REG-01 | — | Pending |
-| REG-02 | — | Pending |
+| MATCH-01 | Phase 9 | Pending |
+| MATCH-02 | Phase 9 | Pending |
+| MATCH-03 | Phase 9 | Pending |
+| MATCH-04 | Phase 9 | Pending |
+| MATCH-05 | Phase 9 | Pending |
+| SCORE-01 | Phase 10 | Pending |
+| SCORE-02 | Phase 10 | Pending |
+| SCORE-03 | Phase 10 | Pending |
+| SCORE-04 | Phase 10 | Pending |
+| SCORE-05 | Phase 10 | Pending |
+| PERF-01 | Phase 11 | Pending |
+| PERF-02 | Phase 11 | Pending |
+| PERF-03 | Phase 11 | Pending |
+| REG-01 | Phase 12 | Pending |
+| REG-02 | Phase 12 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 15 total
-- Mapped to phases: 0
-- Unmapped: 15
+- Mapped to phases: 15
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-06*
-*Last updated: 2026-02-06 after initial definition*
+*Last updated: 2026-02-06 — All 15 requirements mapped to Phases 9-12*
