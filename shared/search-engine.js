@@ -78,6 +78,18 @@ export class SearchEngine {
         }
     }
 
+    // Local-only suggestions without debouncing (PERF-03 progressive rendering Phase 1)
+    async getLocalSuggestionsImmediate(query, mode = SpotlightTabMode.CURRENT_TAB) {
+        try {
+            const trimmedQuery = query.trim();
+            const results = await this.dataProvider.getLocalSuggestions(trimmedQuery, mode);
+            return results;
+        } catch (error) {
+            Logger.error('[SearchEngine] Local suggestions error:', error);
+            return [];
+        }
+    }
+
     // Internal suggestions implementation
     async getSuggestionsImpl(query, mode) {
         const trimmedQuery = query.trim();

@@ -101,6 +101,59 @@ export class BaseDataProvider {
         }
     }
 
+    // Get local suggestions only (fast, no autocomplete) - PERF-03 progressive rendering
+    async getLocalSuggestions(query, mode = 'current-tab') {
+        const trimmedQuery = query.trim().toLowerCase();
+
+        if (!trimmedQuery) {
+            return this.getDefaultResults(mode);
+        }
+
+        try {
+            // Fetch 5 local data sources in parallel (no autocomplete)
+            const settled = await Promise.allSettled([
+                this.getOpenTabs(trimmedQuery),
+                this.getPinnedTabSuggestions(trimmedQuery),
+                this.getBookmarkSuggestions(trimmedQuery),
+                this.getHistorySuggestions(trimmedQuery),
+                this.getTopSites(),
+            ]);
+
+            const [openTabs, pinnedTabs, bookmarks, history, topSites] =
+                settled.map(result => {
+                    if (result.status === 'fulfilled') return result.value;
+                    Logger.error('[SearchProvider] Source failed:', result.reason);
+                    return [];
+                });
+
+            // Collect all local results
+            const allResults = [];
+            allResults.push(...openTabs, ...pinnedTabs, ...bookmarks, ...history);
+
+            // Add top sites that match query (with fuzzy domain matching)
+            const matchingTopSites = this.findMatchingTopSites(topSites, trimmedQuery);
+            allResults.push(...matchingTopSites);
+
+            // Add fuzzy domain matches from popular sites
+            const fuzzyDomainMatches = this.getFuzzyDomainMatches(trimmedQuery);
+            allResults.push(...fuzzyDomainMatches);
+
+            // Apply comprehensive deduplication across all sources
+            const deduplicatedResults = this.deduplicateResults(allResults);
+
+            // Enrich with Arcify space info (after dedup to avoid redundant lookups)
+            const enrichedResults = await this.enrichWithArcifyInfo(deduplicatedResults);
+
+            // Score and sort results
+            const finalResults = this.scoreAndSortResults(enrichedResults, trimmedQuery);
+            return finalResults;
+        } catch (error) {
+            Logger.error('[SearchProvider] Local search error:', error);
+            const fallback = this.generateFallbackResult(trimmedQuery);
+            return [fallback];
+        }
+    }
+
     // Get default results when no query
     async getDefaultResults(mode) {
         const results = [];

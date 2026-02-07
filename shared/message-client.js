@@ -27,6 +27,45 @@ export class SpotlightMessageClient {
         }
     }
 
+    // Get local suggestions only (fast, no autocomplete) - PERF-03 progressive rendering Phase 1
+    static async getLocalSuggestions(query, mode) {
+        try {
+            const response = await chrome.runtime.sendMessage({
+                action: 'getLocalSuggestions',
+                query: query.trim(),
+                mode: mode
+            });
+            if (response && response.success) {
+                return response.results;
+            } else {
+                Logger.error('[SpotlightMessageClient] Get local suggestions failed:', response?.error);
+                return [];
+            }
+        } catch (error) {
+            Logger.error('[SpotlightMessageClient] Get local suggestions error:', error);
+            return [];
+        }
+    }
+
+    // Get autocomplete suggestions only (slow, network) - PERF-03 progressive rendering Phase 2
+    static async getAutocompleteSuggestions(query) {
+        try {
+            const response = await chrome.runtime.sendMessage({
+                action: 'getAutocompleteSuggestions',
+                query: query.trim()
+            });
+            if (response && response.success) {
+                return response.results;
+            } else {
+                Logger.error('[SpotlightMessageClient] Get autocomplete suggestions failed:', response?.error);
+                return [];
+            }
+        } catch (error) {
+            Logger.error('[SpotlightMessageClient] Get autocomplete suggestions error:', error);
+            return [];
+        }
+    }
+
     // Handle result action via message passing
     static async handleResult(result, mode) {
         try {

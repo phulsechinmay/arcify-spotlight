@@ -60,7 +60,8 @@ const SpotlightTabMode = {
 };
 
 // Create a single SearchEngine instance with BackgroundDataProvider
-const backgroundSearchEngine = new SearchEngine(new BackgroundDataProvider());
+const backgroundDataProvider = new BackgroundDataProvider();
+const backgroundSearchEngine = new SearchEngine(backgroundDataProvider);
 
 // Track tabs that have spotlight open for efficient closing
 const spotlightOpenTabs = new Set();
@@ -399,6 +400,34 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 sendResponse({ success: true, results: results });
             } catch (error) {
                 Logger.error('[Background] Error getting spotlight suggestions:', error);
+                sendResponse({ success: false, error: error.message, results: [] });
+            }
+        })();
+        return true;
+    } else if (message.action === 'getLocalSuggestions') {
+        (async () => {
+            try {
+                const query = message.query.trim();
+                const results = await backgroundSearchEngine.getLocalSuggestionsImmediate(
+                    query, message.mode
+                );
+                sendResponse({ success: true, results: results });
+            } catch (error) {
+                Logger.error('[Background] Error getting local suggestions:', error);
+                sendResponse({ success: false, error: error.message, results: [] });
+            }
+        })();
+        return true;
+    } else if (message.action === 'getAutocompleteSuggestions') {
+        (async () => {
+            try {
+                const query = message.query.trim();
+                const results = query
+                    ? await backgroundDataProvider.getAutocompleteSuggestions(query)
+                    : [];
+                sendResponse({ success: true, results: results });
+            } catch (error) {
+                Logger.error('[Background] Error getting autocomplete suggestions:', error);
                 sendResponse({ success: false, error: error.message, results: [] });
             }
         })();
