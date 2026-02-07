@@ -2,7 +2,7 @@
 
 import { SearchResult, ResultType } from '../search-types.js';
 import { findMatchingDomains } from '../popular-sites.js';
-import { BASE_SCORES, SCORE_BONUSES } from '../scoring-constants.js';
+import { BASE_SCORES, SCORE_BONUSES, SCORING_WEIGHTS, TYPE_SCORE_MAP, SCORE_SCALE, calculateRecencyScore, calculateFrequencyScore, AUTOCOMPLETE_BOOST_MAX, LOCAL_RESULT_THRESHOLD } from '../scoring-constants.js';
 import { SpotlightUtils } from '../ui-utilities.js';
 import { Logger } from '../../logger.js';
 import { FuseSearchService } from '../fuse-search-service.js';
@@ -343,54 +343,104 @@ export class BaseDataProvider {
         }
     }
 
-    // Score and sort results
+    // Score and sort results with conditional autocomplete boost (SCORE-05)
     scoreAndSortResults(results, query) {
+        // Score all results
         results.forEach(result => {
             result.score = this.calculateRelevanceScore(result, query);
         });
-        
+
+        // Apply conditional autocomplete boost when local results are sparse
+        const localCount = results.filter(r =>
+            r.type !== ResultType.AUTOCOMPLETE_SUGGESTION
+        ).length;
+
+        if (localCount < LOCAL_RESULT_THRESHOLD) {
+            const boostFactor = (LOCAL_RESULT_THRESHOLD - localCount) / LOCAL_RESULT_THRESHOLD;
+            results.forEach(r => {
+                if (r.type === ResultType.AUTOCOMPLETE_SUGGESTION) {
+                    r.score += AUTOCOMPLETE_BOOST_MAX * boostFactor;
+                }
+            });
+        }
+
+        // Sort by score (descending) and limit to top 8
         const sorted = results
             .sort((a, b) => b.score - a.score)
             .slice(0, 8);
-            
+
         return sorted;
     }
 
-    // Relevance scoring algorithm
+    // Weighted multi-signal relevance scoring (Phase 10)
+    // Signals: type priority, match quality, recency (history), frequency (history)
+    // Non-history types use redistributed weights so TYPE + MATCH still span full 0-1 range
     calculateRelevanceScore(result, query) {
-        let baseScore = 0;
-
-        switch (result.type) {
-            case ResultType.SEARCH_QUERY: baseScore = BASE_SCORES.SEARCH_QUERY; break;
-            case ResultType.URL_SUGGESTION: baseScore = BASE_SCORES.URL_SUGGESTION; break;
-            case ResultType.OPEN_TAB: baseScore = BASE_SCORES.OPEN_TAB; break;
-            case ResultType.PINNED_TAB: baseScore = BASE_SCORES.PINNED_TAB; break;
-            case ResultType.BOOKMARK: baseScore = BASE_SCORES.BOOKMARK; break;
-            case ResultType.HISTORY: baseScore = BASE_SCORES.HISTORY; break;
-            case ResultType.TOP_SITE: baseScore = BASE_SCORES.TOP_SITE; break;
-            case ResultType.AUTOCOMPLETE_SUGGESTION: baseScore = BASE_SCORES.AUTOCOMPLETE_SUGGESTION; break;
+        // Autocomplete results use their own scoring path (base score + position penalty)
+        if (result.type === ResultType.AUTOCOMPLETE_SUGGESTION) {
+            return result.score || BASE_SCORES.AUTOCOMPLETE_SUGGESTION;
         }
 
-        // If matchScore is available from Fuse.js, use it as bonus (0-25 points)
-        // This skips string matching bonuses since Fuse.js already evaluated match quality
-        const matchScore = result.metadata?.matchScore;
-        if (matchScore != null && matchScore > 0) {
-            baseScore += matchScore * 25;
-            return Math.max(0, baseScore);
+        // Signal 1: Type score (normalized 0-1)
+        const typeScore = TYPE_SCORE_MAP[result.type] || 0;
+
+        // Signal 2: Match quality (0-1 from Fuse.js, or synthetic from string matching)
+        let matchQuality = result.metadata?.matchScore;
+        if (matchQuality == null || matchQuality <= 0) {
+            // Compute synthetic matchScore from string matching
+            const queryLower = query.toLowerCase();
+            const titleLower = (result.title || '').toLowerCase();
+            const urlLower = (result.url || '').toLowerCase();
+
+            let syntheticScore = 0.1; // Passed some filter to get here
+
+            if (titleLower === queryLower) {
+                syntheticScore = 1.0;
+            } else if (titleLower.startsWith(queryLower)) {
+                syntheticScore = 0.8;
+            } else if (titleLower.includes(queryLower)) {
+                syntheticScore = 0.6;
+            }
+
+            if (urlLower.includes(queryLower) && syntheticScore < 0.3) {
+                syntheticScore = 0.3;
+            }
+
+            matchQuality = syntheticScore;
         }
 
-        // Fallback: string matching bonuses for results without matchScore
-        const queryLower = query.toLowerCase();
-        const titleLower = result.title.toLowerCase();
-        const urlLower = result.url.toLowerCase();
+        // Signal 3: Recency (0-1, history only)
+        const isHistory = result.type === ResultType.HISTORY;
+        const recencyScore = isHistory
+            ? calculateRecencyScore(result.metadata?.lastVisitTime)
+            : 0;
 
-        if (titleLower === queryLower) baseScore += SCORE_BONUSES.EXACT_TITLE_MATCH;
-        else if (titleLower.startsWith(queryLower)) baseScore += SCORE_BONUSES.TITLE_STARTS_WITH;
-        else if (titleLower.includes(queryLower)) baseScore += SCORE_BONUSES.TITLE_CONTAINS;
+        // Signal 4: Frequency (0-1, history only)
+        const frequencyScore = isHistory
+            ? calculateFrequencyScore(result.metadata?.visitCount)
+            : 0;
 
-        if (urlLower.includes(queryLower)) baseScore += SCORE_BONUSES.URL_CONTAINS;
+        // Compute weighted score with weight redistribution for non-history types
+        let weightedScore;
+        if (isHistory) {
+            // All 4 weights apply (sum = 1.0)
+            weightedScore =
+                SCORING_WEIGHTS.TYPE * typeScore +
+                SCORING_WEIGHTS.MATCH * matchQuality +
+                SCORING_WEIGHTS.RECENCY * recencyScore +
+                SCORING_WEIGHTS.FREQUENCY * frequencyScore;
+        } else {
+            // Only TYPE and MATCH apply, redistributed to sum to 1.0
+            const weightSum = SCORING_WEIGHTS.TYPE + SCORING_WEIGHTS.MATCH;
+            const effectiveTypeWeight = SCORING_WEIGHTS.TYPE / weightSum;
+            const effectiveMatchWeight = SCORING_WEIGHTS.MATCH / weightSum;
+            weightedScore =
+                effectiveTypeWeight * typeScore +
+                effectiveMatchWeight * matchQuality;
+        }
 
-        return Math.max(0, baseScore);
+        // Scale to existing score range (0-115) for backward compatibility
+        return Math.max(0, weightedScore * SCORE_SCALE);
     }
 
     // Top sites matching using Fuse.js fuzzy search
