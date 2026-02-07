@@ -174,44 +174,46 @@ describe('Spotlight E2E Tests', () => {
       // Type a query - the instant suggestion + any matching results should give us multiple
       await page.type('[data-testid="spotlight-input"]', 'google.com');
 
-      // Wait for at least one result
-      await page.waitForSelector('[data-testid="spotlight-result"]', {
-        timeout: 5000
-      });
+      // Wait for at least 2 results to appear (instant + async)
+      await page.waitForFunction(() => {
+        const results = document.querySelectorAll('[data-testid="spotlight-result"]');
+        return results.length >= 2;
+      }, { timeout: 5000 });
 
-      // Give time for async results to load
+      // Additional wait for any final async results to settle
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      const results = await page.$$('[data-testid="spotlight-result"]');
+      // Verify we still have 2+ results after settling
+      const resultCount = await page.$$eval('[data-testid="spotlight-result"]', els => els.length);
 
-      if (results.length >= 2) {
+      if (resultCount >= 2) {
         // Press arrow down
         await page.keyboard.press('ArrowDown');
-        await wait();
 
-        // Small delay for selection update
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Wait for selection to update in LIVE DOM (immune to re-renders)
+        await page.waitForFunction(() => {
+          const results = document.querySelectorAll('[data-testid="spotlight-result"]');
+          if (results.length < 2) return false;
+          return !results[0].classList.contains('selected') && results[1].classList.contains('selected');
+        }, { timeout: 3000, polling: 50 });
 
-        // Check second result is now selected
-        const firstSelected = await results[0].evaluate(el =>
-          el.classList.contains('selected')
-        );
-        const secondSelected = await results[1].evaluate(el =>
-          el.classList.contains('selected')
-        );
-
-        assert.ok(
-          !firstSelected && secondSelected,
-          'Arrow down should move selection to second result'
-        );
+        // Explicit assert for clarity (waitForFunction already verified this)
+        const selectionState = await page.evaluate(() => {
+          const results = document.querySelectorAll('[data-testid="spotlight-result"]');
+          return {
+            firstSelected: results[0]?.classList.contains('selected'),
+            secondSelected: results[1]?.classList.contains('selected')
+          };
+        });
+        assert.ok(!selectionState.firstSelected && selectionState.secondSelected,
+          'Arrow down should move selection to second result');
       } else {
-        // Only one result - verify arrow down wraps or stays (implementation dependent)
-        // This is still valid behavior to test
+        // Single result fallback
         await page.keyboard.press('ArrowDown');
-        const firstSelected = await results[0].evaluate(el =>
-          el.classList.contains('selected')
-        );
-        assert.ok(firstSelected, 'With single result, selection should stay on first');
+        await new Promise(resolve => setTimeout(resolve, 200));
+        const isSelected = await page.$eval('[data-testid="spotlight-result"]',
+          el => el.classList.contains('selected'));
+        assert.ok(isSelected, 'With single result, selection should stay on first');
       }
 
       await page.close();
@@ -229,39 +231,49 @@ describe('Spotlight E2E Tests', () => {
       // Type a query
       await page.type('[data-testid="spotlight-input"]', 'github.com');
 
-      // Wait for at least one result
-      await page.waitForSelector('[data-testid="spotlight-result"]', {
-        timeout: 5000
-      });
+      // Wait for at least 2 results to appear (instant + async)
+      await page.waitForFunction(() => {
+        const results = document.querySelectorAll('[data-testid="spotlight-result"]');
+        return results.length >= 2;
+      }, { timeout: 5000 });
 
-      // Give time for async results to load
+      // Additional wait for any final async results to settle
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      const results = await page.$$('[data-testid="spotlight-result"]');
+      // Verify we still have 2+ results after settling
+      const resultCount = await page.$$eval('[data-testid="spotlight-result"]', els => els.length);
 
-      if (results.length >= 2) {
-        // Press arrow down then arrow up
+      if (resultCount >= 2) {
+        // Press arrow down
         await page.keyboard.press('ArrowDown');
-        await wait();
-        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Wait for selection to move to second result (live DOM check)
+        await page.waitForFunction(() => {
+          const results = document.querySelectorAll('[data-testid="spotlight-result"]');
+          if (results.length < 2) return false;
+          return !results[0].classList.contains('selected') && results[1].classList.contains('selected');
+        }, { timeout: 3000, polling: 50 });
+
+        // Press arrow up
         await page.keyboard.press('ArrowUp');
-        await wait();
-        await new Promise(resolve => setTimeout(resolve, 100));
 
-        // Check first result is selected again
-        const firstResult = await page.$('[data-testid="spotlight-result"]');
-        const isSelected = await firstResult.evaluate(el =>
-          el.classList.contains('selected')
-        );
+        // Wait for selection to move back to first result (live DOM check)
+        await page.waitForFunction(() => {
+          const results = document.querySelectorAll('[data-testid="spotlight-result"]');
+          if (results.length < 2) return false;
+          return results[0].classList.contains('selected') && !results[1].classList.contains('selected');
+        }, { timeout: 3000, polling: 50 });
 
+        // Explicit assert for clarity
+        const isSelected = await page.$eval('[data-testid="spotlight-result"]',
+          el => el.classList.contains('selected'));
         assert.ok(isSelected, 'Arrow up should move selection back to first result');
       } else {
         // Single result - arrow up should keep it selected
         await page.keyboard.press('ArrowUp');
-        const firstResult = await page.$('[data-testid="spotlight-result"]');
-        const isSelected = await firstResult.evaluate(el =>
-          el.classList.contains('selected')
-        );
+        await new Promise(resolve => setTimeout(resolve, 200));
+        const isSelected = await page.$eval('[data-testid="spotlight-result"]',
+          el => el.classList.contains('selected'));
         assert.ok(isSelected, 'With single result, arrow up should keep first selected');
       }
 
