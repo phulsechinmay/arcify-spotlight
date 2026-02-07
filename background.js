@@ -11,6 +11,7 @@ import { BackgroundDataProvider } from './shared/data-providers/background-data-
 import { Logger } from './logger.js';
 import { getSettings } from './utils.js';
 import { arcifyProvider } from './shared/data-providers/arcify-provider.js';
+import { BookmarkUtils } from './bookmark-utils.js';
 
 // === Arcify Cache Event Listeners ===
 // MV3 REQUIREMENT: Register synchronously at top level for service worker restart handling
@@ -20,18 +21,22 @@ chrome.bookmarks.onCreated.addListener((id, bookmark) => {
     // Invalidate cache when any bookmark is created
     // The rebuild will determine if it's in Arcify folder
     arcifyProvider.invalidateCache();
+    BookmarkUtils.invalidateBookmarkCache();
 });
 
 chrome.bookmarks.onRemoved.addListener((id, removeInfo) => {
     arcifyProvider.invalidateCache();
+    BookmarkUtils.invalidateBookmarkCache();
 });
 
 chrome.bookmarks.onMoved.addListener((id, moveInfo) => {
     arcifyProvider.invalidateCache();
+    BookmarkUtils.invalidateBookmarkCache();
 });
 
 chrome.bookmarks.onChanged.addListener((id, changeInfo) => {
     arcifyProvider.invalidateCache();
+    BookmarkUtils.invalidateBookmarkCache();
 });
 
 // Import batching to prevent cache thrashing during bulk operations
@@ -45,6 +50,7 @@ chrome.bookmarks.onImportEnded.addListener(() => {
         arcifyProvider.pendingInvalidation = false;
         arcifyProvider.invalidateCache();
     }
+    BookmarkUtils.invalidateBookmarkCache();
 });
 
 // Enum for spotlight tab modes

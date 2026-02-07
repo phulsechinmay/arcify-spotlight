@@ -109,14 +109,42 @@ export class BackgroundDataProvider extends BaseDataProvider {
     }
 
     async getBookmarksData(query) {
-        return await BookmarkUtils.getBookmarksData(query);
-    }
+        try {
+            // Get all bookmarks from cache (fast after first call)
+            const allBookmarks = await BookmarkUtils.getAllBookmarks();
 
-    isUnderArcifyFolder(bookmark, arcifyFolderId) {
-        // Simple heuristic: check if the bookmark's parent path includes the Arcify folder
-        // This is a simplified check - for a more robust solution, we'd need to traverse up the parent chain
-        return bookmark.parentId && (bookmark.parentId === arcifyFolderId || 
-               bookmark.parentId.startsWith(arcifyFolderId));
+            // Exclude Arcify folder bookmarks from regular search
+            let arcifyFolderId = null;
+            try {
+                const arcifyFolder = await BookmarkUtils.findArcifyFolder();
+                if (arcifyFolder) {
+                    arcifyFolderId = arcifyFolder.id;
+                }
+            } catch (error) {
+                // Ignore if Arcify folder doesn't exist
+            }
+
+            const searchableBookmarks = arcifyFolderId
+                ? allBookmarks.filter(b => !BookmarkUtils.isUnderArcifyFolder(b, arcifyFolderId))
+                : allBookmarks;
+
+            // Use Fuse.js for fuzzy matching (replaces Chrome's substring-only search)
+            const fuseResults = FuseSearchService.search(searchableBookmarks, query, {
+                keys: [
+                    { name: 'title', weight: 2 },
+                    { name: 'url', weight: 1 }
+                ]
+            });
+
+            // Map back to the expected bookmark format with matchScore
+            return fuseResults.map(result => ({
+                ...result.item,
+                _matchScore: result.matchScore
+            }));
+        } catch (error) {
+            Logger.error('[BackgroundDataProvider] Error getting bookmarks with Fuse:', error);
+            return [];
+        }
     }
 
     async getHistoryData(query) {

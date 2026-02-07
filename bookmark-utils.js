@@ -17,6 +17,62 @@ import { Logger } from './logger.js';
 
 export const BookmarkUtils = {
 
+    // Bookmark cache for Fuse.js-based searching (avoids fetching all bookmarks per keystroke)
+    _bookmarkCache: null,
+    _bookmarkCacheValid: false,
+
+    /**
+     * Invalidate the bookmark cache (called on bookmark change events)
+     */
+    invalidateBookmarkCache() {
+        this._bookmarkCache = null;
+        this._bookmarkCacheValid = false;
+        Logger.log('[BookmarkUtils] Bookmark cache invalidated');
+    },
+
+    /**
+     * Get all bookmarks from the browser, using cache if available
+     * Returns a flat array of bookmark nodes with URLs (no folders)
+     * @returns {Promise<Array>} Array of { id, title, url, parentId } objects
+     */
+    async getAllBookmarks() {
+        if (this._bookmarkCacheValid && this._bookmarkCache) {
+            return this._bookmarkCache;
+        }
+
+        try {
+            // Fetch entire bookmark tree and flatten to bookmark nodes with URLs
+            const tree = await chrome.bookmarks.getTree();
+            const allBookmarks = [];
+
+            const traverse = (nodes) => {
+                for (const node of nodes) {
+                    if (node.url) {
+                        allBookmarks.push({
+                            id: node.id,
+                            title: node.title || '',
+                            url: node.url,
+                            parentId: node.parentId
+                        });
+                    }
+                    if (node.children) {
+                        traverse(node.children);
+                    }
+                }
+            };
+
+            traverse(tree);
+
+            this._bookmarkCache = allBookmarks;
+            this._bookmarkCacheValid = true;
+            Logger.log('[BookmarkUtils] Bookmark cache built:', allBookmarks.length, 'bookmarks');
+            return allBookmarks;
+        } catch (error) {
+            Logger.error('[BookmarkUtils] Error fetching all bookmarks:', error);
+            return [];
+        }
+    },
+
     /**
      * Robust method to find the Arcify folder in Chrome bookmarks
      * Uses 3-method fallback approach for maximum reliability across browsers/locales

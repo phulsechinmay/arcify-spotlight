@@ -250,7 +250,7 @@ export class BaseDataProvider {
                 type: ResultType.BOOKMARK,
                 title: bookmark.title,
                 url: bookmark.url,
-                metadata: { bookmarkId: bookmark.id }
+                metadata: { bookmarkId: bookmark.id, matchScore: bookmark._matchScore || null }
             }));
             return results;
         } catch (error) {
