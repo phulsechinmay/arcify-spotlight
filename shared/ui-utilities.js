@@ -331,15 +331,18 @@ export class SpotlightUtils {
         return chipColorMap[colorName] || chipColorMap.grey;
     }
 
-    // Generate space chip HTML for results with space or tab group info -- returns empty string when neither exists
+    // Generate space chip HTML -- only renders when tab is in a Chrome tab group
     static generateSpaceChipHTML(result) {
-        const spaceName = result.metadata?.spaceName;
         const groupName = result.metadata?.groupName;
-        const chipName = spaceName || groupName;
-        if (!chipName) return '';
+        const spaceName = result.metadata?.spaceName;
 
-        // Prefer live tab group color (Chrome API) over cached space color (storage)
-        const chipColor = result.metadata?.groupColor || result.metadata?.spaceColor || 'grey';
+        // No tab group = no chip (even if Arcify space exists)
+        if (!groupName) return '';
+
+        // If tab's group matches Arcify space, use Arcify name (canonical).
+        // If different or no Arcify space, use actual tab group name.
+        const chipName = (spaceName && spaceName === groupName) ? spaceName : groupName;
+        const chipColor = result.metadata?.groupColor || 'grey';
         const chipColors = SpotlightUtils.getChipColors(chipColor);
         const truncatedName = chipName.length > 18 ? chipName.substring(0, 18) + '\u2026' : chipName;
 

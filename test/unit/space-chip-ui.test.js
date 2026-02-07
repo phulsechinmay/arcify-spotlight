@@ -79,12 +79,12 @@ describe('SpotlightUtils.getChipColors', () => {
 });
 
 describe('SpotlightUtils.generateSpaceChipHTML', () => {
-    it('returns chip HTML with space name and color styling for result with spaceName', () => {
+    it('returns chip HTML with space name and color styling when group matches space', () => {
         const result = new SearchResult({
             type: ResultType.OPEN_TAB,
             title: 'GitHub',
             url: 'https://github.com',
-            metadata: { spaceName: 'Work', spaceColor: 'blue' }
+            metadata: { spaceName: 'Work', spaceColor: 'blue', groupName: 'Work', groupColor: 'blue' }
         });
 
         const html = SpotlightUtils.generateSpaceChipHTML(result);
@@ -133,7 +133,7 @@ describe('SpotlightUtils.generateSpaceChipHTML', () => {
             type: ResultType.OPEN_TAB,
             title: 'Test',
             url: 'https://test.com',
-            metadata: { spaceName: 'This Is A Very Long Space Name', spaceColor: 'blue' }
+            metadata: { spaceName: 'This Is A Very Long Space Name', spaceColor: 'blue', groupName: 'This Is A Very Long Space Name', groupColor: 'blue' }
         });
 
         const html = SpotlightUtils.generateSpaceChipHTML(result);
@@ -149,7 +149,7 @@ describe('SpotlightUtils.generateSpaceChipHTML', () => {
             type: ResultType.OPEN_TAB,
             title: 'Test',
             url: 'https://test.com',
-            metadata: { spaceName: 'Short Name', spaceColor: 'green' }
+            metadata: { spaceName: 'Short Name', spaceColor: 'green', groupName: 'Short Name', groupColor: 'green' }
         });
 
         const html = SpotlightUtils.generateSpaceChipHTML(result);
@@ -163,7 +163,7 @@ describe('SpotlightUtils.generateSpaceChipHTML', () => {
             type: ResultType.OPEN_TAB,
             title: 'Test',
             url: 'https://test.com',
-            metadata: { spaceName: '<script>alert("xss")</script>', spaceColor: 'red' }
+            metadata: { spaceName: '<script>alert("xss")</script>', spaceColor: 'red', groupName: '<script>alert("xss")</script>', groupColor: 'red' }
         });
 
         const html = SpotlightUtils.generateSpaceChipHTML(result);
@@ -172,12 +172,12 @@ describe('SpotlightUtils.generateSpaceChipHTML', () => {
         expect(html).toContain('&lt;script&gt;');
     });
 
-    it('uses spaceColor from metadata for chip styling', () => {
+    it('uses groupColor from metadata for chip styling', () => {
         const result = new SearchResult({
             type: ResultType.OPEN_TAB,
             title: 'Test',
             url: 'https://test.com',
-            metadata: { spaceName: 'Work', spaceColor: 'purple' }
+            metadata: { spaceName: 'Work', spaceColor: 'blue', groupName: 'Work', groupColor: 'purple' }
         });
 
         const html = SpotlightUtils.generateSpaceChipHTML(result);
@@ -187,12 +187,12 @@ describe('SpotlightUtils.generateSpaceChipHTML', () => {
         expect(html).toContain(purpleColors.text);
     });
 
-    it('falls back to grey when no spaceColor in metadata', () => {
+    it('falls back to grey when no groupColor in metadata', () => {
         const result = new SearchResult({
             type: ResultType.OPEN_TAB,
             title: 'Test',
             url: 'https://test.com',
-            metadata: { spaceName: 'Work' } // no spaceColor
+            metadata: { groupName: 'Work' } // no groupColor
         });
 
         const html = SpotlightUtils.generateSpaceChipHTML(result);
@@ -216,19 +216,21 @@ describe('SpotlightUtils.generateSpaceChipHTML', () => {
         expect(html).toContain('arcify-space-chip');
     });
 
-    it('prefers groupColor over spaceColor when both present', () => {
+    it('uses groupColor as only color source (ignores spaceColor)', () => {
         const result = new SearchResult({
             type: ResultType.OPEN_TAB,
             title: 'Test',
             url: 'https://test.com',
-            metadata: { spaceName: 'Work', spaceColor: 'blue', groupColor: 'red' }
+            metadata: { spaceName: 'Work', spaceColor: 'blue', groupName: 'Work', groupColor: 'red' }
         });
 
         const html = SpotlightUtils.generateSpaceChipHTML(result);
         const redColors = SpotlightUtils.getChipColors('red');
+        const blueColors = SpotlightUtils.getChipColors('blue');
 
         expect(html).toContain(redColors.bg);
         expect(html).toContain(redColors.text);
+        expect(html).not.toContain(blueColors.bg);
     });
 
     it('sets title attribute to full (untruncated) space name', () => {
@@ -237,13 +239,55 @@ describe('SpotlightUtils.generateSpaceChipHTML', () => {
             type: ResultType.OPEN_TAB,
             title: 'Test',
             url: 'https://test.com',
-            metadata: { spaceName: longName, spaceColor: 'blue' }
+            metadata: { spaceName: longName, spaceColor: 'blue', groupName: longName, groupColor: 'blue' }
         });
 
         const html = SpotlightUtils.generateSpaceChipHTML(result);
 
         // Title attribute should contain the full escaped name
         expect(html).toContain(`title="${longName}"`);
+    });
+
+    it('shows actual group name when tab group differs from Arcify space', () => {
+        const result = new SearchResult({
+            type: ResultType.OPEN_TAB,
+            title: 'Test',
+            url: 'https://test.com',
+            metadata: { spaceName: 'Work', spaceColor: 'blue', groupName: 'Personal', groupColor: 'green' }
+        });
+
+        const html = SpotlightUtils.generateSpaceChipHTML(result);
+        const greenColors = SpotlightUtils.getChipColors('green');
+
+        expect(html).toContain('Personal');
+        expect(html).not.toContain('Work');
+        expect(html).toContain(greenColors.bg);
+        expect(html).toContain(greenColors.text);
+    });
+
+    it('returns empty string when tab has Arcify space but no tab group', () => {
+        const result = new SearchResult({
+            type: ResultType.OPEN_TAB,
+            title: 'Test',
+            url: 'https://test.com',
+            metadata: { spaceName: 'Work', spaceColor: 'blue', isArcify: true }
+        });
+
+        expect(SpotlightUtils.generateSpaceChipHTML(result)).toBe('');
+    });
+
+    it('shows Arcify space name when group name matches space name', () => {
+        const result = new SearchResult({
+            type: ResultType.OPEN_TAB,
+            title: 'Test',
+            url: 'https://test.com',
+            metadata: { spaceName: 'Work', spaceColor: 'blue', groupName: 'Work', groupColor: 'blue' }
+        });
+
+        const html = SpotlightUtils.generateSpaceChipHTML(result);
+
+        expect(html).toContain('Work');
+        expect(html).toContain('arcify-space-chip');
     });
 });
 
@@ -260,12 +304,12 @@ describe('SpotlightUtils.formatResult - Arcify action text', () => {
         expect(formatted.action).toBe('Switch to Tab');
     });
 
-    it('OPEN_TAB in CURRENT_TAB mode shows "Open Pinned Tab" when isArcify is true', () => {
+    it('OPEN_TAB in CURRENT_TAB mode shows "Open Pinned Tab" when groupName is present', () => {
         const result = new SearchResult({
             type: ResultType.OPEN_TAB,
             title: 'GitHub',
             url: 'https://github.com',
-            metadata: { tabId: 1, windowId: 1, isArcify: true, spaceName: 'Work' }
+            metadata: { tabId: 1, windowId: 1, isArcify: true, spaceName: 'Work', groupName: 'Work' }
         });
 
         const formatted = SpotlightUtils.formatResult(result, SpotlightTabMode.CURRENT_TAB);
@@ -284,7 +328,7 @@ describe('SpotlightUtils.formatResult - Arcify action text', () => {
         expect(formatted.action).toBe('\u21b5');
     });
 
-    it('PINNED_TAB with isActive true shows "Switch to Tab"', () => {
+    it('PINNED_TAB always shows "Open Favorite Tab" regardless of isActive', () => {
         const result = new SearchResult({
             type: ResultType.PINNED_TAB,
             title: 'GitHub',
@@ -293,7 +337,7 @@ describe('SpotlightUtils.formatResult - Arcify action text', () => {
         });
 
         const formatted = SpotlightUtils.formatResult(result, SpotlightTabMode.CURRENT_TAB);
-        expect(formatted.action).toBe('Switch to Tab');
+        expect(formatted.action).toBe('Open Favorite Tab');
     });
 
     it('PINNED_TAB with isActive false and isArcify true shows "Open Favorite Tab"', () => {
@@ -308,7 +352,7 @@ describe('SpotlightUtils.formatResult - Arcify action text', () => {
         expect(formatted.action).toBe('Open Favorite Tab');
     });
 
-    it('PINNED_TAB with isActive false and no isArcify shows "Open Pinned Tab"', () => {
+    it('PINNED_TAB without isArcify still shows "Open Favorite Tab"', () => {
         const result = new SearchResult({
             type: ResultType.PINNED_TAB,
             title: 'Test',
@@ -317,6 +361,6 @@ describe('SpotlightUtils.formatResult - Arcify action text', () => {
         });
 
         const formatted = SpotlightUtils.formatResult(result, SpotlightTabMode.CURRENT_TAB);
-        expect(formatted.action).toBe('Open Pinned Tab');
+        expect(formatted.action).toBe('Open Favorite Tab');
     });
 });
