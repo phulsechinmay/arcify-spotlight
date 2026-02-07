@@ -90,6 +90,20 @@ Key insights from project research (see research/SUMMARY.md):
 | groupName gates chip rendering | No tab group = no chip, even with Arcify space metadata | quick-003 |
 | groupColor only (no spaceColor fallback) | Chip derives from actual Chrome tab group, spaceColor is irrelevant | quick-003 |
 | "Open Pinned Tab" for BOOKMARK+isArcify | Arcify bookmarks are semantically pinned tabs; consistent with OPEN_TAB action text | quick-004 |
+| Weighted multi-signal scoring recommended | Best effort-to-impact ratio, backward compatible, incremental | quick-005 |
+| Parallelize data fetching as top priority | Sequential awaits prevent local results from showing until autocomplete completes | quick-005 |
+| Fix double debouncing (overlay 150ms + SearchEngine 150ms) | Effective 300ms delay is unnecessary; one layer sufficient | quick-005 |
+
+### Search Algorithm Research Findings (quick-005)
+
+Key findings from comprehensive search algorithm research (see SEARCH-ALGORITHM-RESEARCH.md):
+- Sequential data fetching is the biggest performance bottleneck (should use Promise.all)
+- Double debouncing: overlay 150ms + SearchEngine 150ms = 300ms effective delay
+- History visitCount and lastVisitTime collected but never used in scoring
+- Autocomplete score (30) too low to compete with any local source (min 60)
+- fuzzyMatch() has no distance constraint - causes false positives on short queries
+- Bookmarks only use Chrome substring search, not fuzzyMatch (inconsistent with tabs)
+- Recommended: Weighted multi-signal scoring (typeScore + matchQuality + recency + frequency)
 
 ### Technical Debt Noted
 
@@ -103,14 +117,15 @@ Key insights from project research (see research/SUMMARY.md):
 | 002 | E2E tab group space chip | Complete | 2 (9 -> 11 E2E) |
 | 003 | Fix chip tab group mismatch | Complete | 3 new (294 -> 297) |
 | 004 | Bookmark "Open Pinned Tab" for Arcify | Complete | 3 new (297 -> 300) |
+| 005 | Search suggestion algorithm research | Complete | 0 (research only) |
 
 ## Session Continuity
 
-Last session: 2026-02-06
-Stopped at: Completed quick-004 (Bookmark Open Pinned Tab Arcify)
+Last session: 2026-02-07
+Stopped at: Completed quick-005 (Search suggestion algorithm research)
 Next action: Execute 08-02-PLAN.md (Chip rendering, CSS, and visual verification)
 Resume file: None
 
 ---
 
-*Last updated: 2026-02-06 - Quick task 004 complete (BOOKMARK Arcify action text, 3 new tests, 300 total)*
+*Last updated: 2026-02-07 - Quick task 005 complete (search algorithm research, 1021-line analysis document)*
