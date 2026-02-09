@@ -45,15 +45,16 @@ export class SharedSpotlightLogic {
      * Generate HTML for results list
      * @param {Array} results - Array of search results to render
      * @param {string} mode - Spotlight mode ('current-tab' or 'new-tab')
+     * @param {string|null} activeGroupName - Active tab group name for Arcify context
      * @returns {string} HTML string for the results
      */
-    static generateResultsHTML(results, mode) {
+    static generateResultsHTML(results, mode, activeGroupName = null) {
         if (!results || results.length === 0) {
             return '<div class="arcify-spotlight-empty">Start typing to search tabs, bookmarks, and history</div>';
         }
 
         return results.map((result, index) => {
-            const formatted = SpotlightUtils.formatResult(result, mode);
+            const formatted = SpotlightUtils.formatResult(result, mode, activeGroupName);
             const isSelected = index === 0; // First result is always selected by default
             const chipHtml = SpotlightUtils.generateSpaceChipHTML(result);
 
@@ -88,10 +89,11 @@ export class SharedSpotlightLogic {
      * @param {Array} currentResults - Current results array
      * @param {Array} newResults - New results to display
      * @param {string} mode - Spotlight mode
+     * @param {string|null} activeGroupName - Active tab group name for Arcify context
      */
-    static updateResultsDisplay(resultsContainer, currentResults, newResults, mode) {
+    static updateResultsDisplay(resultsContainer, currentResults, newResults, mode, activeGroupName = null) {
         // For now, we'll do a simple full update, but this can be optimized later for incremental updates
-        const html = SharedSpotlightLogic.generateResultsHTML(newResults, mode);
+        const html = SharedSpotlightLogic.generateResultsHTML(newResults, mode, activeGroupName);
         resultsContainer.innerHTML = html;
 
         // Setup favicon error handling for new images

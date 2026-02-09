@@ -166,7 +166,7 @@ export class SpotlightUtils {
     }
 
     // Format result for display (moved from SearchEngine and duplicated code)
-    static formatResult(result, mode) {
+    static formatResult(result, mode, activeGroupName = null) {
         const formatters = {
             [ResultType.URL_SUGGESTION]: {
                 title: result.title,
@@ -199,7 +199,8 @@ export class SpotlightUtils {
             [ResultType.BOOKMARK]: {
                 title: result.title,
                 subtitle: result.domain,
-                action: result.metadata?.isArcify ? 'Open Pinned Tab' : '↵'
+                action: (result.metadata?.isArcify && result.metadata?.spaceName === activeGroupName)
+                    ? 'Open Pinned Tab' : '↵'
             },
             [ResultType.HISTORY]: {
                 title: result.title,

@@ -364,7 +364,7 @@ describe('SpotlightUtils.formatResult - Arcify action text', () => {
         expect(formatted.action).toBe('Open Favorite Tab');
     });
 
-    it('BOOKMARK with isArcify shows "Open Pinned Tab"', () => {
+    it('BOOKMARK with isArcify in current space shows "Open Pinned Tab"', () => {
         const result = new SearchResult({
             type: ResultType.BOOKMARK,
             title: 'GitHub',
@@ -372,8 +372,32 @@ describe('SpotlightUtils.formatResult - Arcify action text', () => {
             metadata: { bookmarkId: 'b1', isArcify: true, spaceName: 'Work', spaceColor: 'blue' }
         });
 
-        const formatted = SpotlightUtils.formatResult(result, SpotlightTabMode.CURRENT_TAB);
+        const formatted = SpotlightUtils.formatResult(result, SpotlightTabMode.CURRENT_TAB, 'Work');
         expect(formatted.action).toBe('Open Pinned Tab');
+    });
+
+    it('BOOKMARK with isArcify in different space shows enter arrow', () => {
+        const result = new SearchResult({
+            type: ResultType.BOOKMARK,
+            title: 'GitHub',
+            url: 'https://github.com',
+            metadata: { bookmarkId: 'b1', isArcify: true, spaceName: 'Work', spaceColor: 'blue' }
+        });
+
+        const formatted = SpotlightUtils.formatResult(result, SpotlightTabMode.CURRENT_TAB, 'Personal');
+        expect(formatted.action).toBe('\u21b5');
+    });
+
+    it('BOOKMARK with isArcify and no active group shows enter arrow', () => {
+        const result = new SearchResult({
+            type: ResultType.BOOKMARK,
+            title: 'GitHub',
+            url: 'https://github.com',
+            metadata: { bookmarkId: 'b1', isArcify: true, spaceName: 'Work', spaceColor: 'blue' }
+        });
+
+        const formatted = SpotlightUtils.formatResult(result, SpotlightTabMode.CURRENT_TAB, null);
+        expect(formatted.action).toBe('\u21b5');
     });
 
     it('BOOKMARK without isArcify shows enter arrow', () => {
@@ -388,7 +412,7 @@ describe('SpotlightUtils.formatResult - Arcify action text', () => {
         expect(formatted.action).toBe('\u21b5');
     });
 
-    it('BOOKMARK with isArcify shows "Open Pinned Tab" in NEW_TAB mode', () => {
+    it('BOOKMARK with isArcify in current space shows "Open Pinned Tab" in NEW_TAB mode', () => {
         const result = new SearchResult({
             type: ResultType.BOOKMARK,
             title: 'GitHub',
@@ -396,7 +420,7 @@ describe('SpotlightUtils.formatResult - Arcify action text', () => {
             metadata: { bookmarkId: 'b1', isArcify: true, spaceName: 'Work', spaceColor: 'blue' }
         });
 
-        const formatted = SpotlightUtils.formatResult(result, SpotlightTabMode.NEW_TAB);
+        const formatted = SpotlightUtils.formatResult(result, SpotlightTabMode.NEW_TAB, 'Work');
         expect(formatted.action).toBe('Open Pinned Tab');
     });
 });

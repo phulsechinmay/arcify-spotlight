@@ -45,6 +45,7 @@ async function initializeSpotlight() {
 
     // Start with default color - will update asynchronously
     let activeSpaceColor = 'purple';
+    let activeGroupName = null; // Active tab group name for Arcify context
 
     // CSS styles with default accent color
     const accentColorDefinitions = await SpotlightUtils.getAccentColorCSS(activeSpaceColor);
@@ -408,7 +409,7 @@ async function initializeSpotlight() {
         }
 
         // Use 'new-tab' mode for display so OPEN_TAB shows "Switch to Tab"
-        SharedSpotlightLogic.updateResultsDisplay(resultsContainer, [], currentResults, 'new-tab');
+        SharedSpotlightLogic.updateResultsDisplay(resultsContainer, [], currentResults, 'new-tab', activeGroupName);
     }
 
     // Display empty state
@@ -481,8 +482,9 @@ async function initializeSpotlight() {
     // Load initial results and update color asynchronously
     (async () => {
         try {
-            // Update active space color asynchronously
-            const realActiveSpaceColor = await SpotlightMessageClient.getActiveSpaceColor();
+            // Update active space color and group name asynchronously
+            const { color: realActiveSpaceColor, groupName } = await SpotlightMessageClient.getActiveSpaceColor();
+            activeGroupName = groupName;
             if (realActiveSpaceColor !== activeSpaceColor) {
                 const newColorDefinitions = await SpotlightUtils.getAccentColorCSS(realActiveSpaceColor);
                 const styleElement = document.querySelector('#arcify-spotlight-styles');

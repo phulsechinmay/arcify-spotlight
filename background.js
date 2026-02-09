@@ -352,22 +352,22 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
                 // Check if tab exists and is in a group
                 if (!activeTab || !activeTab.groupId || activeTab.groupId === chrome.tabGroups.TAB_GROUP_ID_NONE) {
-                    sendResponse({ success: true, color: 'purple' });
+                    sendResponse({ success: true, color: 'purple', groupName: null });
                     return;
                 }
 
                 // Fetch color directly from Tab Groups API
                 try {
                     const group = await chrome.tabGroups.get(activeTab.groupId);
-                    sendResponse({ success: true, color: group.color || 'purple' });
+                    sendResponse({ success: true, color: group.color || 'purple', groupName: group.title || null });
                 } catch (groupError) {
                     // Group may have been closed or API unavailable
                     Logger.error('[Background] Error fetching tab group:', groupError);
-                    sendResponse({ success: true, color: 'purple' });
+                    sendResponse({ success: true, color: 'purple', groupName: null });
                 }
             } catch (error) {
                 Logger.error('[Background] Error getting active space color:', error);
-                sendResponse({ success: false, error: error.message, color: 'purple' });
+                sendResponse({ success: false, error: error.message, color: 'purple', groupName: null });
             }
         })();
         return true;

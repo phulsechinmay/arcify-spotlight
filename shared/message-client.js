@@ -90,7 +90,7 @@ export class SpotlightMessageClient {
     }
 
 
-    // Get active space color from background
+    // Get active space color and group name from background
     static async getActiveSpaceColor() {
         try {
             const response = await chrome.runtime.sendMessage({
@@ -98,14 +98,14 @@ export class SpotlightMessageClient {
             });
 
             if (response && response.success && response.color) {
-                return response.color;
+                return { color: response.color, groupName: response.groupName || null };
             } else {
                 Logger.error('[SpotlightMessageClient] Failed to get active space color:', response?.error);
-                return 'purple'; // Default fallback
+                return { color: 'purple', groupName: null };
             }
         } catch (error) {
             Logger.error('[SpotlightMessageClient] Error getting active space color:', error);
-            return 'purple'; // Default fallback
+            return { color: 'purple', groupName: null };
         }
     }
 
