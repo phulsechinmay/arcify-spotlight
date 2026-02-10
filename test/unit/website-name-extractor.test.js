@@ -85,6 +85,13 @@ describe('WebsiteNameExtractor', () => {
         it('returns null for empty string', () => {
             expect(extractor.parseHostnameToName('')).toBeNull();
         });
+
+        it('returns input via catch block for non-string truthy value', () => {
+            // A truthy number passes !hostname guard but throws on .replace()
+            // triggering the catch block which returns hostname as-is
+            const result = extractor.parseHostnameToName(42);
+            expect(result).toBe(42);
+        });
     });
 
     describe('extractWebsiteName', () => {
@@ -113,6 +120,38 @@ describe('WebsiteNameExtractor', () => {
             // parseHostnameToName returns 'Not-a-url'
             const result = extractor.extractWebsiteName('not-a-url');
             expect(result).toBe('Not-a-url');
+        });
+
+        it('returns url when normalizeHostname returns empty (falsy hostname guard)', () => {
+            const guardExtractor = new WebsiteNameExtractor();
+            vi.spyOn(guardExtractor, 'normalizeHostname').mockReturnValue('');
+            const result = guardExtractor.extractWebsiteName('some-url');
+            expect(result).toBe('some-url');
+            guardExtractor.normalizeHostname.mockRestore();
+        });
+
+        it('falls back via catch block when getCuratedName throws', () => {
+            const errExtractor = new WebsiteNameExtractor();
+            vi.spyOn(errExtractor, 'getCuratedName').mockImplementation(() => {
+                throw new Error('test error');
+            });
+            // Catch block calls parseHostnameToName(normalizeHostname(url)) || url
+            const result = errExtractor.extractWebsiteName('https://example.com');
+            expect(result).toBe('Example');
+            errExtractor.getCuratedName.mockRestore();
+        });
+
+        it('returns original url when catch block parseHostnameToName returns falsy', () => {
+            const errExtractor = new WebsiteNameExtractor();
+            vi.spyOn(errExtractor, 'getCuratedName').mockImplementation(() => {
+                throw new Error('test error');
+            });
+            vi.spyOn(errExtractor, 'normalizeHostname').mockReturnValue('');
+            // parseHostnameToName('') returns null, so || url returns original url
+            const result = errExtractor.extractWebsiteName('original-url');
+            expect(result).toBe('original-url');
+            errExtractor.getCuratedName.mockRestore();
+            errExtractor.normalizeHostname.mockRestore();
         });
     });
 
