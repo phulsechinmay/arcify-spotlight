@@ -41,10 +41,10 @@ Prior milestones delivered: bug fixes, UX polish, testing infrastructure (240 te
   2. Every source module is mapped to its test file(s) with a gap classification of untested, partially tested, or well tested
   3. A prioritized gap list exists ranking modules by risk (code complexity, change frequency, user-facing impact)
   4. The gap list has been presented to the user and their approval captured before any test implementation begins
-**Plans**: TBD
+**Plans:** 1 plan
 
 Plans:
-- [ ] 13-01: TBD
+- [ ] 13-01-PLAN.md -- Run V8 coverage audit, map source-to-test, produce prioritized gap report for user approval
 
 ### Phase 14: Utility Module Tests
 **Goal**: The three utility modules (bookmark-utils, website-name-extractor, popular-sites) have thorough unit test coverage validating their core logic paths
@@ -100,7 +100,7 @@ Phase 13 executes first. Phases 14, 15, and 16 can execute in parallel after Pha
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 13. Audit & Coverage Report | v2.1 | 0/TBD | Not started | - |
+| 13. Audit & Coverage Report | v2.1 | 0/1 | Planned | - |
 | 14. Utility Module Tests | v2.1 | 0/TBD | Not started | - |
 | 15. Provider & Component Tests | v2.1 | 0/TBD | Not started | - |
 | 16. Low Priority Tests & E2E | v2.1 | 0/TBD | Not started | - |
