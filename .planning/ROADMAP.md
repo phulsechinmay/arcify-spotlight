@@ -6,7 +6,7 @@
 - ✅ **v1.01 Testing** - Phases 3-4 (shipped 2026-02-04)
 - ✅ **v1.5 Arcify Integration** - Phases 5-8 (shipped 2026-02-06)
 - ✅ **v2.0 Fuse.js Search** - Phases 9-12 (shipped 2026-02-07)
-- 🚧 **v2.1 Test Coverage Audit** - Phases 13-16 (in progress)
+- 🚧 **v2.1 Test Coverage Audit** - Phases 13-17 (in progress)
 
 ## Phases
 
@@ -25,10 +25,11 @@ Prior milestones delivered: bug fixes, UX polish, testing infrastructure (240 te
 - Integer phases (13, 14, 15, 16): Planned milestone work
 - Decimal phases (e.g., 14.1): Urgent insertions if needed (marked with INSERTED)
 
-- [ ] **Phase 13: Audit & Coverage Report** - Produce coverage analysis and prioritized gap list for user review
+- [x] **Phase 13: Audit & Coverage Report** - Produce coverage analysis and prioritized gap list for user review ✓
 - [ ] **Phase 14: Utility Module Tests** - Test bookmark-utils, website-name-extractor, popular-sites
 - [ ] **Phase 15: Provider & Component Tests** - Test data providers and component logic
-- [ ] **Phase 16: Low Priority Tests & E2E** - Remaining tests and CI investigation
+- [ ] **Phase 16: Low Priority Tests** - Remaining low-priority module tests
+- [ ] **Phase 17: E2E Test Suite** - Dedicated E2E test coverage and CI re-enablement
 
 ## Phase Details
 
@@ -44,7 +45,7 @@ Prior milestones delivered: bug fixes, UX polish, testing infrastructure (240 te
 **Plans:** 1 plan
 
 Plans:
-- [ ] 13-01-PLAN.md -- Run V8 coverage audit, map source-to-test, produce prioritized gap report for user approval
+- [x] 13-01-PLAN.md -- Run V8 coverage audit, map source-to-test, produce prioritized gap report for user approval ✓
 
 ### Phase 14: Utility Module Tests
 **Goal**: The three utility modules (bookmark-utils, website-name-extractor, popular-sites) have thorough unit test coverage validating their core logic paths
@@ -78,33 +79,48 @@ Plans:
 - [ ] 15-01: TBD
 - [ ] 15-02: TBD
 
-### Phase 16: Low Priority Tests & E2E Maintenance
-**Goal**: Remaining low-priority modules are assessed and tested where meaningful, and the E2E CI situation is investigated with a clear path forward
+### Phase 16: Low Priority Tests
+**Goal**: Remaining low-priority modules are assessed and tested where meaningful
 **Depends on**: Phase 13 (gap list approved by user)
-**Requirements**: LOW-01, LOW-02, LOW-03, E2E-01
+**Requirements**: LOW-01, LOW-02, LOW-03
 **Success Criteria** (what must be TRUE):
   1. `logger.js` has unit tests covering log levels and formatting -- all passing
   2. `styling.js` has been assessed for testability; tests exist if the module contains meaningful testable logic, or a documented rationale explains why tests were skipped
   3. `utils.js` has been audited and any non-trivial logic has corresponding tests -- all passing
-  4. The root cause of E2E tests being disabled in CI (commit b991caa) is documented, and a concrete next step (re-enable, fix, or defer with rationale) is determined
 **Plans**: TBD
 
 Plans:
 - [ ] 16-01: TBD
 - [ ] 16-02: TBD
 
+### Phase 17: E2E Test Suite
+**Goal**: E2E tests are expanded, documented, and the CI situation is resolved with a clear path to re-enablement
+**Depends on**: Phase 13 (gap list approved by user)
+**Requirements**: E2E-01, E2E-02
+**Success Criteria** (what must be TRUE):
+  1. The root cause of E2E tests being disabled in CI (commit b991caa) is documented
+  2. A concrete path forward for CI re-enablement is determined (re-enable, fix, or defer with rationale)
+  3. Existing local E2E tests are reviewed for coverage gaps and extended where meaningful
+  4. E2E test documentation exists explaining how to run them locally and what they cover
+**Plans**: TBD
+
+Plans:
+- [ ] 17-01: TBD
+- [ ] 17-02: TBD
+
 ## Progress
 
 **Execution Order:**
-Phase 13 executes first. Phases 14, 15, and 16 can execute in parallel after Phase 13 approval (they are independent of each other).
+Phase 13 executes first. Phases 14, 15, 16, and 17 can execute in parallel after Phase 13 approval (they are independent of each other).
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 13. Audit & Coverage Report | v2.1 | 0/1 | Planned | - |
+| 13. Audit & Coverage Report | v2.1 | 1/1 | ✓ Complete | 2026-02-10 |
 | 14. Utility Module Tests | v2.1 | 0/TBD | Not started | - |
 | 15. Provider & Component Tests | v2.1 | 0/TBD | Not started | - |
-| 16. Low Priority Tests & E2E | v2.1 | 0/TBD | Not started | - |
+| 16. Low Priority Tests | v2.1 | 0/TBD | Not started | - |
+| 17. E2E Test Suite | v2.1 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-09*
-*Last updated: 2026-02-09*
+*Last updated: 2026-02-10*

@@ -5,20 +5,20 @@
 See: .planning/PROJECT.md (updated 2026-02-09)
 
 **Core value:** Fast, keyboard-driven tab and URL navigation that feels native to Chrome
-**Current focus:** v2.1 Test Coverage Audit -- Phase 13: Audit & Coverage Report
+**Current focus:** v2.1 Test Coverage Audit -- Phase 13 complete, ready for Phases 14-17
 
 ## Current Position
 
 ```
 Milestone: v2.1 Test Coverage Audit
-Phase: 13 of 16 (Audit & Coverage Report)
-Plan: Not started
-Status: Ready to plan
+Phase: 13 of 17 (Audit & Coverage Report) -- COMPLETE
+Plan: 1 of 1 in phase 13
+Status: Phase complete
 ```
 
-Last activity: 2026-02-09 -- Roadmap created for v2.1 (4 phases, 14 requirements)
+Last activity: 2026-02-10 -- Completed Phase 13 (coverage audit, gap list approved)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██░░░░░░░░] 20%
 
 ## Milestone History
 
@@ -40,6 +40,8 @@ Progress: [░░░░░░░░░░] 0%
 | Promise.allSettled for parallel fetching | Failed sources return [] without blocking others | v2.0 |
 | Two-phase progressive rendering | Local first, autocomplete appends, stale query guard | v2.0 |
 | Audit first, implement after approval | User reviews coverage gaps before any test writing | v2.1 |
+| 3-factor risk scoring for gap prioritization | Complexity x change-freq x user-impact | Phase 13 |
+| E2E tests are local-only, disabled in CI | Not removed, just disabled in GitHub Actions (b991caa) | Phase 13 |
 
 ### Blockers/Concerns
 
@@ -47,11 +49,11 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-09
-Stopped at: Roadmap created for v2.1 Test Coverage Audit
-Next action: Plan Phase 13 (Audit & Coverage Report)
+Last session: 2026-02-10
+Stopped at: Phase 13 complete, Phase 17 (E2E) added per user request
+Next action: Plan Phases 14-17 (independent, can run in parallel)
 Resume file: None
 
 ---
 
-*Last updated: 2026-02-09 -- v2.1 roadmap created*
+*Last updated: 2026-02-10 -- Phase 13 complete, Phase 17 added*

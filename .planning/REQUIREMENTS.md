@@ -9,9 +9,9 @@ Requirements for the Test Coverage Audit milestone. Each maps to roadmap phases.
 
 ### Audit
 
-- [ ] **AUDIT-01**: Run V8 coverage analysis and produce coverage report with per-module line/branch/function metrics
-- [ ] **AUDIT-02**: Map each source module to its test files with gap classification (untested, partially tested, well tested)
-- [ ] **AUDIT-03**: Produce prioritized gap list with risk assessment, present to user for approval before implementing
+- [x] **AUDIT-01**: Run V8 coverage analysis and produce coverage report with per-module line/branch/function metrics
+- [x] **AUDIT-02**: Map each source module to its test files with gap classification (untested, partially tested, well tested)
+- [x] **AUDIT-03**: Produce prioritized gap list with risk assessment, present to user for approval before implementing
 
 ### Utility Tests
 
@@ -35,9 +35,10 @@ Requirements for the Test Coverage Audit milestone. Each maps to roadmap phases.
 - [ ] **LOW-02**: Assess `styling.js` testability and add tests if meaningful
 - [ ] **LOW-03**: Audit `utils.js` and add tests for any non-trivial logic
 
-### E2E Maintenance
+### E2E Tests
 
 - [ ] **E2E-01**: Investigate why E2E tests were disabled in CI and determine path to re-enable
+- [ ] **E2E-02**: Review and extend existing local E2E tests for coverage gaps, document test suite
 
 ## Out of Scope
 
@@ -52,9 +53,9 @@ Requirements for the Test Coverage Audit milestone. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUDIT-01 | Phase 13 | Pending |
-| AUDIT-02 | Phase 13 | Pending |
-| AUDIT-03 | Phase 13 | Pending |
+| AUDIT-01 | Phase 13 | Complete |
+| AUDIT-02 | Phase 13 | Complete |
+| AUDIT-03 | Phase 13 | Complete |
 | UTIL-01 | Phase 14 | Pending |
 | UTIL-02 | Phase 14 | Pending |
 | UTIL-03 | Phase 14 | Pending |
@@ -65,13 +66,14 @@ Requirements for the Test Coverage Audit milestone. Each maps to roadmap phases.
 | LOW-01 | Phase 16 | Pending |
 | LOW-02 | Phase 16 | Pending |
 | LOW-03 | Phase 16 | Pending |
-| E2E-01 | Phase 16 | Pending |
+| E2E-01 | Phase 17 | Pending |
+| E2E-02 | Phase 17 | Pending |
 
 **Coverage:**
-- v2.1 requirements: 14 total
-- Mapped to phases: 14
+- v2.1 requirements: 15 total
+- Mapped to phases: 15
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-09*
-*Last updated: 2026-02-09 -- Phase mappings assigned*
+*Last updated: 2026-02-10 -- AUDIT-01/02/03 complete (Phase 13)*
