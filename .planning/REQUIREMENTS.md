@@ -52,26 +52,26 @@ Requirements for the Test Coverage Audit milestone. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUDIT-01 | TBD | Pending |
-| AUDIT-02 | TBD | Pending |
-| AUDIT-03 | TBD | Pending |
-| UTIL-01 | TBD | Pending |
-| UTIL-02 | TBD | Pending |
-| UTIL-03 | TBD | Pending |
-| PROV-01 | TBD | Pending |
-| PROV-02 | TBD | Pending |
-| COMP-01 | TBD | Pending |
-| COMP-02 | TBD | Pending |
-| LOW-01 | TBD | Pending |
-| LOW-02 | TBD | Pending |
-| LOW-03 | TBD | Pending |
-| E2E-01 | TBD | Pending |
+| AUDIT-01 | Phase 13 | Pending |
+| AUDIT-02 | Phase 13 | Pending |
+| AUDIT-03 | Phase 13 | Pending |
+| UTIL-01 | Phase 14 | Pending |
+| UTIL-02 | Phase 14 | Pending |
+| UTIL-03 | Phase 14 | Pending |
+| PROV-01 | Phase 15 | Pending |
+| PROV-02 | Phase 15 | Pending |
+| COMP-01 | Phase 15 | Pending |
+| COMP-02 | Phase 15 | Pending |
+| LOW-01 | Phase 16 | Pending |
+| LOW-02 | Phase 16 | Pending |
+| LOW-03 | Phase 16 | Pending |
+| E2E-01 | Phase 16 | Pending |
 
 **Coverage:**
 - v2.1 requirements: 14 total
-- Mapped to phases: 0
-- Unmapped: 14
+- Mapped to phases: 14
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-09*
-*Last updated: 2026-02-09 after initial definition*
+*Last updated: 2026-02-09 -- Phase mappings assigned*
