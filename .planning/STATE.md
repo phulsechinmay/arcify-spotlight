@@ -5,20 +5,20 @@
 See: .planning/PROJECT.md (updated 2026-02-09)
 
 **Core value:** Fast, keyboard-driven tab and URL navigation that feels native to Chrome
-**Current focus:** v2.1 Test Coverage Audit -- Phase 14 in progress
+**Current focus:** v2.1 Test Coverage Audit -- Phase 14 complete, ready for Phases 15-17
 
 ## Current Position
 
 ```
 Milestone: v2.1 Test Coverage Audit
-Phase: 14 of 17 (Utility Module Tests) -- IN PROGRESS
-Plan: 1 of 2 in phase 14
-Status: In progress
+Phase: 14 of 17 (Utility Module Tests) -- COMPLETE
+Plan: 2 of 2 in phase 14
+Status: Phase complete
 ```
 
-Last activity: 2026-02-10 -- Completed 14-01-PLAN.md (BookmarkUtils tests: 86 tests, 95.3% line coverage)
+Last activity: 2026-02-10 -- Completed 14-02-PLAN.md (utility module tests: 66 tests, 100% coverage)
 
-Progress: [██████████████████░░░░░░░░] 85% (22/26 plans complete across all milestones)
+Progress: [██████████████████████░░░░] 88% (23/26 plans complete across all milestones)
 
 ## Milestone History
 
@@ -44,6 +44,7 @@ Progress: [██████████████████░░░░░
 | E2E tests are local-only, disabled in CI | Not removed, just disabled in GitHub Actions (b991caa) | Phase 13 |
 | vi.mock Logger for bookmark-utils tests | Prevents chrome.storage.sync.get side effects during import | Phase 14 |
 | mockImplementation with ID lookup tables for recursive traversal | Enables testing functions that call getChildren with different IDs | Phase 14 |
+| vi.spyOn to test catch-block paths | Force errors in methods to verify fallback behavior without modifying source | Phase 14 |
 
 ### Blockers/Concerns
 
@@ -52,10 +53,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 14-01-PLAN.md (BookmarkUtils tests)
-Next action: Execute 14-02-PLAN.md (website-name-extractor, popular-sites, utils tests)
+Stopped at: Completed 14-02-PLAN.md (Phase 14 complete)
+Next action: Execute Phases 15-17 (data provider tests, integration tests, e2e tests)
 Resume file: None
 
 ---
 
-*Last updated: 2026-02-10 -- Completed 14-01-PLAN.md*
+*Last updated: 2026-02-10 -- Phase 14 complete (2/2 plans)*
