@@ -26,7 +26,7 @@ Prior milestones delivered: bug fixes, UX polish, testing infrastructure (240 te
 - Decimal phases (e.g., 14.1): Urgent insertions if needed (marked with INSERTED)
 
 - [x] **Phase 13: Audit & Coverage Report** - Produce coverage analysis and prioritized gap list for user review ✓
-- [ ] **Phase 14: Utility Module Tests** - Test bookmark-utils, website-name-extractor, popular-sites
+- [ ] **Phase 14: Utility Module Tests** - Test bookmark-utils, website-name-extractor, popular-sites, utils
 - [ ] **Phase 15: Provider & Component Tests** - Test data providers and component logic
 - [ ] **Phase 16: Low Priority Tests** - Remaining low-priority module tests
 - [ ] **Phase 17: E2E Test Suite** - Dedicated E2E test coverage and CI re-enablement
@@ -48,7 +48,7 @@ Plans:
 - [x] 13-01-PLAN.md -- Run V8 coverage audit, map source-to-test, produce prioritized gap report for user approval ✓
 
 ### Phase 14: Utility Module Tests
-**Goal**: The three utility modules (bookmark-utils, website-name-extractor, popular-sites) have thorough unit test coverage validating their core logic paths
+**Goal**: The four utility modules (bookmark-utils, website-name-extractor, popular-sites, utils) have thorough unit test coverage validating their core logic paths
 **Depends on**: Phase 13 (gap list approved by user)
 **Requirements**: UTIL-01, UTIL-02, UTIL-03
 **Success Criteria** (what must be TRUE):
@@ -56,12 +56,11 @@ Plans:
   2. `website-name-extractor.js` has tests covering domain name parsing, extraction edge cases, and malformed URLs -- all passing
   3. `popular-sites.js` has tests that go beyond the existing `findMatchingDomains` tests to cover additional exported functions and edge cases -- all passing
   4. Running `npx vitest run` shows all new utility tests passing alongside existing 337 tests with no regressions
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 14-01: TBD
-- [ ] 14-02: TBD
-- [ ] 14-03: TBD
+- [ ] 14-01-PLAN.md -- Extend Chrome mock with missing APIs + exhaustive bookmark-utils tests (80%+ coverage)
+- [ ] 14-02-PLAN.md -- website-name-extractor, popular-sites, and utils tests (90%+ coverage each)
 
 ### Phase 15: Provider & Component Tests
 **Goal**: The data provider and component logic modules have unit tests covering their integration points, data flow, and error handling
@@ -116,7 +115,7 @@ Phase 13 executes first. Phases 14, 15, 16, and 17 can execute in parallel after
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 13. Audit & Coverage Report | v2.1 | 1/1 | ✓ Complete | 2026-02-10 |
-| 14. Utility Module Tests | v2.1 | 0/TBD | Not started | - |
+| 14. Utility Module Tests | v2.1 | 0/2 | Not started | - |
 | 15. Provider & Component Tests | v2.1 | 0/TBD | Not started | - |
 | 16. Low Priority Tests | v2.1 | 0/TBD | Not started | - |
 | 17. E2E Test Suite | v2.1 | 0/TBD | Not started | - |
