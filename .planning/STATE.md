@@ -5,20 +5,20 @@
 See: .planning/PROJECT.md (updated 2026-02-09)
 
 **Core value:** Fast, keyboard-driven tab and URL navigation that feels native to Chrome
-**Current focus:** v2.1 Test Coverage Audit -- Phase 13 complete, ready for Phases 14-17
+**Current focus:** v2.1 Test Coverage Audit -- Phase 14 in progress
 
 ## Current Position
 
 ```
 Milestone: v2.1 Test Coverage Audit
-Phase: 13 of 17 (Audit & Coverage Report) -- COMPLETE
-Plan: 1 of 1 in phase 13
-Status: Phase complete
+Phase: 14 of 17 (Utility Module Tests) -- IN PROGRESS
+Plan: 1 of 2 in phase 14
+Status: In progress
 ```
 
-Last activity: 2026-02-10 -- Completed Phase 13 (coverage audit, gap list approved)
+Last activity: 2026-02-10 -- Completed 14-01-PLAN.md (BookmarkUtils tests: 86 tests, 95.3% line coverage)
 
-Progress: [██░░░░░░░░] 20%
+Progress: [██████████████████░░░░░░░░] 85% (22/26 plans complete across all milestones)
 
 ## Milestone History
 
@@ -42,6 +42,8 @@ Progress: [██░░░░░░░░] 20%
 | Audit first, implement after approval | User reviews coverage gaps before any test writing | v2.1 |
 | 3-factor risk scoring for gap prioritization | Complexity x change-freq x user-impact | Phase 13 |
 | E2E tests are local-only, disabled in CI | Not removed, just disabled in GitHub Actions (b991caa) | Phase 13 |
+| vi.mock Logger for bookmark-utils tests | Prevents chrome.storage.sync.get side effects during import | Phase 14 |
+| mockImplementation with ID lookup tables for recursive traversal | Enables testing functions that call getChildren with different IDs | Phase 14 |
 
 ### Blockers/Concerns
 
@@ -50,10 +52,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Phase 13 complete, Phase 17 (E2E) added per user request
-Next action: Plan Phases 14-17 (independent, can run in parallel)
+Stopped at: Completed 14-01-PLAN.md (BookmarkUtils tests)
+Next action: Execute 14-02-PLAN.md (website-name-extractor, popular-sites, utils tests)
 Resume file: None
 
 ---
 
-*Last updated: 2026-02-10 -- Phase 13 complete, Phase 17 added*
+*Last updated: 2026-02-10 -- Completed 14-01-PLAN.md*
