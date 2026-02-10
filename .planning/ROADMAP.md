@@ -26,7 +26,7 @@ Prior milestones delivered: bug fixes, UX polish, testing infrastructure (240 te
 - Decimal phases (e.g., 14.1): Urgent insertions if needed (marked with INSERTED)
 
 - [x] **Phase 13: Audit & Coverage Report** - Produce coverage analysis and prioritized gap list for user review ✓
-- [ ] **Phase 14: Utility Module Tests** - Test bookmark-utils, website-name-extractor, popular-sites, utils
+- [x] **Phase 14: Utility Module Tests** - Test bookmark-utils, website-name-extractor, popular-sites, utils ✓
 - [ ] **Phase 15: Provider & Component Tests** - Test data providers and component logic
 - [ ] **Phase 16: Low Priority Tests** - Remaining low-priority module tests
 - [ ] **Phase 17: E2E Test Suite** - Dedicated E2E test coverage and CI re-enablement
@@ -59,8 +59,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 14-01-PLAN.md -- Extend Chrome mock with missing APIs + exhaustive bookmark-utils tests (80%+ coverage)
-- [ ] 14-02-PLAN.md -- website-name-extractor, popular-sites, and utils tests (90%+ coverage each)
+- [x] 14-01-PLAN.md -- Extend Chrome mock with missing APIs + exhaustive bookmark-utils tests (80%+ coverage) ✓
+- [x] 14-02-PLAN.md -- website-name-extractor, popular-sites, and utils tests (90%+ coverage each) ✓
 
 ### Phase 15: Provider & Component Tests
 **Goal**: The data provider and component logic modules have unit tests covering their integration points, data flow, and error handling
@@ -115,11 +115,11 @@ Phase 13 executes first. Phases 14, 15, 16, and 17 can execute in parallel after
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 13. Audit & Coverage Report | v2.1 | 1/1 | ✓ Complete | 2026-02-10 |
-| 14. Utility Module Tests | v2.1 | 0/2 | Not started | - |
+| 14. Utility Module Tests | v2.1 | 2/2 | ✓ Complete | 2026-02-10 |
 | 15. Provider & Component Tests | v2.1 | 0/TBD | Not started | - |
 | 16. Low Priority Tests | v2.1 | 0/TBD | Not started | - |
 | 17. E2E Test Suite | v2.1 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-09*
-*Last updated: 2026-02-10*
+*Last updated: 2026-02-10 -- Phase 14 complete*

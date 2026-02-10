@@ -15,9 +15,9 @@ Requirements for the Test Coverage Audit milestone. Each maps to roadmap phases.
 
 ### Utility Tests
 
-- [ ] **UTIL-01**: Add unit tests for `bookmark-utils.js` — folder detection, tree traversal, import handling
-- [ ] **UTIL-02**: Add unit tests for `website-name-extractor.js` — domain name parsing and extraction
-- [ ] **UTIL-03**: Add unit tests for `popular-sites.js` — comprehensive coverage beyond existing `findMatchingDomains` tests
+- [x] **UTIL-01**: Add unit tests for `bookmark-utils.js` — folder detection, tree traversal, import handling
+- [x] **UTIL-02**: Add unit tests for `website-name-extractor.js` — domain name parsing and extraction
+- [x] **UTIL-03**: Add unit tests for `popular-sites.js` — comprehensive coverage beyond existing `findMatchingDomains` tests
 
 ### Provider Tests
 
@@ -56,9 +56,9 @@ Requirements for the Test Coverage Audit milestone. Each maps to roadmap phases.
 | AUDIT-01 | Phase 13 | Complete |
 | AUDIT-02 | Phase 13 | Complete |
 | AUDIT-03 | Phase 13 | Complete |
-| UTIL-01 | Phase 14 | Pending |
-| UTIL-02 | Phase 14 | Pending |
-| UTIL-03 | Phase 14 | Pending |
+| UTIL-01 | Phase 14 | Complete |
+| UTIL-02 | Phase 14 | Complete |
+| UTIL-03 | Phase 14 | Complete |
 | PROV-01 | Phase 15 | Pending |
 | PROV-02 | Phase 15 | Pending |
 | COMP-01 | Phase 15 | Pending |
@@ -76,4 +76,4 @@ Requirements for the Test Coverage Audit milestone. Each maps to roadmap phases.
 
 ---
 *Requirements defined: 2026-02-09*
-*Last updated: 2026-02-10 -- AUDIT-01/02/03 complete (Phase 13)*
+*Last updated: 2026-02-10 -- UTIL-01/02/03 complete (Phase 14)*
