@@ -89,9 +89,19 @@ See [MILESTONES.md](MILESTONES.md) for full history.
 - **v1.01 Testing** (2026-02-04): 240 tests — unit, integration, E2E with Vitest + Puppeteer
 - **v1.0 Polish** (2026-02-04): Bug fixes (deduplication, fuzzy matching) and UX improvements (URL preview, tab group colors)
 
+## Current Milestone: v2.1 Test Coverage Audit
+
+**Goal:** Comprehensive blind audit of test coverage across all layers, identify gaps, and fill them with user-approved tests.
+
+**Target features:**
+- Audit existing test coverage across unit, integration, and E2E layers
+- Identify untested flows, especially from v2.0 Fuse.js and v1.5 Arcify changes
+- Produce coverage report with prioritized gap list
+- Implement approved tests to build a solid safety net for future feature work
+
 ## Future Milestones
 
-### v2.1 (Planned)
+### v2.2+ (Planned)
 
 **Goal:** TBD — potential features:
 - Space chip UI (deferred from v1.5)
@@ -115,4 +125,4 @@ See [MILESTONES.md](MILESTONES.md) for full history.
 | Bookmark cache + Fuse.js pattern | Chrome API retrieval + Fuse.js re-scoring for quality | ✓ v2.0 |
 
 ---
-*Last updated: 2026-02-07 after v2.0 milestone*
+*Last updated: 2026-02-09 after v2.1 milestone started*

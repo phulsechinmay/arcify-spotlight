@@ -2,22 +2,22 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-07)
+See: .planning/PROJECT.md (updated 2026-02-09)
 
 **Core value:** Fast, keyboard-driven tab and URL navigation that feels native to Chrome
-**Current focus:** Planning next milestone
+**Current focus:** v2.1 Test Coverage Audit
 
 ## Current Position
 
 ```
-Milestone: v2.0 Fuse.js Search — SHIPPED
-Phase: Complete (12 of 12)
-Status: Milestone archived, ready for next milestone
+Milestone: v2.1 Test Coverage Audit
+Phase: Not started (defining requirements)
+Status: Defining requirements
 ```
 
-Last activity: 2026-02-07 — v2.0 milestone completed and archived
+Last activity: 2026-02-09 — Milestone v2.1 started
 
-Progress: [██████████] 100% (v2.0 shipped)
+Progress: [░░░░░░░░░░] 0%
 
 ## Milestone History
 
@@ -55,11 +55,11 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-07
-Stopped at: v2.0 milestone archived
-Next action: /gsd:new-milestone to start next milestone
+Last session: 2026-02-09
+Stopped at: Defining requirements for v2.1
+Next action: Define requirements and create roadmap
 Resume file: None
 
 ---
 
-*Last updated: 2026-02-07 — v2.0 Fuse.js Search milestone archived*
+*Last updated: 2026-02-09 — v2.1 Test Coverage Audit milestone started*
