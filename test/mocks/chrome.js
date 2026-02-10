@@ -15,6 +15,7 @@ export const chromeMock = {
     create: vi.fn().mockResolvedValue({ id: 1 }),
     get: vi.fn().mockResolvedValue({}),
     sendMessage: vi.fn().mockResolvedValue(undefined),
+    group: vi.fn().mockResolvedValue(1),
     onActivated: {
       addListener: vi.fn(),
       removeListener: vi.fn()
@@ -52,6 +53,9 @@ export const chromeMock = {
     search: vi.fn().mockResolvedValue([]),
     getChildren: vi.fn().mockResolvedValue([]),
     getSubTree: vi.fn().mockResolvedValue([]),
+    getTree: vi.fn().mockResolvedValue([]),
+    remove: vi.fn().mockResolvedValue(undefined),
+    update: vi.fn().mockResolvedValue({}),
     onCreated: {
       addListener: vi.fn(),
       removeListener: vi.fn()
@@ -138,6 +142,7 @@ export function resetChromeMocks() {
   chromeMock.tabs.create.mockClear().mockResolvedValue({ id: 1 });
   chromeMock.tabs.get.mockClear().mockResolvedValue({});
   chromeMock.tabs.sendMessage.mockClear().mockResolvedValue(undefined);
+  chromeMock.tabs.group.mockClear().mockResolvedValue(1);
   chromeMock.tabs.onActivated.addListener.mockClear();
   chromeMock.tabs.onActivated.removeListener.mockClear();
   chromeMock.tabs.onRemoved.addListener.mockClear();
@@ -157,6 +162,9 @@ export function resetChromeMocks() {
   chromeMock.bookmarks.search.mockClear().mockResolvedValue([]);
   chromeMock.bookmarks.getChildren.mockClear().mockResolvedValue([]);
   chromeMock.bookmarks.getSubTree.mockClear().mockResolvedValue([]);
+  chromeMock.bookmarks.getTree.mockClear().mockResolvedValue([]);
+  chromeMock.bookmarks.remove.mockClear().mockResolvedValue(undefined);
+  chromeMock.bookmarks.update.mockClear().mockResolvedValue({});
   chromeMock.bookmarks.onCreated.addListener.mockClear();
   chromeMock.bookmarks.onCreated.removeListener.mockClear();
   chromeMock.bookmarks.onRemoved.addListener.mockClear();
