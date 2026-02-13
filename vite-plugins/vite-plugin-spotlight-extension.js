@@ -64,6 +64,14 @@ function getExtensionPlugins(isDev = false) {
           });
         }
 
+        // Copy installation-onboarding files
+        if (await fs.pathExists('installation-onboarding.html')) {
+          await fs.copy('installation-onboarding.html', `${outDir}/installation-onboarding.html`);
+        }
+        if (await fs.pathExists('installation-onboarding.css')) {
+          await fs.copy('installation-onboarding.css', `${outDir}/installation-onboarding.css`);
+        }
+
         console.log(`✅ Main spotlight files built to ${outDir}/`);
       }
     },
@@ -158,6 +166,51 @@ function getExtensionPlugins(isDev = false) {
 
         console.log(`✅ Newtab page built to ${outDir}/newtab.js`);
         console.log(`🎉 Spotlight extension build complete!`);
+      }
+    },
+
+    // Installation Onboarding build plugin - runs after main build
+    {
+      name: 'spotlight-extension-onboarding',
+      writeBundle: async () => {
+        console.log('🔄 Building onboarding page...');
+
+        // Build installation-onboarding.js as ES module
+        await build({
+          configFile: false,
+          build: {
+            outDir,
+            emptyOutDir: false, // Don't clear main build
+            rollupOptions: {
+              input: {
+                'installation-onboarding': resolve(process.cwd(), 'installation-onboarding.js'),
+              },
+              output: {
+                entryFileNames: 'installation-onboarding.js',
+                format: 'es',
+                inlineDynamicImports: true,
+              }
+            },
+            target: 'es2020',
+            minify: !isDev,
+            sourcemap: isDev
+          },
+          plugins: [
+            viteSingleFile({
+              removeViteModuleLoader: true
+            })
+          ],
+          resolve: {
+            alias: {
+              '@': resolve(process.cwd(), './'),
+            }
+          },
+          define: {
+            '__IS_DEV__': isDev
+          }
+        });
+
+        console.log(`✅ Onboarding page built to ${outDir}/installation-onboarding.js`);
       }
     }
   ];

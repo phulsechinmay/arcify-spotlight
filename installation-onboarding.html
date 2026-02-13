@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Arcify Spotlight - Setup Guide</title>
+    <link rel="icon" href="assets/icon.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
+    <style>
+        .varela-round-regular {
+            font-family: "Varela Round", sans-serif;
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: "Varela Round", sans-serif;
+            font-style: normal;
+        }
+    </style>
+    <link rel="stylesheet" href="installation-onboarding.css">
+</head>
+
+<body>
+    <div class="onboarding-container">
+        <div class="header">
+            <h1>Welcome to <span style="color: var(--primary-color);">Arcify Spotlight</span></h1>
+            <p>Let's get you set up in just a few steps</p>
+        </div>
+
+        <div class="content">
+            <!-- Step 1: Meet Arcify Spotlight -->
+            <div class="step active" id="step1">
+                <div class="step-content">
+                    <h2 class="step-title">Meet Arcify Spotlight</h2>
+                    <p class="step-description">
+                        A powerful search overlay that helps you navigate your browser faster.
+                    </p>
+
+                    <div class="step-layout">
+                        <div class="gif-section">
+                            <div class="gif-placeholder">
+                                <!-- Placeholder for spotlight.gif -->
+                                <img src="assets/spotlight.gif" alt="Arcify Spotlight demo">
+                            </div>
+                        </div>
+
+                        <div class="instructions-section">
+                            <div class="instructions">
+                                <h3>What Spotlight can do:</h3>
+                                <ul class="feature-highlights">
+                                    <li>Search across all your open tabs instantly</li>
+                                    <li>Find bookmarks and browsing history in one place</li>
+                                    <li>Smart autocomplete with keyboard-first navigation</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Set Up Keyboard Shortcuts -->
+            <div class="step" id="step2">
+                <div class="step-content">
+                    <h2 class="step-title">Set Up Keyboard Shortcuts</h2>
+                    <p class="step-description">
+                        Access Spotlight instantly from anywhere with these keyboard shortcuts.
+                    </p>
+
+                    <div class="step-layout">
+                        <div class="gif-section">
+                            <div class="gif-placeholder shadow">
+                                <img src="assets/chrometutorial.gif" alt="Keyboard shortcuts tutorial">
+                            </div>
+                        </div>
+
+                        <div class="instructions-section">
+                            <div class="instructions">
+                                <h3>How to set up keyboard shortcuts:</h3>
+                                <ol>
+                                    <li>Open Chrome Extensions Keyboard Shortcuts page <a href="#" id="shortcuts-link"
+                                            class="shortcuts-link">chrome://extensions/shortcuts</a></li>
+                                    <li>Find Arcify Spotlight and customize the shortcuts</li>
+                                </ol>
+
+                                <h3 style="margin-top: 2rem;">Recommended Shortcuts:</h3>
+                                <ul style="list-style: none; padding-left: 0;">
+                                    <li>🔍 <strong>Toggle Spotlight</strong>: <kbd>Alt + L</kbd></li>
+                                    <li>📑 <strong>New Tab Spotlight</strong>: <kbd>Alt + T</kbd></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Meet Arcify (Companion Promo) -->
+            <div class="step" id="step3">
+                <div class="step-content">
+                    <h2 class="step-title">Enhance your Experience</h2>
+                    <p class="step-description">Get the full Arcify experience with our sidebar extension.</p>
+
+                    <div class="step-layout">
+                        <div class="gif-section">
+                            <div class="gif-placeholder shadow">
+                                <img src="assets/extension.gif" alt="Arcify Sidebar demo">
+                            </div>
+                        </div>
+
+                        <div class="instructions-section">
+                            <div class="instructions">
+                                <h3>Arcify Sidebar</h3>
+                                <p style="margin-bottom: 1rem; line-height: 1.6;">
+                                    Works seamlessly with Spotlight to organize your tabs into a vertical sidebar with
+                                    spaces and archiving.
+                                </p>
+                                <ul style="list-style: none; padding-left: 0;">
+                                    <li style="margin-bottom: 0.5rem;">📁 Organize tabs into Spaces</li>
+                                    <li style="margin-bottom: 0.5rem;">📦 Auto-archive inactive tabs</li>
+                                    <li style="margin-bottom: 0.5rem;">🎨 Vertical tab layout</li>
+                                </ul>
+                                <a href="https://chromewebstore.google.com/detail/arcify-arc-like-vertical/ghbflkcnhdpkmbbdoflmemnifphjehec"
+                                    target="_blank" rel="noopener noreferrer" class="cws-button"
+                                    style="display: inline-block; margin-top: 1rem;">Get Arcify Sidebar</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="progress-bar">
+            <div class="progress-dots">
+                <div class="progress-dot active" data-step="1"></div>
+                <div class="progress-dot" data-step="2"></div>
+                <div class="progress-dot" data-step="3"></div>
+            </div>
+            <div class="step-counter">
+                Step <span id="currentStep">1</span> of 3
+            </div>
+        </div>
+
+        <div class="navigation">
+            <button class="nav-button secondary" id="prevBtn" disabled>Previous</button>
+            <button class="nav-button" id="nextBtn">Next</button>
+        </div>
+    </div>
+
+    <script type="module" src="installation-onboarding.js"></script>
+</body>
+
+</html>
