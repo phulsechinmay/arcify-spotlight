@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Arcify Spotlight",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "description": "Arc Browser (Spotlight)-like experience for your URL bar, including auto-complete, history, bookmarks and more",
   "permissions": [
     "tabs",
