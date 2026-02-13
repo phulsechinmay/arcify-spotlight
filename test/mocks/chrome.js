@@ -110,6 +110,10 @@ export const chromeMock = {
         runtimeMessageListeners = [];
       }
     },
+    onInstalled: {
+      addListener: vi.fn(),
+      removeListener: vi.fn()
+    },
     getURL: vi.fn((path) => `chrome-extension://mock-id/${path}`)
   },
 
@@ -181,6 +185,8 @@ export function resetChromeMocks() {
   chromeMock.history.search.mockClear().mockResolvedValue([]);
 
   chromeMock.runtime.sendMessage.mockClear().mockResolvedValue(undefined);
+  chromeMock.runtime.onInstalled.addListener.mockClear();
+  chromeMock.runtime.onInstalled.removeListener.mockClear();
   chromeMock.runtime.onMessage.addListener.mockClear();
   chromeMock.runtime.onMessage.removeListener.mockClear();
   chromeMock.runtime.onMessage.hasListener.mockClear();
