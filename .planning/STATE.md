@@ -50,6 +50,9 @@ Progress: [██████░░░░] 55%
 | Scoped fake timers for debounce tests only | vi.useFakeTimers in describe block beforeEach/afterEach to avoid timer leaks | Phase 15 |
 | Real FuseSearchService in BackgroundDataProvider tests | No mock -- catches interface mismatches between providers | Phase 15 |
 | Pre-set arcifyProvider mock to avoid dynamic import() | Same pattern as arcify-enrichment.test.js for testing enrichWithArcifyInfo | Phase 15 |
+| vi.stubGlobal('fetch') for API mocking | Cleaner global mock lifecycle with vi.unstubAllGlobals() in afterEach | Phase 15 |
+| Window shim in beforeAll for Node env | Lightweight alternative to jsdom when only one global property needed | Phase 15 |
+| Runtime save/restore for chrome.runtime undefined tests | Save globalThis.chrome.runtime before, set undefined, restore in afterEach | Phase 15 |
 
 ### Blockers/Concerns
 
@@ -64,10 +67,10 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-14
-Stopped at: Completed 15-02-PLAN.md (BackgroundDataProvider tests)
+Stopped at: Completed 15-01-PLAN.md (AutocompleteProvider + SpotlightMessageClient tests, 90 tests)
 Next action: Execute Phase 16 (Integration Tests)
 Resume file: None
 
 ---
 
-*Last updated: 2026-02-14 -- Phase 15 complete (all 3 plans done, 696/696 full suite)*
+*Last updated: 2026-02-14 -- Phase 15 plan 01 complete (AutocompleteProvider + MessageClient, 90 tests, 696/696 full suite)*
