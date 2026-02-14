@@ -5,20 +5,20 @@
 See: .planning/PROJECT.md (updated 2026-02-09)
 
 **Core value:** Fast, keyboard-driven tab and URL navigation that feels native to Chrome
-**Current focus:** v2.1 Test Coverage Audit -- Phase 14 complete, ready for Phases 15-17
+**Current focus:** v2.1 Test Coverage Audit -- Phase 15 in progress (plan 03 of 03 complete)
 
 ## Current Position
 
 ```
 Milestone: v2.1 Test Coverage Audit
-Phase: 14 of 17 (Utility Module Tests) -- COMPLETE
-Plan: 2 of 2 in phase 14
-Status: Phase complete
+Phase: 15 of 17 (Provider & Component Tests)
+Plan: 3 of 3 in phase 15
+Status: Plan 15-03 complete
 ```
 
-Last activity: 2026-02-13 - Completed quick task 007: Fix 35 failing integration tests (missing chrome.runtime.onInstalled mock)
+Last activity: 2026-02-14 - Completed 15-03: SharedSpotlightLogic tests (60 tests, 100% coverage)
 
-Progress: [████░░░░░░] 40%
+Progress: [█████░░░░░] 50%
 
 ## Milestone History
 
@@ -45,6 +45,9 @@ Progress: [████░░░░░░] 40%
 | vi.mock Logger for bookmark-utils tests | Prevents chrome.storage.sync.get side effects during import | Phase 14 |
 | mockImplementation with ID lookup tables for recursive traversal | Enables testing functions that call getChildren with different IDs | Phase 14 |
 | vi.spyOn to test catch-block paths | Force errors in methods to verify fallback behavior without modifying source | Phase 14 |
+| jsdom vitest environment for DOM-dependent tests | Real DOM manipulation instead of manual shims; use `// @vitest-environment jsdom` annotation | Phase 15 |
+| Mock SpotlightUtils as passthrough to isolate SharedSpotlightLogic | Tests focus on component logic behavior, not utility internals | Phase 15 |
+| Scoped fake timers for debounce tests only | vi.useFakeTimers in describe block beforeEach/afterEach to avoid timer leaks | Phase 15 |
 
 ### Blockers/Concerns
 
@@ -58,11 +61,11 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-13
-Stopped at: Completed quick-007 (fix 35 failing integration tests, 491/491 passing)
-Next action: Execute Phases 15-17 (data provider tests, integration tests, e2e tests)
+Last session: 2026-02-14
+Stopped at: Completed 15-03-PLAN.md (SharedSpotlightLogic tests)
+Next action: Execute remaining Phase 15 plans (15-01, 15-02) or proceed to Phase 16
 Resume file: None
 
 ---
 
-*Last updated: 2026-02-13 -- Quick task 007 complete (35 integration test failures fixed)*
+*Last updated: 2026-02-14 -- Phase 15 plan 03 complete (SharedSpotlightLogic tests, 627/627 full suite)*
