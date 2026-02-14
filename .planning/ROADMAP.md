@@ -72,11 +72,12 @@ Plans:
   3. `shared-component-logic.js` has tests covering input handling, overlay lifecycle (show/hide/toggle), and suggestion rendering logic -- all passing
   4. `message-client.js` has tests covering message serialization, error handling, response parsing, and timeout scenarios -- all passing
   5. Running `npx vitest run` shows all new provider and component tests passing with no regressions
-**Plans**: TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 15-01: TBD
-- [ ] 15-02: TBD
+- [ ] 15-01-PLAN.md -- Install jsdom, write AutocompleteProvider and SpotlightMessageClient tests (PROV-01, COMP-02)
+- [ ] 15-02-PLAN.md -- Write BackgroundDataProvider data fetcher and partial-failure tests (PROV-02)
+- [ ] 15-03-PLAN.md -- Write SharedSpotlightLogic DOM, event handling, and lifecycle tests (COMP-01)
 
 ### Phase 16: Low Priority Tests
 **Goal**: Remaining low-priority modules are assessed and tested where meaningful
