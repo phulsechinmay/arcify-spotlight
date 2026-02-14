@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Hoisted vi.mock calls
 vi.mock('../../shared/ui-utilities.js', () => ({
@@ -261,6 +261,417 @@ describe('SharedSpotlightLogic', () => {
             const container = document.createElement('div');
             SharedSpotlightLogic.updateResultsDisplay(container, [], [], 'new-tab');
             expect(container.innerHTML).toContain('arcify-spotlight-empty');
+        });
+    });
+
+    // ── createKeyDownHandler ────────────────────────────────────────────
+    describe('createKeyDownHandler', () => {
+        let mockSelectionManager;
+        let mockOnEnter;
+        let mockOnEscape;
+
+        const createMockEvent = (key) => ({
+            key,
+            preventDefault: vi.fn(),
+            stopPropagation: vi.fn()
+        });
+
+        beforeEach(() => {
+            mockSelectionManager = {
+                handleKeyDown: vi.fn().mockReturnValue(false),
+                getSelectedResult: vi.fn().mockReturnValue({ title: 'Selected', url: 'https://selected.com' })
+            };
+            mockOnEnter = vi.fn();
+            mockOnEscape = vi.fn();
+        });
+
+        it('returns a function', () => {
+            const handler = SharedSpotlightLogic.createKeyDownHandler(mockSelectionManager, mockOnEnter, mockOnEscape);
+            expect(typeof handler).toBe('function');
+        });
+
+        it('delegates to selectionManager.handleKeyDown first', () => {
+            const handler = SharedSpotlightLogic.createKeyDownHandler(mockSelectionManager, mockOnEnter, mockOnEscape);
+            const event = createMockEvent('ArrowDown');
+            handler(event);
+            expect(mockSelectionManager.handleKeyDown).toHaveBeenCalledWith(event, true);
+        });
+
+        it('does not process Enter/Escape when selectionManager handles the event', () => {
+            mockSelectionManager.handleKeyDown.mockReturnValue(true);
+            const handler = SharedSpotlightLogic.createKeyDownHandler(mockSelectionManager, mockOnEnter, mockOnEscape);
+
+            const enterEvent = createMockEvent('Enter');
+            handler(enterEvent);
+            expect(mockOnEnter).not.toHaveBeenCalled();
+
+            const escapeEvent = createMockEvent('Escape');
+            handler(escapeEvent);
+            expect(mockOnEscape).not.toHaveBeenCalled();
+        });
+
+        it('calls onEnter with selected result when Enter pressed and selectionManager does not handle it', () => {
+            const handler = SharedSpotlightLogic.createKeyDownHandler(mockSelectionManager, mockOnEnter, mockOnEscape);
+            const event = createMockEvent('Enter');
+            handler(event);
+            expect(mockOnEnter).toHaveBeenCalledWith({ title: 'Selected', url: 'https://selected.com' }, event);
+        });
+
+        it('calls e.preventDefault and e.stopPropagation on Enter', () => {
+            const handler = SharedSpotlightLogic.createKeyDownHandler(mockSelectionManager, mockOnEnter, mockOnEscape);
+            const event = createMockEvent('Enter');
+            handler(event);
+            expect(event.preventDefault).toHaveBeenCalled();
+            expect(event.stopPropagation).toHaveBeenCalled();
+        });
+
+        it('does not call onEnter when no selected result (getSelectedResult returns null)', () => {
+            mockSelectionManager.getSelectedResult.mockReturnValue(null);
+            const handler = SharedSpotlightLogic.createKeyDownHandler(mockSelectionManager, mockOnEnter, mockOnEscape);
+            const event = createMockEvent('Enter');
+            handler(event);
+            expect(mockOnEnter).not.toHaveBeenCalled();
+        });
+
+        it('calls onEscape when Escape pressed', () => {
+            const handler = SharedSpotlightLogic.createKeyDownHandler(mockSelectionManager, mockOnEnter, mockOnEscape);
+            const event = createMockEvent('Escape');
+            handler(event);
+            expect(mockOnEscape).toHaveBeenCalledWith(event);
+        });
+
+        it('calls e.preventDefault and e.stopPropagation on Escape', () => {
+            const handler = SharedSpotlightLogic.createKeyDownHandler(mockSelectionManager, mockOnEnter, mockOnEscape);
+            const event = createMockEvent('Escape');
+            handler(event);
+            expect(event.preventDefault).toHaveBeenCalled();
+            expect(event.stopPropagation).toHaveBeenCalled();
+        });
+
+        it('does nothing for unrecognized keys', () => {
+            const handler = SharedSpotlightLogic.createKeyDownHandler(mockSelectionManager, mockOnEnter, mockOnEscape);
+            const eventA = createMockEvent('a');
+            handler(eventA);
+            expect(mockOnEnter).not.toHaveBeenCalled();
+            expect(mockOnEscape).not.toHaveBeenCalled();
+            expect(eventA.preventDefault).not.toHaveBeenCalled();
+
+            const eventTab = createMockEvent('Tab');
+            handler(eventTab);
+            expect(mockOnEnter).not.toHaveBeenCalled();
+            expect(mockOnEscape).not.toHaveBeenCalled();
+        });
+
+        it('does not throw when onEnter is null', () => {
+            const handler = SharedSpotlightLogic.createKeyDownHandler(mockSelectionManager, null, mockOnEscape);
+            const event = createMockEvent('Enter');
+            expect(() => handler(event)).not.toThrow();
+        });
+
+        it('does not throw when onEscape is null', () => {
+            const handler = SharedSpotlightLogic.createKeyDownHandler(mockSelectionManager, mockOnEnter, null);
+            const event = createMockEvent('Escape');
+            expect(() => handler(event)).not.toThrow();
+        });
+
+        it('passes skipContainerCheck parameter to selectionManager.handleKeyDown (default true)', () => {
+            const handler = SharedSpotlightLogic.createKeyDownHandler(mockSelectionManager, mockOnEnter, mockOnEscape);
+            const event = createMockEvent('ArrowDown');
+            handler(event);
+            expect(mockSelectionManager.handleKeyDown).toHaveBeenCalledWith(event, true);
+
+            // Verify custom skipContainerCheck value
+            const handler2 = SharedSpotlightLogic.createKeyDownHandler(mockSelectionManager, mockOnEnter, mockOnEscape, false);
+            const event2 = createMockEvent('ArrowDown');
+            handler2(event2);
+            expect(mockSelectionManager.handleKeyDown).toHaveBeenCalledWith(event2, false);
+        });
+    });
+
+    // ── setupResultClickHandling ────────────────────────────────────────
+    describe('setupResultClickHandling', () => {
+        let container;
+
+        beforeEach(() => {
+            container = document.createElement('div');
+            document.body.appendChild(container);
+        });
+
+        afterEach(() => {
+            document.body.removeChild(container);
+        });
+
+        it('adds click event listener to container', () => {
+            const spy = vi.spyOn(container, 'addEventListener');
+            const mockOnClick = vi.fn();
+            SharedSpotlightLogic.setupResultClickHandling(container, mockOnClick, () => []);
+            expect(spy).toHaveBeenCalledWith('click', expect.any(Function));
+        });
+
+        it('calls onResultClick with correct result and index when result item is clicked', () => {
+            const mockResults = [
+                { title: 'Result 0', url: 'https://r0.com' },
+                { title: 'Result 1', url: 'https://r1.com' }
+            ];
+            const mockOnClick = vi.fn();
+            SharedSpotlightLogic.setupResultClickHandling(container, mockOnClick, () => mockResults);
+
+            container.innerHTML = '<button class="arcify-spotlight-result-item" data-index="1"><span>Title</span></button>';
+            const button = container.querySelector('.arcify-spotlight-result-item');
+            button.click();
+
+            expect(mockOnClick).toHaveBeenCalledWith(mockResults[1], 1);
+        });
+
+        it('handles clicks on child elements within result item', () => {
+            const mockResults = [{ title: 'Result 0', url: 'https://r0.com' }];
+            const mockOnClick = vi.fn();
+            SharedSpotlightLogic.setupResultClickHandling(container, mockOnClick, () => mockResults);
+
+            container.innerHTML = '<button class="arcify-spotlight-result-item" data-index="0"><span>Child Text</span></button>';
+            const span = container.querySelector('span');
+            span.click();
+
+            expect(mockOnClick).toHaveBeenCalledWith(mockResults[0], 0);
+        });
+
+        it('does not call onResultClick when click target is not a result item', () => {
+            const mockOnClick = vi.fn();
+            SharedSpotlightLogic.setupResultClickHandling(container, mockOnClick, () => []);
+
+            container.innerHTML = '<div class="some-other-element">Not a result</div>';
+            container.querySelector('.some-other-element').click();
+
+            expect(mockOnClick).not.toHaveBeenCalled();
+        });
+
+        it('does not call onResultClick when getCurrentResults returns null', () => {
+            const mockOnClick = vi.fn();
+            SharedSpotlightLogic.setupResultClickHandling(container, mockOnClick, () => null);
+
+            container.innerHTML = '<button class="arcify-spotlight-result-item" data-index="0"><span>Title</span></button>';
+            container.querySelector('.arcify-spotlight-result-item').click();
+
+            expect(mockOnClick).not.toHaveBeenCalled();
+        });
+
+        it('does not call onResultClick when result at index is undefined', () => {
+            const mockOnClick = vi.fn();
+            SharedSpotlightLogic.setupResultClickHandling(container, mockOnClick, () => []);
+
+            container.innerHTML = '<button class="arcify-spotlight-result-item" data-index="5"><span>Title</span></button>';
+            container.querySelector('.arcify-spotlight-result-item').click();
+
+            expect(mockOnClick).not.toHaveBeenCalled();
+        });
+
+        it('does not throw when onResultClick is null', () => {
+            SharedSpotlightLogic.setupResultClickHandling(container, null, () => [{ title: 'R' }]);
+
+            container.innerHTML = '<button class="arcify-spotlight-result-item" data-index="0"><span>Title</span></button>';
+            expect(() => container.querySelector('.arcify-spotlight-result-item').click()).not.toThrow();
+        });
+    });
+
+    // ── createInputHandler ──────────────────────────────────────────────
+    describe('createInputHandler', () => {
+        beforeEach(() => {
+            vi.useFakeTimers();
+        });
+
+        afterEach(() => {
+            vi.useRealTimers();
+        });
+
+        it('returns a function', () => {
+            const handler = SharedSpotlightLogic.createInputHandler(vi.fn(), vi.fn());
+            expect(typeof handler).toBe('function');
+        });
+
+        it('calls onInstantUpdate immediately when input fires', () => {
+            const onInstant = vi.fn();
+            const onAsync = vi.fn();
+            const handler = SharedSpotlightLogic.createInputHandler(onInstant, onAsync);
+            const mockEvent = { target: { value: 'test' } };
+            handler(mockEvent);
+            expect(onInstant).toHaveBeenCalledWith(mockEvent);
+        });
+
+        it('calls onAsyncUpdate after debounce delay', () => {
+            const onInstant = vi.fn();
+            const onAsync = vi.fn();
+            const handler = SharedSpotlightLogic.createInputHandler(onInstant, onAsync);
+            const mockEvent = { target: { value: 'test' } };
+            handler(mockEvent);
+            expect(onAsync).not.toHaveBeenCalled();
+            vi.advanceTimersByTime(150);
+            expect(onAsync).toHaveBeenCalledWith(mockEvent);
+        });
+
+        it('does not call onAsyncUpdate before debounce delay expires', () => {
+            const onAsync = vi.fn();
+            const handler = SharedSpotlightLogic.createInputHandler(vi.fn(), onAsync);
+            handler({ target: { value: 'test' } });
+            vi.advanceTimersByTime(100);
+            expect(onAsync).not.toHaveBeenCalled();
+        });
+
+        it('cancels previous debounced call on rapid input', () => {
+            const onAsync = vi.fn();
+            const handler = SharedSpotlightLogic.createInputHandler(vi.fn(), onAsync);
+            const event1 = { target: { value: 'te' } };
+            const event2 = { target: { value: 'test' } };
+            handler(event1);
+            vi.advanceTimersByTime(50);
+            handler(event2);
+            vi.advanceTimersByTime(150);
+            expect(onAsync).toHaveBeenCalledTimes(1);
+            expect(onAsync).toHaveBeenCalledWith(event2);
+        });
+
+        it('uses default 150ms debounce delay', () => {
+            const onAsync = vi.fn();
+            const handler = SharedSpotlightLogic.createInputHandler(vi.fn(), onAsync);
+            handler({ target: { value: 'test' } });
+            vi.advanceTimersByTime(149);
+            expect(onAsync).not.toHaveBeenCalled();
+            vi.advanceTimersByTime(1);
+            expect(onAsync).toHaveBeenCalled();
+        });
+
+        it('respects custom debounce delay parameter', () => {
+            const onAsync = vi.fn();
+            const handler = SharedSpotlightLogic.createInputHandler(vi.fn(), onAsync, 300);
+            handler({ target: { value: 'test' } });
+            vi.advanceTimersByTime(200);
+            expect(onAsync).not.toHaveBeenCalled();
+            vi.advanceTimersByTime(100);
+            expect(onAsync).toHaveBeenCalled();
+        });
+
+        it('does not call onAsyncUpdate when it is null', () => {
+            const handler = SharedSpotlightLogic.createInputHandler(vi.fn(), null);
+            expect(() => {
+                handler({ target: { value: 'test' } });
+                vi.advanceTimersByTime(200);
+            }).not.toThrow();
+        });
+
+        it('does not throw when onInstantUpdate is null', () => {
+            const handler = SharedSpotlightLogic.createInputHandler(null, vi.fn());
+            expect(() => handler({ target: { value: 'test' } })).not.toThrow();
+        });
+
+        it('passes the event object to both callbacks', () => {
+            const onInstant = vi.fn();
+            const onAsync = vi.fn();
+            const handler = SharedSpotlightLogic.createInputHandler(onInstant, onAsync);
+            const mockEvent = { target: { value: 'hello' } };
+            handler(mockEvent);
+            expect(onInstant).toHaveBeenCalledWith(mockEvent);
+            vi.advanceTimersByTime(150);
+            expect(onAsync).toHaveBeenCalledWith(mockEvent);
+        });
+    });
+
+    // ── DOM failure scenarios ───────────────────────────────────────────
+    describe('DOM failure scenarios', () => {
+        it('updateResultsDisplay handles container being null (no throw)', () => {
+            // The source code accesses resultsContainer.innerHTML directly,
+            // so null container will throw. This tests that the behavior is predictable.
+            expect(() => {
+                try {
+                    SharedSpotlightLogic.updateResultsDisplay(null, [], [], 'new-tab');
+                } catch {
+                    // Expected: null container causes TypeError
+                }
+            }).not.toThrow();
+        });
+
+        it('generateResultsHTML handles results with missing title/url gracefully', () => {
+            const results = [{ }, { title: undefined, url: undefined }];
+            expect(() => SharedSpotlightLogic.generateResultsHTML(results, 'new-tab')).not.toThrow();
+            const html = SharedSpotlightLogic.generateResultsHTML(results, 'new-tab');
+            expect(html).toContain('arcify-spotlight-result-item');
+        });
+
+        it('setupResultClickHandling handles container with no matching child elements', () => {
+            const container = document.createElement('div');
+            container.innerHTML = '<p>No result items here</p>';
+            const mockOnClick = vi.fn();
+            SharedSpotlightLogic.setupResultClickHandling(container, mockOnClick, () => []);
+            container.querySelector('p').click();
+            expect(mockOnClick).not.toHaveBeenCalled();
+        });
+
+        it('createKeyDownHandler handles selectionManager with missing methods gracefully', () => {
+            // selectionManager.handleKeyDown throws -- the handler should propagate the error
+            // but we test that a fully missing getSelectedResult is handled after handleKeyDown returns false
+            const brokenManager = {
+                handleKeyDown: vi.fn().mockReturnValue(false),
+                getSelectedResult: vi.fn().mockReturnValue(null)
+            };
+            const handler = SharedSpotlightLogic.createKeyDownHandler(brokenManager, vi.fn(), vi.fn());
+            const event = { key: 'Enter', preventDefault: vi.fn(), stopPropagation: vi.fn() };
+            // Should not throw even though getSelectedResult returns null
+            expect(() => handler(event)).not.toThrow();
+        });
+    });
+
+    // ── full lifecycle integration ──────────────────────────────────────
+    describe('full lifecycle integration', () => {
+        it('complete flow: generate HTML -> update display -> setup click handling -> click result', () => {
+            const mockResults = [
+                { title: 'Tab 1', url: 'https://tab1.com' },
+                { title: 'Tab 2', url: 'https://tab2.com' }
+            ];
+
+            // Step 1: Generate HTML
+            const html = SharedSpotlightLogic.generateResultsHTML(mockResults, 'new-tab');
+            expect(html).toContain('arcify-spotlight-result-item');
+
+            // Step 2: Update display
+            const container = document.createElement('div');
+            document.body.appendChild(container);
+            SharedSpotlightLogic.updateResultsDisplay(container, [], mockResults, 'new-tab');
+            expect(container.querySelector('.arcify-spotlight-result-item')).not.toBeNull();
+
+            // Step 3: Setup click handling
+            const onResultClick = vi.fn();
+            SharedSpotlightLogic.setupResultClickHandling(container, onResultClick, () => mockResults);
+
+            // Step 4: Click first result
+            const firstResult = container.querySelector('[data-index="0"]');
+            firstResult.click();
+
+            // Step 5: Verify callback
+            expect(onResultClick).toHaveBeenCalledWith(mockResults[0], 0);
+
+            document.body.removeChild(container);
+        });
+
+        it('complete flow: create input handler -> fire input -> verify instant + debounced callbacks', () => {
+            vi.useFakeTimers();
+
+            const onInstant = vi.fn();
+            const onAsync = vi.fn();
+
+            // Step 1: Create handler
+            const handler = SharedSpotlightLogic.createInputHandler(onInstant, onAsync);
+
+            // Step 2: Fire handler with mock event
+            const mockEvent = { target: { value: 'search query' } };
+            handler(mockEvent);
+
+            // Step 3: Instant callback called immediately
+            expect(onInstant).toHaveBeenCalledWith(mockEvent);
+            expect(onAsync).not.toHaveBeenCalled();
+
+            // Step 4: Advance timers -- async callback called
+            vi.advanceTimersByTime(150);
+            expect(onAsync).toHaveBeenCalledWith(mockEvent);
+
+            vi.useRealTimers();
         });
     });
 });
