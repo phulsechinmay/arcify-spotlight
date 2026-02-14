@@ -673,3 +673,301 @@ describe('BackgroundDataProvider', () => {
         });
     });
 });
+
+// ============================================================
+// Promise.allSettled partial-failure scenarios
+// ============================================================
+describe('Promise.allSettled partial-failure scenarios', () => {
+    let provider;
+
+    // Helper to set up all data sources as "success" with data that Fuse.js can match
+    function setupAllSourcesSuccess() {
+        // Tabs - will be matched by getOpenTabs via getOpenTabsData
+        chromeMock.tabs.query.mockResolvedValue([
+            { id: 1, title: 'GitHub Test Repository', url: 'https://github.com/test', groupId: -1, windowId: 1 }
+        ]);
+        chromeMock.tabGroups.query.mockResolvedValue([]);
+
+        // Storage for recent tabs and spaces
+        chromeMock.storage.local.get.mockImplementation(async (keys) => {
+            if (Array.isArray(keys) && keys.includes('tabLastActivity')) {
+                return { tabLastActivity: { 1: Date.now() } };
+            }
+            if (keys === 'spaces') {
+                return { spaces: [] };
+            }
+            return {};
+        });
+
+        // History
+        chromeMock.history.search.mockResolvedValue([
+            { title: 'GitHub Test History', url: 'https://github.com/test-history', visitCount: 5, lastVisitTime: Date.now() }
+        ]);
+
+        // Top sites
+        chromeMock.topSites.get.mockResolvedValue([
+            { title: 'GitHub Test TopSite', url: 'https://github.com/test-top' }
+        ]);
+
+        // Bookmarks via mocked BookmarkUtils
+        BookmarkUtils.getAllBookmarks.mockResolvedValue([
+            { id: 'b1', title: 'GitHub Test Bookmark', url: 'https://github.com/test-bookmark', parentId: '0' }
+        ]);
+        BookmarkUtils.findArcifyFolder.mockResolvedValue(null);
+
+        // Autocomplete via spied autocompleteProvider
+        provider.autocompleteProvider.getAutocompleteSuggestions.mockResolvedValue([]);
+    }
+
+    beforeEach(() => {
+        provider = new BackgroundDataProvider();
+        provider.arcifyProvider = {
+            ensureCacheBuilt: vi.fn().mockResolvedValue(undefined),
+            hasData: vi.fn().mockReturnValue(false),
+            getSpaceForUrl: vi.fn().mockResolvedValue(null)
+        };
+        vi.spyOn(provider.autocompleteProvider, 'getAutocompleteSuggestions')
+            .mockResolvedValue([]);
+    });
+
+    it('tabs fail, others succeed: results still contain bookmarks and history', async () => {
+        setupAllSourcesSuccess();
+        // Make tabs fail
+        chromeMock.tabs.query.mockRejectedValue(new Error('Tabs API error'));
+
+        const results = await provider.getSpotlightSuggestions('github test', 'current-tab');
+
+        // Should not throw and should have results from other sources
+        expect(results).toBeDefined();
+        expect(Array.isArray(results)).toBe(true);
+        // Since tabs failed, results should come from bookmarks/history
+        const urls = results.map(r => r.url);
+        expect(urls).toContain('https://github.com/test-bookmark');
+    });
+
+    it('history fail, others succeed: results still contain tabs and bookmarks', async () => {
+        setupAllSourcesSuccess();
+        chromeMock.history.search.mockRejectedValue(new Error('History API error'));
+
+        const results = await provider.getSpotlightSuggestions('github test', 'current-tab');
+
+        expect(results).toBeDefined();
+        const urls = results.map(r => r.url);
+        // Tabs should still be present
+        expect(urls).toContain('https://github.com/test');
+        // Bookmarks should still be present
+        expect(urls).toContain('https://github.com/test-bookmark');
+    });
+
+    it('bookmarks fail, others succeed: results still contain tabs and history', async () => {
+        setupAllSourcesSuccess();
+        BookmarkUtils.getAllBookmarks.mockRejectedValue(new Error('Bookmarks API error'));
+
+        const results = await provider.getSpotlightSuggestions('github test', 'current-tab');
+
+        expect(results).toBeDefined();
+        const urls = results.map(r => r.url);
+        expect(urls).toContain('https://github.com/test');
+        expect(urls).toContain('https://github.com/test-history');
+    });
+
+    it('all sources fail: returns fallback result (no unhandled rejections)', async () => {
+        chromeMock.tabs.query.mockRejectedValue(new Error('Tabs failed'));
+        chromeMock.tabGroups.query.mockRejectedValue(new Error('TabGroups failed'));
+        chromeMock.history.search.mockRejectedValue(new Error('History failed'));
+        chromeMock.topSites.get.mockRejectedValue(new Error('TopSites failed'));
+        chromeMock.storage.local.get.mockRejectedValue(new Error('Storage failed'));
+        BookmarkUtils.getAllBookmarks.mockRejectedValue(new Error('Bookmarks failed'));
+        BookmarkUtils.findArcifyFolder.mockRejectedValue(new Error('FindArcify failed'));
+        provider.autocompleteProvider.getAutocompleteSuggestions.mockRejectedValue(
+            new Error('Autocomplete failed')
+        );
+
+        const results = await provider.getSpotlightSuggestions('test query', 'current-tab');
+
+        // Should still return an array (empty or with fallback)
+        expect(results).toBeDefined();
+        expect(Array.isArray(results)).toBe(true);
+    });
+
+    it('only tabs succeed: results contain only tab-sourced results', async () => {
+        setupAllSourcesSuccess();
+        // Fail everything except tabs
+        chromeMock.history.search.mockRejectedValue(new Error('History failed'));
+        chromeMock.topSites.get.mockRejectedValue(new Error('TopSites failed'));
+        BookmarkUtils.getAllBookmarks.mockRejectedValue(new Error('Bookmarks failed'));
+        BookmarkUtils.findArcifyFolder.mockRejectedValue(new Error('FindArcify failed'));
+        provider.autocompleteProvider.getAutocompleteSuggestions.mockRejectedValue(
+            new Error('Autocomplete failed')
+        );
+        // Storage for pinned tabs fail
+        chromeMock.storage.local.get.mockRejectedValue(new Error('Storage failed'));
+
+        const results = await provider.getSpotlightSuggestions('github test', 'current-tab');
+
+        expect(results).toBeDefined();
+        // Should contain at least a tab result
+        const hasTabResult = results.some(r => r.url === 'https://github.com/test');
+        expect(hasTabResult).toBe(true);
+    });
+
+    it('tabs + history fail: bookmarks and top sites still appear', async () => {
+        setupAllSourcesSuccess();
+        chromeMock.tabs.query.mockRejectedValue(new Error('Tabs failed'));
+        chromeMock.history.search.mockRejectedValue(new Error('History failed'));
+
+        const results = await provider.getSpotlightSuggestions('github test', 'current-tab');
+
+        expect(results).toBeDefined();
+        const urls = results.map(r => r.url);
+        expect(urls).toContain('https://github.com/test-bookmark');
+    });
+
+    it('autocomplete fails, others succeed: results still contain local sources', async () => {
+        setupAllSourcesSuccess();
+        provider.autocompleteProvider.getAutocompleteSuggestions.mockRejectedValue(
+            new Error('Autocomplete failed')
+        );
+
+        const results = await provider.getSpotlightSuggestions('github test', 'current-tab');
+
+        expect(results).toBeDefined();
+        const urls = results.map(r => r.url);
+        expect(urls).toContain('https://github.com/test');
+        expect(urls).toContain('https://github.com/test-bookmark');
+    });
+
+    it('top sites fail, others succeed: results still contain tabs and bookmarks', async () => {
+        setupAllSourcesSuccess();
+        chromeMock.topSites.get.mockRejectedValue(new Error('TopSites failed'));
+
+        const results = await provider.getSpotlightSuggestions('github test', 'current-tab');
+
+        expect(results).toBeDefined();
+        const urls = results.map(r => r.url);
+        expect(urls).toContain('https://github.com/test');
+        expect(urls).toContain('https://github.com/test-bookmark');
+    });
+
+    it('pinned tabs fail (storage error), other results still present', async () => {
+        // Set up everything to succeed, but storage fails for pinned tabs only
+        chromeMock.tabs.query.mockResolvedValue([
+            { id: 1, title: 'GitHub Test Repository', url: 'https://github.com/test', groupId: -1, windowId: 1 }
+        ]);
+        chromeMock.tabGroups.query.mockResolvedValue([]);
+        chromeMock.history.search.mockResolvedValue([
+            { title: 'GitHub Test History', url: 'https://github.com/test-history', visitCount: 5, lastVisitTime: Date.now() }
+        ]);
+        chromeMock.topSites.get.mockResolvedValue([]);
+        BookmarkUtils.getAllBookmarks.mockResolvedValue([
+            { id: 'b1', title: 'GitHub Test Bookmark', url: 'https://github.com/test-bookmark', parentId: '0' }
+        ]);
+        BookmarkUtils.findArcifyFolder.mockResolvedValue(null);
+        // Storage: succeed for tabLastActivity but fail for spaces (needed by pinnedTabs)
+        chromeMock.storage.local.get.mockImplementation(async (keys) => {
+            if (Array.isArray(keys) && keys.includes('tabLastActivity')) {
+                return { tabLastActivity: {} };
+            }
+            if (keys === 'spaces') {
+                throw new Error('Storage failed for spaces');
+            }
+            return {};
+        });
+
+        const results = await provider.getSpotlightSuggestions('github test', 'current-tab');
+
+        expect(results).toBeDefined();
+        const urls = results.map(r => r.url);
+        expect(urls).toContain('https://github.com/test');
+    });
+
+    it('bookmarks + history fail: tabs still appear', async () => {
+        setupAllSourcesSuccess();
+        BookmarkUtils.getAllBookmarks.mockRejectedValue(new Error('Bookmarks failed'));
+        chromeMock.history.search.mockRejectedValue(new Error('History failed'));
+
+        const results = await provider.getSpotlightSuggestions('github test', 'current-tab');
+
+        expect(results).toBeDefined();
+        const urls = results.map(r => r.url);
+        expect(urls).toContain('https://github.com/test');
+    });
+
+    // ==========================================
+    // Timing tests with real delays
+    // ==========================================
+    describe('async timing behavior', () => {
+        it('slow-resolving source does not block faster sources', async () => {
+            // Tabs resolve instantly
+            chromeMock.tabs.query.mockResolvedValue([
+                { id: 1, title: 'GitHub Test Fast Tab', url: 'https://github.com/test-fast', groupId: -1, windowId: 1 }
+            ]);
+            chromeMock.tabGroups.query.mockResolvedValue([]);
+            chromeMock.storage.local.get.mockImplementation(async (keys) => {
+                if (Array.isArray(keys) && keys.includes('tabLastActivity')) {
+                    return { tabLastActivity: {} };
+                }
+                if (keys === 'spaces') {
+                    return { spaces: [] };
+                }
+                return {};
+            });
+            chromeMock.topSites.get.mockResolvedValue([]);
+            BookmarkUtils.findArcifyFolder.mockResolvedValue(null);
+            BookmarkUtils.getAllBookmarks.mockResolvedValue([]);
+
+            // History is slow (50ms delay)
+            chromeMock.history.search.mockImplementation(() =>
+                new Promise(resolve => setTimeout(() => resolve([
+                    { title: 'GitHub Test Slow History', url: 'https://github.com/test-slow', visitCount: 3, lastVisitTime: Date.now() }
+                ]), 50))
+            );
+
+            const startTime = Date.now();
+            const results = await provider.getSpotlightSuggestions('github test', 'current-tab');
+            const elapsed = Date.now() - startTime;
+
+            expect(results).toBeDefined();
+            // The slow source should have been waited for (Promise.allSettled waits for all)
+            expect(elapsed).toBeGreaterThanOrEqual(40);
+            // But both fast and slow sources should be in results
+            const urls = results.map(r => r.url);
+            expect(urls).toContain('https://github.com/test-fast');
+        });
+
+        it('slow-rejecting source does not block other results', async () => {
+            // Tabs resolve instantly
+            chromeMock.tabs.query.mockResolvedValue([
+                { id: 1, title: 'GitHub Test Quick Tab', url: 'https://github.com/test-quick', groupId: -1, windowId: 1 }
+            ]);
+            chromeMock.tabGroups.query.mockResolvedValue([]);
+            chromeMock.storage.local.get.mockImplementation(async (keys) => {
+                if (Array.isArray(keys) && keys.includes('tabLastActivity')) {
+                    return { tabLastActivity: {} };
+                }
+                if (keys === 'spaces') {
+                    return { spaces: [] };
+                }
+                return {};
+            });
+            chromeMock.topSites.get.mockResolvedValue([]);
+            BookmarkUtils.findArcifyFolder.mockResolvedValue(null);
+            BookmarkUtils.getAllBookmarks.mockResolvedValue([
+                { id: 'b1', title: 'GitHub Test Quick Bookmark', url: 'https://github.com/test-quick-bm', parentId: '0' }
+            ]);
+
+            // History rejects slowly (50ms delay)
+            chromeMock.history.search.mockImplementation(() =>
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Slow rejection')), 50))
+            );
+
+            const results = await provider.getSpotlightSuggestions('github test', 'current-tab');
+
+            expect(results).toBeDefined();
+            // Fast sources should be in results despite slow rejection
+            const urls = results.map(r => r.url);
+            expect(urls).toContain('https://github.com/test-quick');
+            expect(urls).toContain('https://github.com/test-quick-bm');
+        });
+    });
+});
