@@ -85,6 +85,9 @@ function getExtensionPlugins(isDev = false) {
         // Build overlay.js as IIFE for content script injection
         await build({
           configFile: false,
+          define: {
+            '__DEBUG_ENABLED__': JSON.stringify(isDev)
+          },
           build: {
             outDir,
             emptyOutDir: false, // Don't clear main build
@@ -127,6 +130,9 @@ function getExtensionPlugins(isDev = false) {
         // Build newtab.js as ES module with inlined dependencies
         await build({
           configFile: false,
+          define: {
+            '__DEBUG_ENABLED__': JSON.stringify(isDev)
+          },
           build: {
             outDir,
             emptyOutDir: false, // Don't clear main build
@@ -206,7 +212,8 @@ function getExtensionPlugins(isDev = false) {
             }
           },
           define: {
-            '__IS_DEV__': isDev
+            '__IS_DEV__': isDev,
+            '__DEBUG_ENABLED__': JSON.stringify(isDev)
           }
         });
 
@@ -225,6 +232,9 @@ export function createSpotlightConfig(options = {}) {
   const outDir = isDev ? 'dist-dev' : 'dist';
 
   const config = {
+    define: {
+      '__DEBUG_ENABLED__': JSON.stringify(isDev)
+    },
     build: {
       outDir,
       emptyOutDir: true,
