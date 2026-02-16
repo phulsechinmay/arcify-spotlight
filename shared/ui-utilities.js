@@ -302,8 +302,8 @@ export class SpotlightUtils {
 
     // DEBUG: Format debug info for result items (easy to remove)
     static formatDebugInfo(result) {
-        // Use environment variable for debug mode (false by default, true for dev builds)
-        const DEBUG_ENABLED = false;
+        // Debug mode controlled by build: true for dev builds, false for prod builds
+        const DEBUG_ENABLED = __DEBUG_ENABLED__;
 
         if (!DEBUG_ENABLED) {
             return '';
