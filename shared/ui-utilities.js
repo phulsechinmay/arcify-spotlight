@@ -303,7 +303,7 @@ export class SpotlightUtils {
     // DEBUG: Format debug info for result items (easy to remove)
     static formatDebugInfo(result) {
         // Use environment variable for debug mode (false by default, true for dev builds)
-        const DEBUG_ENABLED = true;
+        const DEBUG_ENABLED = false;
 
         if (!DEBUG_ENABLED) {
             return '';
