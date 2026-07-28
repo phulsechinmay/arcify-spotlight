@@ -5,20 +5,20 @@
 See: .planning/PROJECT.md (updated 2026-02-09)
 
 **Core value:** Fast, keyboard-driven tab and URL navigation that feels native to Chrome
-**Current focus:** v2.1 Test Coverage Audit -- Phase 14 complete, ready for Phases 15-17
+**Current focus:** v2.1 Test Coverage Audit -- Phase 15 verified complete, ready for Phase 16
 
 ## Current Position
 
 ```
 Milestone: v2.1 Test Coverage Audit
-Phase: 14 of 17 (Utility Module Tests) -- COMPLETE
-Plan: 2 of 2 in phase 14
+Phase: 15 of 17 (Provider & Component Tests) -- COMPLETE
+Plan: 3 of 3 in phase 15
 Status: Phase complete
 ```
 
-Last activity: 2026-02-13 - Completed quick task 007: Fix 35 failing integration tests (missing chrome.runtime.onInstalled mock)
+Last activity: 2026-02-14 - Phase 15 verified complete (205 new tests, 696/696 suite, 5/5 must-haves passed)
 
-Progress: [████░░░░░░] 40%
+Progress: [██████░░░░] 55%
 
 ## Milestone History
 
@@ -45,6 +45,14 @@ Progress: [████░░░░░░] 40%
 | vi.mock Logger for bookmark-utils tests | Prevents chrome.storage.sync.get side effects during import | Phase 14 |
 | mockImplementation with ID lookup tables for recursive traversal | Enables testing functions that call getChildren with different IDs | Phase 14 |
 | vi.spyOn to test catch-block paths | Force errors in methods to verify fallback behavior without modifying source | Phase 14 |
+| jsdom vitest environment for DOM-dependent tests | Real DOM manipulation instead of manual shims; use `// @vitest-environment jsdom` annotation | Phase 15 |
+| Mock SpotlightUtils as passthrough to isolate SharedSpotlightLogic | Tests focus on component logic behavior, not utility internals | Phase 15 |
+| Scoped fake timers for debounce tests only | vi.useFakeTimers in describe block beforeEach/afterEach to avoid timer leaks | Phase 15 |
+| Real FuseSearchService in BackgroundDataProvider tests | No mock -- catches interface mismatches between providers | Phase 15 |
+| Pre-set arcifyProvider mock to avoid dynamic import() | Same pattern as arcify-enrichment.test.js for testing enrichWithArcifyInfo | Phase 15 |
+| vi.stubGlobal('fetch') for API mocking | Cleaner global mock lifecycle with vi.unstubAllGlobals() in afterEach | Phase 15 |
+| Window shim in beforeAll for Node env | Lightweight alternative to jsdom when only one global property needed | Phase 15 |
+| Runtime save/restore for chrome.runtime undefined tests | Save globalThis.chrome.runtime before, set undefined, restore in afterEach | Phase 15 |
 
 ### Blockers/Concerns
 
@@ -55,14 +63,15 @@ None.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 007 | Run npm run test and understand the test failures. Suggest a fix plan for the tests | 2026-02-13 | 74c23d4 | [7-run-npm-run-test-and-understand-the-test](./quick/7-run-npm-run-test-and-understand-the-test/) |
+| 008 | Automate DEBUG_ENABLED via build mode (Vite define) | 2026-02-15 | cfbef51 | [8-automate-debug-enabled-via-build-mode-so](./quick/8-automate-debug-enabled-via-build-mode-so/) |
 
 ## Session Continuity
 
-Last session: 2026-02-13
-Stopped at: Completed quick-007 (fix 35 failing integration tests, 491/491 passing)
-Next action: Execute Phases 15-17 (data provider tests, integration tests, e2e tests)
+Last session: 2026-02-15
+Stopped at: Completed quick task 8 (automate DEBUG_ENABLED via build mode)
+Next action: Plan Phase 16 (Low Priority Tests) or Phase 17 (E2E Test Suite)
 Resume file: None
 
 ---
 
-*Last updated: 2026-02-13 -- Quick task 007 complete (35 integration test failures fixed)*
+*Last updated: 2026-02-15 -- Quick task 8 complete (automate DEBUG_ENABLED via Vite define)*

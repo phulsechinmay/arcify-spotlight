@@ -18,8 +18,13 @@ import {
   launchBrowserWithExtension,
   closeBrowser,
   waitForExtension,
-  openNewTabPage
+  openNewTabPage,
+  overlaySelector,
+  OVERLAY_HOST_SELECTOR
 } from '../setup.js';
+
+// NOTE: newtab.html tests use plain selectors -- that page has no shadow root.
+// The overlay tests (E2E-04, E2E-05) must pierce into #arcify-spotlight-host's shadow root.
 
 // Set DEBUG=true env var to add delays between actions and run with visible browser
 const DEBUG = process.env.DEBUG === 'true';
@@ -358,12 +363,12 @@ describe('Spotlight E2E Tests', () => {
       await wait();
 
       // Wait for spotlight overlay to appear on the page
-      await page.waitForSelector('[data-testid="spotlight-overlay"]', {
+      await page.waitForSelector(overlaySelector('[data-testid="spotlight-overlay"]'), {
         timeout: 5000
       });
 
       // Verify spotlight is visible as an overlay
-      const spotlight = await page.$('[data-testid="spotlight-overlay"]');
+      const spotlight = await page.$(overlaySelector('[data-testid="spotlight-overlay"]'));
       assert.ok(spotlight, 'Spotlight overlay should appear on the page');
 
       // Verify the page content is still in the background (not navigated away)
@@ -375,18 +380,18 @@ describe('Spotlight E2E Tests', () => {
       await wait();
 
       // Verify we can interact with spotlight
-      const input = await page.$('[data-testid="spotlight-input"]');
+      const input = await page.$(overlaySelector('[data-testid="spotlight-input"]'));
       assert.ok(input, 'Spotlight input should be available');
 
       // Type a query to verify functionality
-      await page.type('[data-testid="spotlight-input"]', 'test');
+      await page.type(overlaySelector('[data-testid="spotlight-input"]'), 'test');
 
       // Wait for results
-      await page.waitForSelector('[data-testid="spotlight-result"]', {
+      await page.waitForSelector(overlaySelector('[data-testid="spotlight-result"]'), {
         timeout: 5000
       });
 
-      const results = await page.$$('[data-testid="spotlight-result"]');
+      const results = await page.$$(overlaySelector('[data-testid="spotlight-result"]'));
       assert.ok(results.length > 0, 'Should show results in overlay mode');
 
       await page.close();
@@ -501,35 +506,40 @@ describe('Spotlight E2E Tests', () => {
       await wait();
 
       // Wait for spotlight overlay to appear
-      await searchPage.waitForSelector('[data-testid="spotlight-overlay"]', {
+      await searchPage.waitForSelector(overlaySelector('[data-testid="spotlight-overlay"]'), {
         timeout: 5000
       });
       await wait();
 
       // 4. Search for the grouped tab by its title
-      await searchPage.type('[data-testid="spotlight-input"]', 'Example');
+      await searchPage.type(overlaySelector('[data-testid="spotlight-input"]'), 'Example');
 
       // Wait for results to appear (instant suggestion first)
-      await searchPage.waitForSelector('[data-testid="spotlight-result"]', {
+      await searchPage.waitForSelector(overlaySelector('[data-testid="spotlight-result"]'), {
         timeout: 5000
       });
 
       // Wait for async tab results from background (150ms debounce + query time)
       // Poll for the chip to appear as async results replace/augment the instant suggestion
       await searchPage.waitForFunction(
-        () => {
-          const results = document.querySelectorAll('[data-testid="spotlight-result"]');
+        hostSelector => {
+          const root = document.querySelector(hostSelector)?.shadowRoot;
+          if (!root) return false;
+          const results = root.querySelectorAll('[data-testid="spotlight-result"]');
           for (const result of results) {
             if (result.querySelector('.arcify-space-chip')) return true;
           }
           return false;
         },
-        { timeout: 8000, polling: 200 }
+        { timeout: 8000, polling: 200 },
+        OVERLAY_HOST_SELECTOR
       );
 
       // 5. Find the result with the chip and verify its content
-      const chipData = await searchPage.evaluate(() => {
-        const results = document.querySelectorAll('[data-testid="spotlight-result"]');
+      const chipData = await searchPage.evaluate(hostSelector => {
+        const root = document.querySelector(hostSelector)?.shadowRoot;
+        if (!root) return { found: false };
+        const results = root.querySelectorAll('[data-testid="spotlight-result"]');
         for (const result of results) {
           const chip = result.querySelector('.arcify-space-chip');
           if (chip) {
@@ -543,7 +553,7 @@ describe('Spotlight E2E Tests', () => {
           }
         }
         return { found: false };
-      });
+      }, OVERLAY_HOST_SELECTOR);
 
       assert.ok(
         chipData.found,
@@ -612,15 +622,15 @@ describe('Spotlight E2E Tests', () => {
       });
       await wait();
 
-      await searchPage.waitForSelector('[data-testid="spotlight-overlay"]', {
+      await searchPage.waitForSelector(overlaySelector('[data-testid="spotlight-overlay"]'), {
         timeout: 5000
       });
       await wait();
 
       // Search for the non-grouped tab
-      await searchPage.type('[data-testid="spotlight-input"]', 'Example');
+      await searchPage.type(overlaySelector('[data-testid="spotlight-input"]'), 'Example');
 
-      await searchPage.waitForSelector('[data-testid="spotlight-result"]', {
+      await searchPage.waitForSelector(overlaySelector('[data-testid="spotlight-result"]'), {
         timeout: 5000
       });
 
@@ -628,15 +638,17 @@ describe('Spotlight E2E Tests', () => {
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       // Verify NO chip is present on results for non-grouped tabs
-      const hasChip = await searchPage.evaluate(() => {
-        const results = document.querySelectorAll('[data-testid="spotlight-result"]');
+      const hasChip = await searchPage.evaluate(hostSelector => {
+        const root = document.querySelector(hostSelector)?.shadowRoot;
+        if (!root) return false;
+        const results = root.querySelectorAll('[data-testid="spotlight-result"]');
         for (const result of results) {
           if (result.querySelector('.arcify-space-chip')) {
             return true;
           }
         }
         return false;
-      });
+      }, OVERLAY_HOST_SELECTOR);
 
       assert.ok(
         !hasChip,

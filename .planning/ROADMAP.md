@@ -27,7 +27,7 @@ Prior milestones delivered: bug fixes, UX polish, testing infrastructure (240 te
 
 - [x] **Phase 13: Audit & Coverage Report** - Produce coverage analysis and prioritized gap list for user review ✓
 - [x] **Phase 14: Utility Module Tests** - Test bookmark-utils, website-name-extractor, popular-sites, utils ✓
-- [ ] **Phase 15: Provider & Component Tests** - Test data providers and component logic
+- [x] **Phase 15: Provider & Component Tests** - Test data providers and component logic ✓
 - [ ] **Phase 16: Low Priority Tests** - Remaining low-priority module tests
 - [ ] **Phase 17: E2E Test Suite** - Dedicated E2E test coverage and CI re-enablement
 
@@ -72,11 +72,12 @@ Plans:
   3. `shared-component-logic.js` has tests covering input handling, overlay lifecycle (show/hide/toggle), and suggestion rendering logic -- all passing
   4. `message-client.js` has tests covering message serialization, error handling, response parsing, and timeout scenarios -- all passing
   5. Running `npx vitest run` shows all new provider and component tests passing with no regressions
-**Plans**: TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 15-01: TBD
-- [ ] 15-02: TBD
+- [x] 15-01-PLAN.md -- Install jsdom, write AutocompleteProvider and SpotlightMessageClient tests (PROV-01, COMP-02) ✓
+- [x] 15-02-PLAN.md -- Write BackgroundDataProvider data fetcher and partial-failure tests (PROV-02) ✓
+- [x] 15-03-PLAN.md -- Write SharedSpotlightLogic DOM, event handling, and lifecycle tests (COMP-01) ✓
 
 ### Phase 16: Low Priority Tests
 **Goal**: Remaining low-priority modules are assessed and tested where meaningful
@@ -116,10 +117,10 @@ Phase 13 executes first. Phases 14, 15, 16, and 17 can execute in parallel after
 |-------|-----------|----------------|--------|-----------|
 | 13. Audit & Coverage Report | v2.1 | 1/1 | ✓ Complete | 2026-02-10 |
 | 14. Utility Module Tests | v2.1 | 2/2 | ✓ Complete | 2026-02-10 |
-| 15. Provider & Component Tests | v2.1 | 0/TBD | Not started | - |
+| 15. Provider & Component Tests | v2.1 | 3/3 | ✓ Complete | 2026-02-14 |
 | 16. Low Priority Tests | v2.1 | 0/TBD | Not started | - |
 | 17. E2E Test Suite | v2.1 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-09*
-*Last updated: 2026-02-10 -- Phase 14 complete*
+*Last updated: 2026-02-14 -- Phase 15 complete*
