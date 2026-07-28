@@ -231,7 +231,12 @@ export class SpotlightUtils {
     }
 
     // Generate accent color CSS based on active space color (from overlay.js)
-    static async getAccentColorCSS(spaceColor) {
+    //
+    // selector: where the custom properties get defined. Defaults to ':root' for
+    // extension pages (newtab). The overlay must pass ':host' -- it renders inside a
+    // shadow root, where ':root' matches nothing and every var() would fall back to
+    // an empty value (colorless hover/selection states, no error).
+    static async getAccentColorCSS(spaceColor, selector = ':root') {
         // Default RGB values for each color name (matching --chrome-*-color variables in styles.css)
         const defaultColorMap = {
             grey: '204, 204, 204',
@@ -262,7 +267,7 @@ export class SpotlightUtils {
         }
 
         return `
-            :root {
+            ${selector} {
                 --spotlight-accent-color: rgb(${rgb});
                 --spotlight-accent-color-15: rgba(${rgb}, 0.15);
                 --spotlight-accent-color-20: rgba(${rgb}, 0.2);

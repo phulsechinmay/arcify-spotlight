@@ -76,9 +76,21 @@ export class SelectionManager {
         }
     }
 
+    // Resolve the focused element in the container's own tree.
+    // The overlay lives in a shadow root, where document.activeElement is the shadow
+    // HOST -- never the input -- so a document-level lookup would fail the container
+    // check every time. ShadowRoot has its own activeElement; fall back to document
+    // for extension pages (and for test mocks without getRootNode).
+    getActiveElement() {
+        const root = typeof this.container.getRootNode === 'function'
+            ? this.container.getRootNode()
+            : null;
+        return (root && root.activeElement) || document.activeElement;
+    }
+
     // Enhanced keyboard navigation (can be extended with more features)
     handleKeyDown(event, skipContainerCheck = false) {
-        if (!skipContainerCheck && !this.container.contains(document.activeElement)) {
+        if (!skipContainerCheck && !this.container.contains(this.getActiveElement())) {
             return false; // Not handling this event
         }
 
