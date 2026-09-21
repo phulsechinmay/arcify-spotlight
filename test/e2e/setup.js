@@ -93,7 +93,7 @@ export async function waitForExtension(browser) {
  *
  * Neither applies to newtab.html -- that's a normal extension page with no shadow root.
  */
-export const OVERLAY_HOST_SELECTOR = '#arcify-spotlight-host';
+export const OVERLAY_HOST_SELECTOR = '[data-arcify-spotlight-host]';
 
 export function overlaySelector(selector) {
   return `${OVERLAY_HOST_SELECTOR} >>> ${selector}`;

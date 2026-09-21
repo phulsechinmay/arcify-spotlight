@@ -63,20 +63,34 @@ if (!window.arcifySpotlightTabMode) {
  * selectors, and inherited properties (font, color) flowing in from html/body. Sites with
  * an opinionated design system -- Reddit, StackOverflow -- rendered a visibly different bar.
  *
- * Everything now lives in a shadow root, so page selectors cannot match our nodes at all,
- * and ':host { all: initial }' cuts off inheritance at the boundary.
+ * Everything now lives in a shadow root, so page selectors cannot match our nodes at all.
+ * The host reset cuts off inherited page styles at the boundary, including the direction
+ * properties that the CSS `all` shorthand intentionally excludes.
  *
- * Consequence: document.getElementById() cannot see into the shadow tree. Every lookup of
- * our own DOM must go through the host element.
+ * The host and dialog are retained by reference instead of being rediscovered through the
+ * page DOM. Besides working with Shadow DOM, this prevents a page-owned ID collision from
+ * breaking toggle and cleanup behavior.
  */
 const SPOTLIGHT_HOST_ID = 'arcify-spotlight-host';
 const SPOTLIGHT_DIALOG_ID = 'arcify-spotlight-dialog';
+const SPOTLIGHT_HOST_ATTRIBUTE = 'data-arcify-spotlight-host';
+
+let spotlightHost = null;
+let spotlightDialog = null;
+let spotlightRemovalTimer = null;
 
 function getExistingSpotlightDialog() {
-    const host = document.getElementById(SPOTLIGHT_HOST_ID);
-    return host && host.shadowRoot
-        ? host.shadowRoot.getElementById(SPOTLIGHT_DIALOG_ID)
-        : null;
+    if (spotlightHost?.isConnected && spotlightDialog?.isConnected) {
+        return spotlightDialog;
+    }
+
+    if (spotlightRemovalTimer !== null) {
+        clearTimeout(spotlightRemovalTimer);
+        spotlightRemovalTimer = null;
+    }
+    spotlightHost = null;
+    spotlightDialog = null;
+    return null;
 }
 
 // Main spotlight activation function
@@ -89,6 +103,10 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
         if (existingDialog.open) {
             existingDialog.close();
         } else {
+            if (spotlightRemovalTimer !== null) {
+                clearTimeout(spotlightRemovalTimer);
+                spotlightRemovalTimer = null;
+            }
             existingDialog.showModal();
 
             // Notify background that spotlight opened in this tab
@@ -131,6 +149,8 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
         :host {
             all: initial !important;
             display: contents !important;
+            direction: ltr !important;
+            unicode-bidi: isolate !important;
         }
 
         #arcify-spotlight-dialog {
@@ -388,12 +408,18 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
     // document.head / document.body (see SHADOW DOM ISOLATION above).
     const host = document.createElement('div');
     host.id = SPOTLIGHT_HOST_ID;
+    host.setAttribute(SPOTLIGHT_HOST_ATTRIBUTE, '');
     // Same reset as ':host', applied inline as a second line of defence: an inline
     // '!important' declaration is the strongest author-level rule, so page CSS matching
     // the host (div {}, * {}) cannot feed inherited values into the shadow tree.
-    host.setAttribute('style', 'all: initial !important; display: contents !important;');
+    host.setAttribute(
+        'style',
+        'all: initial !important; display: contents !important; direction: ltr !important; unicode-bidi: isolate !important;'
+    );
 
-    // Must stay 'open': the e2e suite reaches the overlay through host.shadowRoot.
+    // This is deliberately open for diagnostics and end-to-end assertions. Shadow DOM is a
+    // style-encapsulation mechanism, not a security boundary; page data exposed here was also
+    // visible in the former light-DOM implementation.
     const shadow = host.attachShadow({ mode: 'open' });
 
     const styleSheet = document.createElement('style');
@@ -442,6 +468,8 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
     // showModal() later requires the dialog to be connected -- the host must be in the
     // document before then, and appending it here keeps that ordering obvious.
     document.body.appendChild(host);
+    spotlightHost = host;
+    spotlightDialog = dialog;
 
     // Get references to key elements
     const input = dialog.querySelector('.arcify-spotlight-input');
@@ -661,16 +689,31 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
 
     // Close spotlight function
     function closeSpotlight() {
-        dialog.close();
+        if (dialog.open) {
+            dialog.close();
+        }
+    }
+
+    function scheduleSpotlightRemoval() {
+        // The native close event is queued. If the overlay was reopened before it arrived,
+        // that event belongs to the previous state and must not close or remove the live UI.
+        if (dialog.open) return;
 
         SpotlightMessageClient.notifyClosed();
 
-        setTimeout(() => {
+        if (spotlightRemovalTimer !== null) {
+            return;
+        }
+
+        spotlightRemovalTimer = setTimeout(() => {
             // Removing the host takes the dialog and both stylesheets with it.
             if (host.parentNode) {
                 host.parentNode.removeChild(host);
-                window.arcifySpotlightInjected = false;
             }
+            if (spotlightHost === host) spotlightHost = null;
+            if (spotlightDialog === dialog) spotlightDialog = null;
+            spotlightRemovalTimer = null;
+            window.arcifySpotlightInjected = false;
         }, 200);
     }
 
@@ -681,7 +724,7 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
         }
     });
 
-    dialog.addEventListener('close', closeSpotlight);
+    dialog.addEventListener('close', scheduleSpotlightRemoval);
 
     // Listen for global close messages from background script
     SpotlightMessageClient.setupGlobalCloseListener(() => {

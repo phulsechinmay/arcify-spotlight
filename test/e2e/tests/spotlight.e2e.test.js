@@ -12,8 +12,9 @@
  * - Fresh browser per test to prevent state pollution
  */
 
-import { describe, it, beforeEach, afterEach } from 'node:test';
+import { describe, it, before, after, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert';
+import http from 'node:http';
 import {
   launchBrowserWithExtension,
   closeBrowser,
@@ -24,7 +25,7 @@ import {
 } from '../setup.js';
 
 // NOTE: newtab.html tests use plain selectors -- that page has no shadow root.
-// The overlay tests (E2E-04, E2E-05) must pierce into #arcify-spotlight-host's shadow root.
+// The overlay tests (E2E-04, E2E-05) must pierce into the Arcify host's shadow root.
 
 // Set DEBUG=true env var to add delays between actions and run with visible browser
 const DEBUG = process.env.DEBUG === 'true';
@@ -35,6 +36,52 @@ const wait = (ms = ACTION_DELAY) =>
 describe('Spotlight E2E Tests', () => {
   let browser;
   let extensionId;
+  let testServer;
+  let testOrigin;
+
+  before(async () => {
+    testServer = http.createServer((request, response) => {
+      const hostileStyles = request.url === '/hostile'
+        ? `
+          <style>
+            html, body, body * {
+              direction: rtl !important;
+              unicode-bidi: bidi-override !important;
+              font-family: fantasy !important;
+              color: rgb(255, 0, 0) !important;
+              letter-spacing: 12px !important;
+            }
+            button, input, dialog {
+              position: static !important;
+              background: rgb(0, 255, 0) !important;
+              border: 20px solid magenta !important;
+              font-size: 42px !important;
+            }
+          </style>
+          <div id="arcify-spotlight-host">Page-owned ID collision</div>
+        `
+        : '';
+
+      response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      response.end(`<!doctype html>
+        <html>
+          <head><title>Example Domain</title>${hostileStyles}</head>
+          <body><main>Local extension test page</main></body>
+        </html>`);
+    });
+
+    await new Promise((resolve, reject) => {
+      testServer.once('error', reject);
+      testServer.listen(0, '127.0.0.1', resolve);
+    });
+    testOrigin = `http://127.0.0.1:${testServer.address().port}`;
+  });
+
+  after(async () => {
+    if (testServer) {
+      await new Promise(resolve => testServer.close(resolve));
+    }
+  });
 
   beforeEach(async () => {
     browser = await launchBrowserWithExtension();
@@ -295,7 +342,7 @@ describe('Spotlight E2E Tests', () => {
       await wait();
 
       // Type a URL that will be recognized
-      await page.type('[data-testid="spotlight-input"]', 'https://example.com');
+      await page.type('[data-testid="spotlight-input"]', `${testOrigin}/destination`);
 
       // Wait for results
       await page.waitForSelector('[data-testid="spotlight-result"]', {
@@ -315,7 +362,7 @@ describe('Spotlight E2E Tests', () => {
       // Verify we navigated (URL should change or page should load)
       const currentUrl = page.url();
       assert.ok(
-        currentUrl.includes('example.com') ||
+        currentUrl.startsWith(testOrigin) ||
           currentUrl.startsWith('chrome-extension://'),
         'Enter should trigger navigation'
       );
@@ -325,15 +372,15 @@ describe('Spotlight E2E Tests', () => {
   });
 
   describe('E2E-04: Overlay on Regular Page', () => {
-    it('opens spotlight as overlay on a regular webpage', async () => {
+    it('isolates the overlay from hostile page CSS and ID collisions', async () => {
       // Get the service worker to trigger spotlight programmatically
       const ext = await waitForExtension(browser);
       const worker = ext.worker;
 
       // Open a regular webpage
       const page = await browser.newPage();
-      await page.goto('https://example.com', {
-        waitUntil: 'networkidle0'
+      await page.goto(`${testOrigin}/hostile`, {
+        waitUntil: 'domcontentloaded'
       });
       await wait();
 
@@ -341,7 +388,7 @@ describe('Spotlight E2E Tests', () => {
       const pageTitle = await page.title();
       assert.ok(
         pageTitle.includes('Example'),
-        'Should have loaded example.com page'
+        'Should have loaded the local test page'
       );
 
       // Wait for content script to be ready (it loads at document_start)
@@ -374,10 +421,40 @@ describe('Spotlight E2E Tests', () => {
       // Verify the page content is still in the background (not navigated away)
       const currentUrl = page.url();
       assert.ok(
-        currentUrl.includes('example.com'),
-        'Should still be on example.com (overlay, not navigation)'
+        currentUrl === `${testOrigin}/hostile`,
+        'Should still be on the host page (overlay, not navigation)'
       );
       await wait();
+
+      const isolation = await page.evaluate(hostSelector => {
+        const hostsWithCollidingId = document.querySelectorAll('#arcify-spotlight-host');
+        const host = document.querySelector(hostSelector);
+        const root = host?.shadowRoot;
+        const dialog = root?.querySelector('[data-testid="spotlight-overlay"]');
+        const input = root?.querySelector('[data-testid="spotlight-input"]');
+        const accent = root
+          ? getComputedStyle(root.querySelector('.arcify-spotlight-container'))
+              .getPropertyValue('--spotlight-accent-color').trim()
+          : '';
+
+        return {
+          collidingIdCount: hostsWithCollidingId.length,
+          hostDirection: host ? getComputedStyle(host).direction : null,
+          dialogPosition: dialog ? getComputedStyle(dialog).position : null,
+          inputDirection: input ? getComputedStyle(input).direction : null,
+          inputFontSize: input ? getComputedStyle(input).fontSize : null,
+          inputBorderWidth: input ? getComputedStyle(input).borderTopWidth : null,
+          accent
+        };
+      }, OVERLAY_HOST_SELECTOR);
+
+      assert.strictEqual(isolation.collidingIdCount, 2, 'Page collision fixture should be present');
+      assert.strictEqual(isolation.hostDirection, 'ltr', 'Host must reset page direction');
+      assert.strictEqual(isolation.inputDirection, 'ltr', 'Input must not inherit RTL direction');
+      assert.strictEqual(isolation.dialogPosition, 'fixed', 'Page dialog rules must not cross the shadow root');
+      assert.strictEqual(isolation.inputFontSize, '18px', 'Page input rules must not cross the shadow root');
+      assert.strictEqual(isolation.inputBorderWidth, '0px', 'Page input borders must not cross the shadow root');
+      assert.match(isolation.accent, /^rgb\(/, 'Accent custom property should resolve inside the shadow root');
 
       // Verify we can interact with spotlight
       const input = await page.$(overlaySelector('[data-testid="spotlight-input"]'));
@@ -394,6 +471,26 @@ describe('Spotlight E2E Tests', () => {
       const results = await page.$$(overlaySelector('[data-testid="spotlight-result"]'));
       assert.ok(results.length > 0, 'Should show results in overlay mode');
 
+      // Toggle closed and reopen while the delayed teardown is pending. The pending removal
+      // must be cancelled, and the page-owned colliding ID must not confuse lookup.
+      await worker.evaluate(async () => {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        await chrome.tabs.sendMessage(tab.id, { action: 'activateSpotlight', mode: 'current-tab' });
+        await chrome.tabs.sendMessage(tab.id, { action: 'activateSpotlight', mode: 'current-tab' });
+      });
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      const lifecycle = await page.evaluate(hostSelector => {
+        const hosts = document.querySelectorAll(hostSelector);
+        const dialog = hosts[0]?.shadowRoot?.querySelector('[data-testid="spotlight-overlay"]');
+        return { hostCount: hosts.length, dialogOpen: Boolean(dialog?.open) };
+      }, OVERLAY_HOST_SELECTOR);
+      assert.deepStrictEqual(
+        lifecycle,
+        { hostCount: 1, dialogOpen: true },
+        'Rapid close/reopen should preserve exactly one open Arcify overlay'
+      );
+
       await page.close();
     });
   });
@@ -402,7 +499,7 @@ describe('Spotlight E2E Tests', () => {
     it('selecting an open tab result switches to that tab', async () => {
       // First, open a known page in a new tab
       const targetPage = await browser.newPage();
-      await targetPage.goto('https://example.com', {
+      await targetPage.goto(`${testOrigin}/example`, {
         waitUntil: 'domcontentloaded'
       });
       await wait();
@@ -417,7 +514,7 @@ describe('Spotlight E2E Tests', () => {
       await wait();
 
       // Search for the open tab
-      await spotlightPage.type('[data-testid="spotlight-input"]', 'example.com');
+      await spotlightPage.type('[data-testid="spotlight-input"]', 'Example Domain');
 
       // Wait for results
       await spotlightPage.waitForSelector('[data-testid="spotlight-result"]', {
@@ -440,10 +537,10 @@ describe('Spotlight E2E Tests', () => {
         const pages = await browser.pages();
 
         // Find the example.com page and check if it's in focus
-        const examplePage = pages.find(p => p.url().includes('example.com'));
+        const examplePage = pages.find(p => p.url() === `${testOrigin}/example`);
         assert.ok(
           examplePage,
-          'Should still have the example.com tab open'
+          'Should still have the local example tab open'
         );
       }
 
@@ -459,31 +556,31 @@ describe('Spotlight E2E Tests', () => {
 
       // 1. Open a target page that will be put into a tab group
       const targetPage = await browser.newPage();
-      await targetPage.goto('https://example.com', {
+      await targetPage.goto(`${testOrigin}/grouped`, {
         waitUntil: 'domcontentloaded'
       });
       await wait();
 
       // 2. Create a tab group via the service worker using Chrome APIs
       //    Put the example.com tab into a group named "Research" with color "blue"
-      await worker.evaluate(async () => {
+      await worker.evaluate(async targetUrl => {
         const tabs = await chrome.tabs.query({});
-        const exampleTab = tabs.find(t => t.url && t.url.includes('example.com'));
-        if (!exampleTab) throw new Error('Could not find example.com tab');
+        const exampleTab = tabs.find(t => t.url === targetUrl);
+        if (!exampleTab) throw new Error('Could not find local example tab');
 
         const groupId = await chrome.tabs.group({ tabIds: [exampleTab.id] });
         await chrome.tabGroups.update(groupId, {
           title: 'Research',
           color: 'blue'
         });
-      });
+      }, `${testOrigin}/grouped`);
       await wait();
 
       // 3. Open a second (non-grouped) page and trigger Spotlight as overlay.
       //    Using overlay mode on a regular page because the content script message
       //    pipeline reliably delivers background search results in Puppeteer.
       const searchPage = await browser.newPage();
-      await searchPage.goto('https://www.google.com', {
+      await searchPage.goto(`${testOrigin}/search`, {
         waitUntil: 'domcontentloaded'
       });
       await wait();
@@ -593,14 +690,14 @@ describe('Spotlight E2E Tests', () => {
 
       // Open a non-grouped tab
       const targetPage = await browser.newPage();
-      await targetPage.goto('https://example.com', {
+      await targetPage.goto(`${testOrigin}/ungrouped`, {
         waitUntil: 'domcontentloaded'
       });
       await wait();
 
       // Open a second page and trigger Spotlight as overlay
       const searchPage = await browser.newPage();
-      await searchPage.goto('https://www.google.com', {
+      await searchPage.goto(`${testOrigin}/search`, {
         waitUntil: 'domcontentloaded'
       });
       await wait();
