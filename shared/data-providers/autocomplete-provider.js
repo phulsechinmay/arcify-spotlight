@@ -23,6 +23,7 @@ export class AutocompleteProvider {
         this.cache = new Map();
         this.pendingRequests = new Map();
         this.CACHE_TTL = 30000; // 30 seconds
+        this.MAX_CACHE_ENTRIES = 100;
         this.REQUEST_TIMEOUT = 3000; // 3 seconds
     }
 
@@ -40,6 +41,7 @@ export class AutocompleteProvider {
         if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
             return cached.results;
         }
+        if (cached) this.cache.delete(cacheKey);
 
         // Check if request is already pending to avoid duplicates
         if (this.pendingRequests.has(cacheKey)) {
@@ -58,6 +60,9 @@ export class AutocompleteProvider {
                 results,
                 timestamp: Date.now()
             });
+            while (this.cache.size > this.MAX_CACHE_ENTRIES) {
+                this.cache.delete(this.cache.keys().next().value);
+            }
 
             return results;
         } catch (error) {

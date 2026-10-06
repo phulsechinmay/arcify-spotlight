@@ -109,6 +109,54 @@ describe('SharedSpotlightLogic', () => {
         });
     });
 
+    describe('mergeRankedResults', () => {
+        it('sorts merged results by score and applies the limit', () => {
+            const local = [{ title: 'Local', score: 90 }];
+            const autocomplete = [
+                { title: 'Remote low', score: 40 },
+                { title: 'Remote high', score: 80 }
+            ];
+
+            expect(SharedSpotlightLogic.mergeRankedResults(local, autocomplete, 2))
+                .toEqual([local[0], autocomplete[1]]);
+        });
+
+        it('keeps the local result when autocomplete contains a duplicate', () => {
+            const local = [{ title: 'Open tab', url: 'https://example.com', score: 70 }];
+            const autocomplete = [{ title: 'Suggestion', url: 'https://example.com', score: 100 }];
+            SpotlightUtils.areResultsDuplicate.mockImplementation((a, b) => a.url === b.url);
+
+            expect(SharedSpotlightLogic.mergeRankedResults(local, autocomplete))
+                .toEqual(local);
+        });
+
+        it('does not mutate either source array', () => {
+            const local = [{ title: 'Local', score: 20 }];
+            const autocomplete = [{ title: 'Remote', score: 30 }];
+
+            SharedSpotlightLogic.mergeRankedResults(local, autocomplete);
+
+            expect(local).toEqual([{ title: 'Local', score: 20 }]);
+            expect(autocomplete).toEqual([{ title: 'Remote', score: 30 }]);
+        });
+
+        it('deduplicates equivalent URL forms without a second provider search', () => {
+            const local = [{ type: 'open-tab', title: 'Open', url: 'https://www.example.com/path/#section', score: 80 }];
+            const autocomplete = [{ type: 'autocomplete-suggestion', title: 'Remote', url: 'http://example.com/path', score: 30 }];
+
+            expect(SharedSpotlightLogic.mergeRankedResults(local, autocomplete)).toEqual(local);
+        });
+
+        it('boosts autocomplete results when local results are sparse without mutating them', () => {
+            const autocomplete = [{ type: 'autocomplete-suggestion', title: 'Remote', url: 'https://remote.test', score: 30 }];
+
+            const [result] = SharedSpotlightLogic.mergeRankedResults([], autocomplete);
+
+            expect(result.score).toBe(70);
+            expect(autocomplete[0].score).toBe(30);
+        });
+    });
+
     // ── generateResultsHTML ─────────────────────────────────────────────
     describe('generateResultsHTML', () => {
         it('returns empty-state HTML for null results', () => {
@@ -571,6 +619,17 @@ describe('SharedSpotlightLogic', () => {
             expect(onInstant).toHaveBeenCalledWith(mockEvent);
             vi.advanceTimersByTime(150);
             expect(onAsync).toHaveBeenCalledWith(mockEvent);
+        });
+
+        it('cancels a pending debounced update', () => {
+            const onAsync = vi.fn();
+            const handler = SharedSpotlightLogic.createInputHandler(vi.fn(), onAsync);
+            handler({ target: { value: 'test' } });
+
+            handler.cancel();
+            vi.advanceTimersByTime(200);
+
+            expect(onAsync).not.toHaveBeenCalled();
         });
     });
 

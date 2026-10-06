@@ -9,7 +9,8 @@
  * - Score inversion: Fuse.js returns 0=perfect, we return 1=perfect (matchScore = 1 - fuseScore)
  * - ignoreLocation: true is CRITICAL for URL matching (matches can appear anywhere in string)
  * - Do NOT add `keys` to defaults -- each data source passes its own keys via optionOverrides
- * - Each search creates a fresh Fuse instance (data changes between searches, <1000 items per source)
+ * - Indexes are cached by collection identity; callers must replace arrays when data changes
+ * - Result counts are bounded before downstream enrichment and rendering
  */
 
 import Fuse from 'fuse.js';
@@ -28,6 +29,8 @@ export const FUSE_DEFAULT_OPTIONS = {
 };
 
 export class FuseSearchService {
+    static indexCache = new WeakMap();
+
     /**
      * Search a collection of items using Fuse.js
      * @param {Array} items - Array of objects to search through
@@ -35,12 +38,18 @@ export class FuseSearchService {
      * @param {Object} optionOverrides - Override default options (must include `keys` for the data source)
      * @returns {Array<{item: Object, matchScore: number}>} Results with matchScore 0-1 (1=perfect match)
      */
-    static search(items, query, optionOverrides = {}) {
+    static search(items, query, optionOverrides = {}, limit = 20) {
         if (!items || items.length === 0 || !query) return [];
 
         const mergedOptions = { ...FUSE_DEFAULT_OPTIONS, ...optionOverrides };
-        const fuse = new Fuse(items, mergedOptions);
-        const results = fuse.search(query);
+        const optionKey = JSON.stringify(mergedOptions);
+        let cached = FuseSearchService.indexCache.get(items);
+        if (!cached || cached.optionKey !== optionKey) {
+            cached = { optionKey, fuse: new Fuse(items, mergedOptions) };
+            FuseSearchService.indexCache.set(items, cached);
+        }
+        const searchOptions = Number.isInteger(limit) && limit >= 0 ? { limit } : undefined;
+        const results = cached.fuse.search(query, searchOptions);
 
         // Convert Fuse score (0=perfect, 1=mismatch) to our format (1=perfect, 0=mismatch)
         return results.map(result => ({

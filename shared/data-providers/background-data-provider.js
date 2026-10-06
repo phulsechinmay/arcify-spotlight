@@ -204,10 +204,17 @@ export class BackgroundDataProvider extends BaseDataProvider {
             // Get spaces from storage
             const storage = await chrome.storage.local.get('spaces');
             const spaces = storage.spaces || [];
-            Logger.log('[BackgroundDataProvider] Found spaces:', spaces.length, spaces.map(s => s.name));
+            const spacesByName = new Map(spaces.map(space => [space.name, space]));
+            Logger.log('[BackgroundDataProvider] Found spaces:', spaces.length);
 
             // Get current tabs
             const tabs = await chrome.tabs.query({});
+            const tabsByUrl = new Map();
+            for (const tab of tabs) {
+                if (tab.url && !tabsByUrl.has(tab.url)) {
+                    tabsByUrl.set(tab.url, tab);
+                }
+            }
             Logger.log('[BackgroundDataProvider] Found tabs:', tabs.length);
 
             // Get Arcify folder structure using robust method
@@ -219,36 +226,27 @@ export class BackgroundDataProvider extends BaseDataProvider {
             Logger.log('[BackgroundDataProvider] Found Arcify folder:', arcifyFolder.id);
 
             const spaceFolders = await chrome.bookmarks.getChildren(arcifyFolder.id);
-            Logger.log('[BackgroundDataProvider] Found space folders:', spaceFolders.length, spaceFolders.map(f => f.title));
+            Logger.log('[BackgroundDataProvider] Found space folders:', spaceFolders.length);
 
-            // Collect ALL pinned tab candidates first (no query filtering in loop)
+            // Collect candidates with bounded memory. Spaces are intentionally
+            // traversed one at a time; users can have large bookmark trees and
+            // launching a complete traversal for every space spikes heap/API use.
             const allCandidates = [];
-
-            // Process each space folder
             for (const spaceFolder of spaceFolders) {
-                const space = spaces.find(s => s.name === spaceFolder.title);
-                Logger.log('[BackgroundDataProvider] Processing space folder:', spaceFolder.title, 'found space:', !!space);
+                const space = spacesByName.get(spaceFolder.title);
                 if (!space) continue;
 
-                // Get all bookmarks in this space folder (recursively)
                 const bookmarks = await BookmarkUtils.getBookmarksFromFolderRecursive(spaceFolder.id);
-                Logger.log('[BackgroundDataProvider] Found bookmarks in', spaceFolder.title, ':', bookmarks.length);
-
                 for (const bookmark of bookmarks) {
-                    // Check if there's a matching open tab
-                    const matchingTab = BookmarkUtils.findTabByUrl(tabs, bookmark.url);
-                    Logger.log('[BackgroundDataProvider] Processing bookmark:', bookmark.title, 'matching tab:', !!matchingTab);
-
-                    const pinnedTab = {
+                    const matchingTab = tabsByUrl.get(bookmark.url);
+                    allCandidates.push({
                         ...bookmark,
                         spaceId: space.id,
                         spaceName: space.name,
                         spaceColor: space.color,
                         tabId: matchingTab?.id || null,
                         isActive: !!matchingTab
-                    };
-                    Logger.log('[BackgroundDataProvider] Adding pinned tab:', pinnedTab);
-                    allCandidates.push(pinnedTab);
+                    });
                 }
             }
 
@@ -259,7 +257,7 @@ export class BackgroundDataProvider extends BaseDataProvider {
                         { name: 'title', weight: 2 },
                         { name: 'url', weight: 1 }
                     ]
-                });
+                }, 16);
 
                 const filteredPinnedTabs = fuseResults.map(result => {
                     const pinnedTab = result.item;

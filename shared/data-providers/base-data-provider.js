@@ -159,8 +159,8 @@ export class BaseDataProvider {
         const results = [];
 
         try {
-            // Show all open tabs for both modes when no query
-            const openTabs = await this.getOpenTabs('');
+            // Keep first paint bounded for users with hundreds of open tabs.
+            const openTabs = await this.getOpenTabs('', 8);
             results.push(...openTabs);
         } catch (error) {
             Logger.error('[SearchProvider] Error getting default results:', error);
@@ -175,11 +175,14 @@ export class BaseDataProvider {
     }
 
     // Chrome tabs API integration
-    async getOpenTabs(query = '') {
+    async getOpenTabs(query = '', limit = null) {
         try {
             const tabsData = await this.getOpenTabsData(query);
+            const limitedTabs = Number.isInteger(limit) && limit >= 0
+                ? tabsData.slice(0, limit)
+                : tabsData;
 
-            const results = tabsData.map(tab => new SearchResult({
+            const results = limitedTabs.map(tab => new SearchResult({
                 type: tab.pinned ? ResultType.PINNED_TAB : ResultType.OPEN_TAB,
                 title: tab.title,
                 url: tab.url,
@@ -226,12 +229,10 @@ export class BaseDataProvider {
     // Chrome bookmarks API integration
     async getPinnedTabSuggestions(query) {
         try {
-            Logger.log('[BaseDataProvider] getPinnedTabSuggestions called with query:', query);
             const pinnedTabsData = await this.getPinnedTabsData(query);
-            Logger.log('[BaseDataProvider] Got pinned tabs data:', pinnedTabsData.length, pinnedTabsData);
-            
-            const results = pinnedTabsData.map(pinnedTab => {
-                const result = new SearchResult({
+
+            return pinnedTabsData.map(pinnedTab => {
+                return new SearchResult({
                     type: ResultType.PINNED_TAB,
                     title: pinnedTab.title,
                     url: pinnedTab.url,
@@ -245,11 +246,7 @@ export class BaseDataProvider {
                         matchScore: pinnedTab._matchScore || null
                     }
                 });
-                Logger.log('[BaseDataProvider] Created PINNED_TAB SearchResult:', result);
-                return result;
             });
-            Logger.log('[BaseDataProvider] Returning', results.length, 'pinned tab results');
-            return results;
         } catch (error) {
             Logger.error('[SearchProvider-PinnedTabs] Error getting pinned tab suggestions:', error);
             return [];

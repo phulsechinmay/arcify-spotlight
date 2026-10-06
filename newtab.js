@@ -326,12 +326,15 @@ async function initializeSpotlight() {
     // Load initial results
     // Use 'current-tab' mode since we're on the new tab page itself
     async function loadInitialResults() {
+        const queryId = ++searchQueryId;
         try {
             instantSuggestion = null;
             const results = await sendGetSuggestionsMessage('', 'current-tab');
+            if (queryId !== searchQueryId || input.value.trim()) return;
             asyncSuggestions = results || [];
             updateDisplay();
         } catch (error) {
+            if (queryId !== searchQueryId) return;
             Logger.error('[NewTab Spotlight] Error loading initial results:', error);
             instantSuggestion = null;
             asyncSuggestions = [];
@@ -344,8 +347,9 @@ async function initializeSpotlight() {
         const query = input.value.trim();
 
         if (!query) {
-            instantSuggestion = null;
-            loadInitialResults();
+            // Clearing the input should be immediate and deterministic. Do not
+            // start another background lookup that can race with the empty state.
+            displayEmptyState();
             return;
         }
 
@@ -359,7 +363,7 @@ async function initializeSpotlight() {
     // Stale queries are discarded via query generation counter
     async function handleAsyncSearch() {
         const query = input.value.trim();
-        const queryId = ++searchQueryId;
+        const queryId = searchQueryId;
 
         if (!query) {
             asyncSuggestions = [];
@@ -368,22 +372,26 @@ async function initializeSpotlight() {
         }
 
         try {
+            // Start both requests together, then paint local results as soon as
+            // they arrive. This saves a network round trip without delaying the
+            // fast local phase.
+            const localResultsPromise = SpotlightMessageClient.getLocalSuggestions(query, 'current-tab');
+            const autocompleteResultsPromise = SpotlightMessageClient.getAutocompleteSuggestions(query);
+
             // Phase 1: Local results (fast)
-            const localResults = await SpotlightMessageClient.getLocalSuggestions(query, 'current-tab');
+            const localResults = await localResultsPromise;
             if (queryId !== searchQueryId) return; // Stale query -- discard
             asyncSuggestions = localResults || [];
             updateDisplay();
 
             // Phase 2: Autocomplete results (slow, network)
-            const autocompleteResults = await SpotlightMessageClient.getAutocompleteSuggestions(query);
+            const autocompleteResults = await autocompleteResultsPromise;
             if (queryId !== searchQueryId) return; // Stale query -- discard
-
-            if (autocompleteResults && autocompleteResults.length > 0) {
-                const allResults = await SpotlightMessageClient.getSuggestions(query, 'current-tab');
-                if (queryId !== searchQueryId) return; // Stale query -- discard
-                asyncSuggestions = allResults || [];
-                updateDisplay();
-            }
+            asyncSuggestions = SharedSpotlightLogic.mergeRankedResults(
+                localResults || [],
+                autocompleteResults || []
+            );
+            updateDisplay();
         } catch (error) {
             Logger.error('[NewTab Spotlight] Search error:', error);
             if (queryId === searchQueryId) {
@@ -435,6 +443,9 @@ async function initializeSpotlight() {
             isSelectionDrivenChange = false;
             return;
         }
+        // Invalidate any previous local/autocomplete request immediately rather
+        // than leaving it live until the debounced callback runs.
+        searchQueryId += 1;
         // User typed something - trigger search
         baseInputHandler(e);
     });
@@ -479,7 +490,11 @@ async function initializeSpotlight() {
     // Focus input immediately
     input.focus();
 
-    // Load initial results and update color asynchronously
+    // Load initial results immediately; theming is independent and must not
+    // delay useful content when storage is slow.
+    loadInitialResults();
+
+    // Update color asynchronously.
     (async () => {
         try {
             // Update active space color and group name asynchronously
@@ -502,7 +517,5 @@ async function initializeSpotlight() {
             Logger.error('[NewTab Spotlight] Error updating active space color:', error);
         }
 
-        // Load initial results
-        loadInitialResults();
     })();
 }

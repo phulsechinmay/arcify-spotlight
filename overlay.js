@@ -47,10 +47,17 @@ if (!window.arcifySpotlightTabMode) {
             window.arcifyCurrentTabUrl = message.tabUrl;
             window.arcifyCurrentTabId = message.tabId;
 
-            // Instantly activate spotlight (no injection delay!)
-            activateSpotlight(message.mode);
-            sendResponse({ success: true });
+            // Keep the response channel open until the dialog is actually mounted. This lets
+            // the background fallback recover from early-document or rendering failures.
+            activateSpotlight(message.mode)
+                .then(() => sendResponse({ success: true }))
+                .catch(error => {
+                    Logger.error('[Spotlight] Activation failed:', error);
+                    sendResponse({ success: false, error: error.message });
+                });
+            return true;
         }
+        return false;
     });
 }
 
@@ -78,6 +85,20 @@ const SPOTLIGHT_HOST_ATTRIBUTE = 'data-arcify-spotlight-host';
 let spotlightHost = null;
 let spotlightDialog = null;
 let spotlightRemovalTimer = null;
+
+async function getDocumentMountPoint() {
+    if (document.documentElement) return document.documentElement;
+
+    return await new Promise(resolve => {
+        const observer = new MutationObserver(() => {
+            if (document.documentElement) {
+                observer.disconnect();
+                resolve(document.documentElement);
+            }
+        });
+        observer.observe(document, { childList: true });
+    });
+}
 
 function getExistingSpotlightDialog() {
     if (spotlightHost?.isConnected && spotlightDialog?.isConnected) {
@@ -132,7 +153,7 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
     // CSS styles with default accent color (will be updated)
     // ':host' -- not ':root' -- because these are injected into the shadow root, where
     // ':root' matches nothing and every var() below would silently resolve to empty.
-    const accentColorDefinitions = await SpotlightUtils.getAccentColorCSS(activeSpaceColor, ':host');
+    const accentColorDefinitions = SpotlightUtils.getDefaultAccentColorCSS(activeSpaceColor, ':host');
     const spotlightCSS = `
         /*
             Cut inheritance off at the shadow boundary. Shadow DOM blocks page SELECTORS
@@ -467,7 +488,9 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
     shadow.appendChild(dialog);
     // showModal() later requires the dialog to be connected -- the host must be in the
     // document before then, and appending it here keeps that ordering obvious.
-    document.body.appendChild(host);
+    // documentElement exists at document_start; body may not exist yet on slow-loading pages.
+    const mountPoint = await getDocumentMountPoint();
+    mountPoint.appendChild(host);
     spotlightHost = host;
     spotlightDialog = dialog;
 
@@ -480,6 +503,7 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
     let instantSuggestion = null; // The real-time first suggestion
     let asyncSuggestions = []; // Debounced suggestions from background
     let searchQueryId = 0; // Query generation counter for stale response protection (PERF-03)
+    let disposed = false;
 
     // Send get suggestions message to background script using shared client
     async function sendGetSuggestionsMessage(query, mode) {
@@ -515,15 +539,18 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
 
     // Load initial results
     async function loadInitialResults() {
+        const queryId = ++searchQueryId;
         try {
             // Clear instant suggestion when loading initial results
             instantSuggestion = null;
 
             const mode = spotlightTabMode === SpotlightTabMode.NEW_TAB ? 'new-tab' : 'current-tab';
             const results = await sendGetSuggestionsMessage('', mode);
+            if (disposed || !host.isConnected || queryId !== searchQueryId || input.value.trim()) return;
             asyncSuggestions = results || [];
             updateDisplay();
         } catch (error) {
+            if (disposed || queryId !== searchQueryId) return;
             Logger.error('[Spotlight] Error loading initial results:', error);
             instantSuggestion = null;
             asyncSuggestions = [];
@@ -531,25 +558,19 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
         }
     }
 
-    // Pre-fill URL in current-tab mode
+    // Pre-fill URL in current-tab mode. Do not automatically search every provider for the
+    // current URL; the instant URL suggestion is enough until the user actually types.
     if (spotlightTabMode === SpotlightTabMode.CURRENT_TAB && window.arcifyCurrentTabUrl) {
         input.value = window.arcifyCurrentTabUrl;
-        setTimeout(() => {
-            handleInstantInput();
-            handleAsyncSearch();
-        }, 10);
-    } else {
-        // Initial results will be loaded asynchronously after UI appears (Phase 2 optimization)
-        displayEmptyState();
     }
+    displayEmptyState();
 
     // Handle instant suggestion update (no debouncing)
     function handleInstantInput() {
         const query = input.value.trim();
 
         if (!query) {
-            instantSuggestion = null;
-            loadInitialResults();
+            displayEmptyState();
             return;
         }
 
@@ -564,7 +585,7 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
     // Stale queries are discarded via query generation counter
     async function handleAsyncSearch() {
         const query = input.value.trim();
-        const queryId = ++searchQueryId;
+        const queryId = searchQueryId;
 
         if (!query) {
             asyncSuggestions = [];
@@ -575,22 +596,29 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
         try {
             const mode = spotlightTabMode === SpotlightTabMode.NEW_TAB ? 'new-tab' : 'current-tab';
 
+            // Start local and network work together. Local results still paint first, while
+            // autocomplete uses the same debounce window without adding another serial wait.
+            const localPromise = SpotlightMessageClient.getLocalSuggestions(query, mode);
+            const autocompletePromise = SpotlightMessageClient.getAutocompleteSuggestions(query);
+
             // Phase 1: Local results (fast, ~10-50ms)
-            const localResults = await SpotlightMessageClient.getLocalSuggestions(query, mode);
-            if (queryId !== searchQueryId) return; // Stale query -- discard
+            const localResults = await localPromise;
+            if (disposed || queryId !== searchQueryId) return; // Stale query -- discard
             asyncSuggestions = localResults || [];
             updateDisplay();
 
             // Phase 2: Autocomplete results (slow, ~200-500ms network)
-            const autocompleteResults = await SpotlightMessageClient.getAutocompleteSuggestions(query);
-            if (queryId !== searchQueryId) return; // Stale query -- discard
+            const autocompleteResults = await autocompletePromise;
+            if (disposed || queryId !== searchQueryId) return; // Stale query -- discard
 
             if (autocompleteResults && autocompleteResults.length > 0) {
-                // Merge autocomplete with local results using the original all-in-one path
-                // for proper deduplication, scoring, and sorting
-                const allResults = await SpotlightMessageClient.getSuggestions(query, mode);
-                if (queryId !== searchQueryId) return; // Stale query -- discard
-                asyncSuggestions = allResults || [];
+                // Both sources are already scored. Merge them in-memory instead of running
+                // tabs/bookmarks/history/pinned-tab collection a second time.
+                asyncSuggestions = SharedSpotlightLogic.mergeRankedResults(
+                    localResults || [],
+                    autocompleteResults,
+                    8
+                );
                 updateDisplay();
             }
         } catch (error) {
@@ -610,6 +638,7 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
 
     // Update the display with combined results
     function updateDisplay() {
+        if (disposed || !host.isConnected) return;
         currentResults = combineResults();
         selectionManager.updateResults(currentResults);
 
@@ -648,6 +677,9 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
             isSelectionDrivenChange = false;
             return;
         }
+        // Invalidate in-flight work synchronously; waiting for the debounced
+        // callback leaves a window where stale results can repaint the UI.
+        searchQueryId += 1;
         // User typed something - trigger search
         baseInputHandler(e);
     });
@@ -700,12 +732,18 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
         if (dialog.open) return;
 
         SpotlightMessageClient.notifyClosed();
+        searchQueryId += 1;
+        baseInputHandler.cancel();
 
         if (spotlightRemovalTimer !== null) {
             return;
         }
 
         spotlightRemovalTimer = setTimeout(() => {
+            disposed = true;
+            searchQueryId += 1;
+            baseInputHandler.cancel();
+            removeGlobalCloseListener();
             // Removing the host takes the dialog and both stylesheets with it.
             if (host.parentNode) {
                 host.parentNode.removeChild(host);
@@ -727,7 +765,7 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
     dialog.addEventListener('close', scheduleSpotlightRemoval);
 
     // Listen for global close messages from background script
-    SpotlightMessageClient.setupGlobalCloseListener(() => {
+    const removeGlobalCloseListener = SpotlightMessageClient.setupGlobalCloseListener(() => {
         const existingDialog = getExistingSpotlightDialog();
         if (existingDialog && existingDialog.open) {
             closeSpotlight();
@@ -745,6 +783,11 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
     input.select();
     input.scrollLeft = 0;
 
+    // Paint a useful first result without crossing the extension messaging boundary.
+    if (input.value.trim()) {
+        handleInstantInput();
+    }
+
     /**
      * PHASE 2: NON-BLOCKING INITIALIZATION OPTIMIZATIONS
      * 
@@ -758,27 +801,33 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
      * Benefits: Additional 20-50ms improvement in perceived performance
      */
 
-    // Async Phase 2 improvements: Update color and load initial results non-blocking
-    (async () => {
+    // Update color independently from initial results so a slow storage/API response cannot
+    // delay useful content.
+    const colorUpdatePromise = (async () => {
         try {
             // Update active space color and group name asynchronously (non-blocking)
             const { color: realActiveSpaceColor, groupName } = await SpotlightMessageClient.getActiveSpaceColor();
+            if (disposed || !host.isConnected) return;
             activeGroupName = groupName;
             if (realActiveSpaceColor !== activeSpaceColor) {
                 // Update CSS variables by replacing the dedicated accent stylesheet
                 // wholesale -- no regex surgery on the main sheet.
-                accentStyleSheet.textContent =
-                    await SpotlightUtils.getAccentColorCSS(realActiveSpaceColor, ':host');
+                const colorCSS = await SpotlightUtils.getAccentColorCSS(realActiveSpaceColor, ':host');
+                if (disposed || !host.isConnected) return;
+                accentStyleSheet.textContent = colorCSS;
             }
         } catch (error) {
             Logger.error('[Spotlight] Error updating active space color:', error);
         }
 
-        // Load initial results after color update (if input is still empty)
-        if (!input.value.trim()) {
-            loadInitialResults();
-        }
     })();
+
+    if (!input.value.trim()) {
+        loadInitialResults();
+    }
+
+    // Prevent an unhandled rejection without making activation wait for theming.
+    void colorUpdatePromise;
 
 }
 

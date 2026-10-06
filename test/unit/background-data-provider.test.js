@@ -589,6 +589,17 @@ describe('BackgroundDataProvider', () => {
             expect(jiraTab.tabId).toBeNull();
         });
 
+        it('preserves first-tab targeting when duplicate URLs are open', async () => {
+            setupPinnedTabMocks();
+            chromeMock.tabs.query.mockResolvedValue([
+                { id: 1, url: 'https://github.com' },
+                { id: 2, url: 'https://github.com' }
+            ]);
+
+            const result = await provider.getPinnedTabsData();
+            expect(result.find(tab => tab.url === 'https://github.com').tabId).toBe(1);
+        });
+
         it('applies FuseSearchService filtering when query provided', async () => {
             setupPinnedTabMocks();
             BookmarkUtils.findTabByUrl.mockReturnValue(null);

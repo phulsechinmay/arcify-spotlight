@@ -389,5 +389,17 @@ describe('AutocompleteProvider', () => {
             expect(stats.pendingRequests).toBe(0);
             expect(stats.cacheEntries).toContain('stats query');
         });
+
+        it('caps cached unique queries to prevent unbounded growth', async () => {
+            provider.MAX_CACHE_ENTRIES = 2;
+            mockFetch.mockResolvedValue(createGoogleResponse(['result']));
+
+            await provider.getAutocompleteSuggestions('first query');
+            await provider.getAutocompleteSuggestions('second query');
+            await provider.getAutocompleteSuggestions('third query');
+
+            expect(provider.cache.size).toBe(2);
+            expect(provider.cache.has('first query')).toBe(false);
+        });
     });
 });

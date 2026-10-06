@@ -44,3 +44,17 @@ describe('SpotlightUtils.normalizeURL', () => {
         expect(SpotlightUtils.normalizeURL(input)).toBe(expected);
     });
 });
+
+describe('SpotlightUtils accent CSS', () => {
+    it('builds default accent CSS synchronously without reading storage', () => {
+        const css = SpotlightUtils.getDefaultAccentColorCSS('purple', ':host');
+
+        expect(css).toContain(':host');
+        expect(css).toContain('--spotlight-accent-color: rgb(214, 166, 255)');
+    });
+
+    it('falls back to purple for an unknown color', () => {
+        expect(SpotlightUtils.getDefaultAccentColorCSS('unknown'))
+            .toContain('rgb(214, 166, 255)');
+    });
+});

@@ -63,6 +63,28 @@ class TestDataProvider extends BaseDataProvider {
     }
 }
 
+describe('Default result performance bounds', () => {
+    it('limits empty-query results before enrichment and rendering', async () => {
+        const provider = new TestDataProvider();
+        provider._openTabs = Array.from({ length: 100 }, (_, index) => ({
+            id: index,
+            windowId: 1,
+            title: `Tab ${index}`,
+            url: `https://example.com/${index}`,
+            favIconUrl: ''
+        }));
+        provider.arcifyProvider = {
+            ensureCacheBuilt: vi.fn().mockResolvedValue(undefined),
+            hasData: vi.fn().mockReturnValue(false),
+            getSpaceForUrl: vi.fn().mockResolvedValue(null)
+        };
+
+        const results = await provider.getSpotlightSuggestions('');
+
+        expect(results).toHaveLength(8);
+    });
+});
+
 // ============================================================
 // REG-02: Deduplication across data sources
 // ============================================================
