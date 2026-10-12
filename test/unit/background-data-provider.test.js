@@ -44,6 +44,35 @@ describe('BackgroundDataProvider', () => {
             .mockResolvedValue([]);
     });
 
+    it('keeps distinct matching tabs when duplicate URLs occupy the first 20 fuzzy matches', async () => {
+        chromeMock.tabs.query.mockResolvedValue([
+            ...Array.from({ length: 20 }, (_, index) => ({
+                id: index + 1,
+                title: 'reviewneedle',
+                url: 'https://duplicate.test/',
+                groupId: -1,
+                windowId: 1
+            })),
+            {
+                id: 21,
+                title: 'reviewneedle guide',
+                url: 'https://unique.test/',
+                groupId: -1,
+                windowId: 1
+            }
+        ]);
+        chromeMock.tabGroups.query.mockResolvedValue([]);
+        vi.spyOn(provider, 'getPinnedTabSuggestions').mockResolvedValue([]);
+        vi.spyOn(provider, 'getBookmarkSuggestions').mockResolvedValue([]);
+        vi.spyOn(provider, 'getHistorySuggestions').mockResolvedValue([]);
+        vi.spyOn(provider, 'getTopSites').mockResolvedValue([]);
+        vi.spyOn(provider, 'getFuzzyDomainMatches').mockReturnValue([]);
+
+        const results = await provider.getLocalSuggestions('reviewneedle');
+
+        expect(results.map(result => result.url)).toContain('https://unique.test/');
+    });
+
     // ==========================================
     // 1. getOpenTabsData
     // ==========================================

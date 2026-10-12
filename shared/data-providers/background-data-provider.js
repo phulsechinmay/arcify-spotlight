@@ -257,7 +257,7 @@ export class BackgroundDataProvider extends BaseDataProvider {
                         { name: 'title', weight: 2 },
                         { name: 'url', weight: 1 }
                     ]
-                }, 16);
+                });
 
                 const filteredPinnedTabs = fuseResults.map(result => {
                     const pinnedTab = result.item;

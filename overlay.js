@@ -809,13 +809,11 @@ async function activateSpotlight(spotlightTabMode = 'current-tab') {
             const { color: realActiveSpaceColor, groupName } = await SpotlightMessageClient.getActiveSpaceColor();
             if (disposed || !host.isConnected) return;
             activeGroupName = groupName;
-            if (realActiveSpaceColor !== activeSpaceColor) {
-                // Update CSS variables by replacing the dedicated accent stylesheet
-                // wholesale -- no regex surgery on the main sheet.
-                const colorCSS = await SpotlightUtils.getAccentColorCSS(realActiveSpaceColor, ':host');
-                if (disposed || !host.isConnected) return;
-                accentStyleSheet.textContent = colorCSS;
-            }
+            // Resolve saved overrides even when the active color is purple, matching
+            // the synchronous fallback's color name.
+            const colorCSS = await SpotlightUtils.getAccentColorCSS(realActiveSpaceColor, ':host');
+            if (disposed || !host.isConnected) return;
+            accentStyleSheet.textContent = colorCSS;
         } catch (error) {
             Logger.error('[Spotlight] Error updating active space color:', error);
         }

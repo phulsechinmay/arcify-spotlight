@@ -85,6 +85,29 @@ describe('Default result performance bounds', () => {
     });
 });
 
+describe('Search result performance bounds', () => {
+    it('enriches only the eight results retained after ranking', async () => {
+        const provider = new TestDataProvider();
+        provider._openTabs = Array.from({ length: 30 }, (_, index) => ({
+            id: index + 1,
+            windowId: 1,
+            title: `reviewneedle tab ${index}`,
+            url: `https://example.com/${index}`
+        }));
+        const getSpaceForUrl = vi.fn().mockResolvedValue(null);
+        provider.arcifyProvider = {
+            ensureCacheBuilt: vi.fn().mockResolvedValue(undefined),
+            hasData: vi.fn().mockReturnValue(true),
+            getSpaceForUrl
+        };
+
+        const results = await provider.getLocalSuggestions('reviewneedle');
+
+        expect(results).toHaveLength(8);
+        expect(getSpaceForUrl).toHaveBeenCalledTimes(8);
+    });
+});
+
 // ============================================================
 // REG-02: Deduplication across data sources
 // ============================================================

@@ -88,12 +88,11 @@ export class BaseDataProvider {
             // Apply comprehensive deduplication across all sources
             const deduplicatedResults = this.deduplicateResults(allResults);
 
-            // Enrich with Arcify space info (after dedup to avoid redundant lookups)
-            const enrichedResults = await this.enrichWithArcifyInfo(deduplicatedResults);
-
-            // Score and sort results
-            const finalResults = this.scoreAndSortResults(enrichedResults, trimmedQuery);
-            return finalResults;
+            // Score and limit after deduplication so duplicate fuzzy matches cannot
+            // crowd out distinct results. Space metadata does not affect ranking, so
+            // enrich only the final visible results.
+            const finalResults = this.scoreAndSortResults(deduplicatedResults, trimmedQuery);
+            return await this.enrichWithArcifyInfo(finalResults);
         } catch (error) {
             Logger.error('[SearchProvider] Search error:', error);
             const fallback = this.generateFallbackResult(trimmedQuery);
@@ -141,12 +140,10 @@ export class BaseDataProvider {
             // Apply comprehensive deduplication across all sources
             const deduplicatedResults = this.deduplicateResults(allResults);
 
-            // Enrich with Arcify space info (after dedup to avoid redundant lookups)
-            const enrichedResults = await this.enrichWithArcifyInfo(deduplicatedResults);
-
-            // Score and sort results
-            const finalResults = this.scoreAndSortResults(enrichedResults, trimmedQuery);
-            return finalResults;
+            // Rank before enrichment so only the final visible results need
+            // Arcify lookups, after duplicate URLs have been removed.
+            const finalResults = this.scoreAndSortResults(deduplicatedResults, trimmedQuery);
+            return await this.enrichWithArcifyInfo(finalResults);
         } catch (error) {
             Logger.error('[SearchProvider] Local search error:', error);
             const fallback = this.generateFallbackResult(trimmedQuery);

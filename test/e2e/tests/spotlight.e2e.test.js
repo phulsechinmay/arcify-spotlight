@@ -372,6 +372,33 @@ describe('Spotlight E2E Tests', () => {
   });
 
   describe('E2E-04: Overlay on Regular Page', () => {
+    it('applies a saved purple color override after opening with the default color', async () => {
+      const { worker } = await waitForExtension(browser);
+      await worker.evaluate(() => chrome.storage.sync.set({
+        colorOverrides: { purple: '#123456' }
+      }));
+
+      const page = await browser.newPage();
+      await page.goto(`${testOrigin}/color`, { waitUntil: 'domcontentloaded' });
+      await worker.evaluate(async () => {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        await chrome.tabs.sendMessage(tab.id, {
+          action: 'activateSpotlight',
+          mode: 'current-tab',
+          tabUrl: tab.url,
+          tabId: tab.id
+        });
+      });
+
+      await page.waitForFunction(hostSelector => {
+        const style = document.querySelector(hostSelector)?.shadowRoot
+          ?.querySelector('#arcify-spotlight-accent-styles');
+        return style?.textContent.includes('rgb(18, 52, 86)');
+      }, { timeout: 5000 }, OVERLAY_HOST_SELECTOR);
+
+      await page.close();
+    });
+
     it('isolates the overlay from hostile page CSS and ID collisions', async () => {
       // Get the service worker to trigger spotlight programmatically
       const ext = await waitForExtension(browser);

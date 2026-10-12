@@ -10,7 +10,7 @@
  * - ignoreLocation: true is CRITICAL for URL matching (matches can appear anywhere in string)
  * - Do NOT add `keys` to defaults -- each data source passes its own keys via optionOverrides
  * - Indexes are cached by collection identity; callers must replace arrays when data changes
- * - Result counts are bounded before downstream enrichment and rendering
+ * - Callers may request a result limit when ranking and deduplication do not need later matches
  */
 
 import Fuse from 'fuse.js';
@@ -36,9 +36,10 @@ export class FuseSearchService {
      * @param {Array} items - Array of objects to search through
      * @param {string} query - Search query
      * @param {Object} optionOverrides - Override default options (must include `keys` for the data source)
+     * @param {number|null} limit - Optional raw match limit; leave unset when callers deduplicate or re-rank results
      * @returns {Array<{item: Object, matchScore: number}>} Results with matchScore 0-1 (1=perfect match)
      */
-    static search(items, query, optionOverrides = {}, limit = 20) {
+    static search(items, query, optionOverrides = {}, limit = null) {
         if (!items || items.length === 0 || !query) return [];
 
         const mergedOptions = { ...FUSE_DEFAULT_OPTIONS, ...optionOverrides };
