@@ -18,7 +18,35 @@ import { BASE_SCORES } from './scoring-constants.js';
 import { Utils } from '../utils.js';
 import { Logger } from '../logger.js';
 
+const DEFAULT_ACCENT_COLOR_MAP = {
+    grey: '204, 204, 204',
+    blue: '139, 179, 243',
+    red: '255, 158, 151',
+    yellow: '255, 226, 159',
+    green: '139, 218, 153',
+    pink: '251, 170, 215',
+    purple: '214, 166, 255',
+    cyan: '165, 226, 234',
+    orange: '255, 176, 103'
+};
+
 export class SpotlightUtils {
+    static getDefaultAccentColorCSS(spaceColor, selector = ':root') {
+        const rgb = DEFAULT_ACCENT_COLOR_MAP[spaceColor] || DEFAULT_ACCENT_COLOR_MAP.purple;
+        return SpotlightUtils.buildAccentColorCSS(rgb, selector);
+    }
+
+    static buildAccentColorCSS(rgb, selector = ':root') {
+        return `
+            ${selector} {
+                --spotlight-accent-color: rgb(${rgb});
+                --spotlight-accent-color-15: rgba(${rgb}, 0.15);
+                --spotlight-accent-color-20: rgba(${rgb}, 0.2);
+                --spotlight-accent-color-80: rgba(${rgb}, 0.8);
+            }
+        `;
+    }
+
     // Helper to properly prefix URLs with protocol
     static normalizeURL(url) {
         // Return as-is if it already has a protocol (http, https, chrome, etc.)
@@ -238,19 +266,7 @@ export class SpotlightUtils {
     // an empty value (colorless hover/selection states, no error).
     static async getAccentColorCSS(spaceColor, selector = ':root') {
         // Default RGB values for each color name (matching --chrome-*-color variables in styles.css)
-        const defaultColorMap = {
-            grey: '204, 204, 204',
-            blue: '139, 179, 243',
-            red: '255, 158, 151',
-            yellow: '255, 226, 159',
-            green: '139, 218, 153',
-            pink: '251, 170, 215',
-            purple: '214, 166, 255',
-            cyan: '165, 226, 234',
-            orange: '255, 176, 103'
-        };
-
-        let rgb = defaultColorMap[spaceColor] || defaultColorMap.purple;
+        let rgb = DEFAULT_ACCENT_COLOR_MAP[spaceColor] || DEFAULT_ACCENT_COLOR_MAP.purple;
 
         // Try to get overridden color from settings
         try {
@@ -266,14 +282,7 @@ export class SpotlightUtils {
             Logger.error('Error getting color overrides:', error);
         }
 
-        return `
-            ${selector} {
-                --spotlight-accent-color: rgb(${rgb});
-                --spotlight-accent-color-15: rgba(${rgb}, 0.15);
-                --spotlight-accent-color-20: rgba(${rgb}, 0.2);
-                --spotlight-accent-color-80: rgba(${rgb}, 0.8);
-            }
-        `;
+        return SpotlightUtils.buildAccentColorCSS(rgb, selector);
     }
 
     // Check if two results are duplicates based on URL (for deduplication)

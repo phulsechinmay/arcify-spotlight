@@ -131,6 +131,16 @@ describe('FuseSearchService.search', () => {
         });
     });
 
+    it('bounds result creation at the requested limit', () => {
+        const results = FuseSearchService.search(testItems, 't', {
+            keys: searchKeys,
+            minMatchCharLength: 1,
+            threshold: 1
+        }, 3);
+
+        expect(results).toHaveLength(3);
+    });
+
     describe('score inversion correctness', () => {
         it('exact match has matchScore close to 1.0 (not 0.0)', () => {
             const results = FuseSearchService.search(testItems, 'GitHub', { keys: searchKeys });

@@ -13,6 +13,7 @@
  */
 
 import { SpotlightUtils } from './ui-utilities.js';
+import { AUTOCOMPLETE_BOOST_MAX, LOCAL_RESULT_THRESHOLD } from './scoring-constants.js';
 
 export class SharedSpotlightLogic {
 
@@ -39,6 +40,56 @@ export class SharedSpotlightLogic {
         }
 
         return combined;
+    }
+
+    /**
+     * Merge already-ranked local and autocomplete results without refetching local data.
+     * Local results win URL collisions because they represent actionable browser state
+     * (for example, switching to an existing tab instead of navigating again).
+     */
+    static mergeRankedResults(localResults = [], autocompleteResults = [], limit = 8) {
+        const localCount = localResults.filter(result => result.type !== 'autocomplete-suggestion').length;
+        const boostFactor = localCount < LOCAL_RESULT_THRESHOLD
+            ? (LOCAL_RESULT_THRESHOLD - localCount) / LOCAL_RESULT_THRESHOLD
+            : 0;
+        const boostedAutocomplete = autocompleteResults.map(result => (
+            result.type === 'autocomplete-suggestion' && boostFactor > 0
+                ? { ...result, score: (result.score || 0) + (AUTOCOMPLETE_BOOST_MAX * boostFactor) }
+                : result
+        ));
+
+        const mergedByKey = new Map();
+        for (const result of [...localResults, ...boostedAutocomplete]) {
+            const key = SharedSpotlightLogic.getResultDeduplicationKey(result);
+            const existing = mergedByKey.get(key);
+
+            // Local/actionable browser results are visited first and win a
+            // collision with a navigation-only autocomplete suggestion.
+            if (!existing) {
+                mergedByKey.set(key, result);
+            }
+        }
+
+        return [...mergedByKey.values()]
+            .sort((a, b) => (b.score || 0) - (a.score || 0))
+            .slice(0, limit);
+    }
+
+    static getResultDeduplicationKey(result) {
+        if (result?.url) {
+            return result.url
+                .toLowerCase()
+                .split('#', 1)[0]
+                .replace(/\/+$/, '')
+                .replace(/^https?:\/\//, '')
+                .replace(/^www\./, '');
+        }
+
+        if (result?.type === 'search-query') {
+            return `search:${result.title || ''}`;
+        }
+
+        return `${result?.type || ''}:${result?.title || ''}`;
     }
 
     /**
@@ -109,7 +160,7 @@ export class SharedSpotlightLogic {
      * @returns {Function} Event handler function for keydown events
      */
     static createKeyDownHandler(selectionManager, onEnter, onEscape, skipContainerCheck = true) {
-        return (e) => {
+        const handler = (e) => {
             // Let SelectionManager handle navigation keys first
             if (selectionManager.handleKeyDown(e, skipContainerCheck)) {
                 return; // Event was handled by selection manager
@@ -137,6 +188,7 @@ export class SharedSpotlightLogic {
                     break;
             }
         };
+        return handler;
     }
 
     /**
@@ -173,7 +225,7 @@ export class SharedSpotlightLogic {
     static createInputHandler(onInstantUpdate, onAsyncUpdate, debounceDelay = 150) {
         let debounceTimeout = null;
 
-        return (e) => {
+        const handler = (e) => {
             // Clear previous debounced call
             if (debounceTimeout) {
                 clearTimeout(debounceTimeout);
@@ -187,9 +239,19 @@ export class SharedSpotlightLogic {
             // Debounce async update
             if (onAsyncUpdate) {
                 debounceTimeout = setTimeout(() => {
+                    debounceTimeout = null;
                     onAsyncUpdate(e);
                 }, debounceDelay);
             }
         };
+
+        handler.cancel = () => {
+            if (debounceTimeout) {
+                clearTimeout(debounceTimeout);
+                debounceTimeout = null;
+            }
+        };
+
+        return handler;
     }
 }

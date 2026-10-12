@@ -44,6 +44,35 @@ describe('BackgroundDataProvider', () => {
             .mockResolvedValue([]);
     });
 
+    it('keeps distinct matching tabs when duplicate URLs occupy the first 20 fuzzy matches', async () => {
+        chromeMock.tabs.query.mockResolvedValue([
+            ...Array.from({ length: 20 }, (_, index) => ({
+                id: index + 1,
+                title: 'reviewneedle',
+                url: 'https://duplicate.test/',
+                groupId: -1,
+                windowId: 1
+            })),
+            {
+                id: 21,
+                title: 'reviewneedle guide',
+                url: 'https://unique.test/',
+                groupId: -1,
+                windowId: 1
+            }
+        ]);
+        chromeMock.tabGroups.query.mockResolvedValue([]);
+        vi.spyOn(provider, 'getPinnedTabSuggestions').mockResolvedValue([]);
+        vi.spyOn(provider, 'getBookmarkSuggestions').mockResolvedValue([]);
+        vi.spyOn(provider, 'getHistorySuggestions').mockResolvedValue([]);
+        vi.spyOn(provider, 'getTopSites').mockResolvedValue([]);
+        vi.spyOn(provider, 'getFuzzyDomainMatches').mockReturnValue([]);
+
+        const results = await provider.getLocalSuggestions('reviewneedle');
+
+        expect(results.map(result => result.url)).toContain('https://unique.test/');
+    });
+
     // ==========================================
     // 1. getOpenTabsData
     // ==========================================
@@ -587,6 +616,17 @@ describe('BackgroundDataProvider', () => {
             const jiraTab = result.find(t => t.title === 'Jira Work');
             expect(jiraTab.isActive).toBe(false);
             expect(jiraTab.tabId).toBeNull();
+        });
+
+        it('preserves first-tab targeting when duplicate URLs are open', async () => {
+            setupPinnedTabMocks();
+            chromeMock.tabs.query.mockResolvedValue([
+                { id: 1, url: 'https://github.com' },
+                { id: 2, url: 'https://github.com' }
+            ]);
+
+            const result = await provider.getPinnedTabsData();
+            expect(result.find(tab => tab.url === 'https://github.com').tabId).toBe(1);
         });
 
         it('applies FuseSearchService filtering when query provided', async () => {

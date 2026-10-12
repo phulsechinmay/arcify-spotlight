@@ -167,36 +167,44 @@ export const BookmarkUtils = {
     async getBookmarksFromFolderRecursive(folderId, options = {}) {
         const { includeTabIds = false, groupId = null } = options;
         const bookmarks = [];
-        const items = await chrome.bookmarks.getChildren(folderId);
 
         // Get tabs once if needed for matching
-        let tabs = [];
+        let tabsByUrl = null;
         if (includeTabIds && groupId !== null) {
-            tabs = await chrome.tabs.query({ groupId: groupId });
+            const tabs = await chrome.tabs.query({ groupId: groupId });
+            tabsByUrl = new Map();
+            for (const tab of tabs) {
+                if (tab.url && !tabsByUrl.has(tab.url)) {
+                    tabsByUrl.set(tab.url, tab);
+                }
+            }
         }
 
-        for (const item of items) {
+        // Traverse iteratively so deeply nested or very large bookmark trees do
+        // not create an unbounded number of simultaneous promises. Pushing
+        // children in reverse preserves the recursive depth-first bookmark order.
+        const pendingItems = [{ id: folderId }];
+        while (pendingItems.length > 0) {
+            const item = pendingItems.pop();
             if (item.url) {
-                // This is a bookmark
                 const bookmarkData = {
                     id: item.id,
                     title: item.title,
                     url: item.url
                 };
 
-                // Add tab ID if requested and found
-                if (includeTabIds && tabs.length > 0) {
-                    const matchingTab = tabs.find(t => t.url === item.url);
-                    if (matchingTab) {
-                        bookmarkData.tabId = matchingTab.id;
-                    }
+                const matchingTab = tabsByUrl?.get(item.url);
+                if (matchingTab) {
+                    bookmarkData.tabId = matchingTab.id;
                 }
 
                 bookmarks.push(bookmarkData);
-            } else {
-                // This is a folder, recursively get bookmarks
-                const subBookmarks = await this.getBookmarksFromFolderRecursive(item.id, options);
-                bookmarks.push(...subBookmarks);
+                continue;
+            }
+
+            const children = await chrome.bookmarks.getChildren(item.id);
+            for (let index = children.length - 1; index >= 0; index -= 1) {
+                pendingItems.push(children[index]);
             }
         }
 

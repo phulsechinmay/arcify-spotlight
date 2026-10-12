@@ -376,6 +376,22 @@ describe('BookmarkUtils', () => {
             expect(result[1].url).toBe('https://wiki.com');
         });
 
+        it('preserves depth-first order across sibling folders', async () => {
+            chromeMock.bookmarks.getChildren.mockImplementation(async (id) => {
+                if (id === '100') return [
+                    { id: '20', title: 'First folder' },
+                    { id: '11', title: 'Middle', url: 'https://middle.test' },
+                    { id: '30', title: 'Second folder' }
+                ];
+                if (id === '20') return [{ id: '21', title: 'First nested', url: 'https://first.test' }];
+                if (id === '30') return [{ id: '31', title: 'Second nested', url: 'https://second.test' }];
+                return [];
+            });
+
+            const result = await BookmarkUtils.getBookmarksFromFolderRecursive('100');
+            expect(result.map(bookmark => bookmark.title)).toEqual(['First nested', 'Middle', 'Second nested']);
+        });
+
         it('returns empty array for empty folder', async () => {
             chromeMock.bookmarks.getChildren.mockResolvedValue([]);
 
@@ -416,6 +432,23 @@ describe('BookmarkUtils', () => {
             });
 
             expect(result[0].tabId).toBeUndefined();
+        });
+
+        it('uses the first matching tab when duplicate URLs are open', async () => {
+            chromeMock.bookmarks.getChildren.mockResolvedValue([
+                { id: '10', title: 'GitHub', url: 'https://github.com' }
+            ]);
+            chromeMock.tabs.query.mockResolvedValue([
+                { id: 41, url: 'https://github.com' },
+                { id: 42, url: 'https://github.com' }
+            ]);
+
+            const result = await BookmarkUtils.getBookmarksFromFolderRecursive('100', {
+                includeTabIds: true,
+                groupId: 5
+            });
+
+            expect(result[0].tabId).toBe(41);
         });
 
         it('with includeTabIds: false (default): no tabs.query called', async () => {

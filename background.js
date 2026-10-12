@@ -147,12 +147,10 @@ async function injectSpotlightScript(spotlightTabMode) {
                 });
 
                 if (response && response.success) {
-                    chrome.runtime.sendMessage({
-                        action: 'spotlightOpened',
-                        mode: spotlightTabMode
-                    });
                     return;
                 }
+
+                throw new Error(response?.error || 'Spotlight activation did not complete');
             } catch (messageError) {
                 Logger.log("Content script messaging failed, using new tab fallback:", messageError);
                 await fallbackToChromeTabs(spotlightTabMode);
@@ -452,7 +450,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (sender.tab && sender.tab.id) {
             spotlightOpenTabs.add(sender.tab.id);
         }
-        arcifyProvider.invalidateCache();
         return false;
     } else if (message.action === 'spotlightClosed') {
         if (sender.tab && sender.tab.id) {
